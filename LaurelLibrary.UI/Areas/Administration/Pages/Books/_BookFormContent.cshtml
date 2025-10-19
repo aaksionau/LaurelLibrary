@@ -1,0 +1,92 @@
+@model LaurelLibrary.Services.Abstractions.Dtos.LaurelBookDto
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row">
+    <div class="col-12 col-md-3 mb-1 mt-3">
+        @if (!string.IsNullOrWhiteSpace(Model?.Image))
+        {
+            <img src="@(Model.Image)" alt="Book cover" class="img-fluid img-thumbnail"
+                style="max-height:300px; width:auto; display:block; margin:0 auto;" />
+        }
+        else
+        {
+            <div class="border bg-light d-flex align-items-center justify-content-center" style="height:300px;">
+                <span class="text-muted">No image</span>
+            </div>
+        }
+    </div>
+
+    <div class="col-12 col-md-9">
+        <div class="mb-3">
+            <label class="form-label" asp-for="Title"></label>
+            <input id="bookTitleInput" class="form-control" asp-for="Title" value="@Model?.Title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Publisher"></label>
+            <input class="form-control" asp-for="Publisher" value="@Model?.Publisher" />
+            <span asp-validation-for="Publisher" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" asp-for="Synopsis"></label>
+            <textarea class="form-control" name="@Html.NameFor(m => m.Synopsis)" rows="6">@Model?.Synopsis</textarea>
+            <span asp-validation-for="Synopsis" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="Language"></label>
+        <input class="form-control" asp-for="Language" value="@Model?.Language" />
+        <span asp-validation-for="Language" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="Edition"></label>
+        <input class="form-control" asp-for="Edition" value="@Model?.Edition" />
+        <span asp-validation-for="Edition" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="Binding"></label>
+        <input class="form-control" asp-for="Binding" value="@Model?.Binding" />
+        <span asp-validation-for="Binding" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="Pages"></label>
+        <input type="number" class="form-control" asp-for="Pages" value="@Model?.Pages" />
+        <span asp-validation-for="Pages" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="DatePublished"></label>
+        <input type="date" class="form-control" asp-for="DatePublished"
+            value="@(Model?.DatePublished.ToString("yyyy-MM-dd"))" />
+        <span asp-validation-for="DatePublished" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-4 mb-3">
+        <label class="form-label" asp-for="Isbn"></label>
+        <input class="form-control" asp-for="Isbn" value="@Model?.Isbn" />
+        <span asp-validation-for="Isbn" class="text-danger"></span>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Authors (comma separated)</label>
+    <input class="form-control" asp-for="Authors" value="@Model?.Authors" placeholder="e.g. Jane Doe, John Smith" />
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Categories (comma separated)</label>
+    <input class="form-control" asp-for="Categories" value="@Model?.Categories" placeholder="e.g. Fiction, Mystery" />
+</div>
+
+<div class="mb-3">
+    <label class="form-label" asp-for="Image"></label>
+    <input class="form-control" asp-for="Image" value="@Model?.Image" />
+    <span asp-validation-for="Image" class="text-danger"></span>
+</div>

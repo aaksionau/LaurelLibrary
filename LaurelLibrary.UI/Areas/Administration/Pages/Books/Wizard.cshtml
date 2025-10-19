@@ -1,0 +1,169 @@
+﻿@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Books.WizardModel
+
+<div class="container-fluid">
+    <!-- ISBN Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Search by ISBN</h5>
+                    <button type="button" id="scanToggleBtn" class="btn btn-success shadow-lg scan-pulse">
+                        <i class="fas fa-barcode"></i> Start Scanning
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="wizardForm">
+                        <input type="hidden" asp-for="IsScanning" />
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <input id="searchIsbnInput" class="form-control" asp-for="SearchIsbn"
+                                        placeholder="Enter ISBN (e.g., 978-0-123456-78-9)" />
+                                    <button type="button" id="clearIsbnBtn" class="btn btn-secondary"
+                                        title="Clear ISBN">
+                                        Clear
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.SearchMessage))
+                        {
+                            <div class="mt-3">
+                                @if (Model.BookFound)
+                                {
+                                    <div class="alert alert-success" role="alert">
+                                        <i class="fas fa-check-circle"></i> @Model.SearchMessage
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="fas fa-warning-circle"></i> @Model.SearchMessage
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <!-- Book Form Section -->
+                        @if (Model.Book != null)
+                        {
+                            <div class="mt-4">
+                                <hr />
+                                <h5 class="mb-3">
+                                    @if (Model.BookFound)
+                                    {
+                                        <text>Edit Book Details</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Create New Book</text>
+                                    }
+                                </h5>
+
+                                <partial name="_BookFormContent" for="Book" />
+
+                                <div class="mb-3 text-end">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Book
+                                    </button>
+                                    <a asp-page="./List" class="btn btn-secondary ms-2">Cancel</a>
+                                </div>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const scanToggleBtn = document.getElementById('scanToggleBtn');
+            const searchIsbnInput = document.getElementById('searchIsbnInput');
+            const wizardForm = document.getElementById('wizardForm');
+            const SCANNING_MODE_KEY = 'bookWizardScanningMode';
+
+            // Clear the search ISBN input if it's empty (after successful search)
+            if (searchIsbnInput && searchIsbnInput.value.trim() === '') {
+                searchIsbnInput.value = '';
+            }
+
+            // Restore scanning mode from localStorage
+            function restoreScanningMode() {
+                const savedMode = localStorage.getItem(SCANNING_MODE_KEY);
+                if (savedMode === 'true') {
+                    setScanningMode(true);
+                }
+            }
+
+            // Set scanning mode and save to localStorage
+            function setScanningMode(isScanning) {
+                if (isScanning) {
+                    scanToggleBtn.innerHTML = '<i class="fas fa-barcode"></i> Stop Scanning';
+                    scanToggleBtn.classList.remove('btn-primary', 'scan-pulse');
+                    scanToggleBtn.classList.add('btn-warning');
+                    searchIsbnInput.classList.add('border-warning', 'border-2');
+                    searchIsbnInput.focus();
+                    localStorage.setItem(SCANNING_MODE_KEY, 'true');
+                } else {
+                    scanToggleBtn.innerHTML = '<i class="fas fa-barcode"></i> Start Scanning';
+                    scanToggleBtn.classList.remove('btn-warning');
+                    scanToggleBtn.classList.add('btn-primary', 'scan-pulse');
+                    searchIsbnInput.classList.remove('border-warning', 'border-2');
+                    localStorage.setItem(SCANNING_MODE_KEY, 'false');
+                }
+            }
+
+            // Initialize scanning mode on page load
+            restoreScanningMode();
+
+            if (scanToggleBtn) {
+                scanToggleBtn.addEventListener('click', function () {
+                    // Toggle scanning mode
+                    const isScanning = this.textContent.includes('Start');
+                    setScanningMode(isScanning);
+                });
+            }
+
+            // Keep focus on input while scanning
+            if (searchIsbnInput) {
+                searchIsbnInput.addEventListener('blur', function () {
+                    const scanBtn = document.getElementById('scanToggleBtn');
+                    if (scanBtn && scanBtn.textContent.includes('Stop')) {
+                        // Re-focus if we're in scanning mode
+                        setTimeout(() => {
+                            this.focus();
+                        }, 100);
+                    }
+                });
+
+                // Auto-submit form when Enter is pressed (barcode scanner sends Enter)
+                searchIsbnInput.addEventListener('keypress', function (e) {
+                    const scanBtn = document.getElementById('scanToggleBtn');
+                    if (e.key === 'Enter' && scanBtn && scanBtn.textContent.includes('Stop')) {
+                        e.preventDefault();
+                        // Submit the form automatically
+                        wizardForm.submit();
+                    }
+                });
+
+                // Clear button functionality
+                const clearIsbnBtn = document.getElementById('clearIsbnBtn');
+                if (clearIsbnBtn) {
+                    clearIsbnBtn.addEventListener('click', function () {
+                        searchIsbnInput.value = '';
+                        searchIsbnInput.focus();
+                    });
+                }
+            }
+        });
+    </script>
+}

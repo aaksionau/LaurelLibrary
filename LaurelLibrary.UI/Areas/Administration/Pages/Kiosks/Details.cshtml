@@ -1,0 +1,184 @@
+@page "{libraryId:guid}/{kioskId:int}"
+@model LaurelLibrary.UI.Areas.Administration.Pages.Kiosks.DetailsModel
+
+<div class="d-flex align-items-center justify-content-between mt-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <a class="btn btn-link p-0 icon-link" asp-page="/Libraries/Details" asp-route-id="@Model.Kiosk?.LibraryId"
+            aria-label="Back to library">
+            <i class="bi bi-arrow-left fs-3" aria-hidden="true"></i>
+        </a>
+        <h1 class="mb-0">Kiosk Details</h1>
+    </div>
+    <div>
+        <a class="btn btn-primary" asp-page="Update" asp-route-libraryId="@Model.Kiosk?.LibraryId"
+            asp-route-kioskId="@Model.Kiosk?.KioskId">
+            <i class="bi bi-pencil me-2"></i>Edit Kiosk
+        </a>
+        <button type="button" class="btn btn-success" id="makeKioskBtn" onclick="makeCurrentComputerKiosk()">
+            <i class="bi bi-pc-display me-2"></i>Make Current Computer a Kiosk
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @Model.StatusMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (Model.Kiosk == null)
+{
+    <div class="alert alert-warning">Kiosk not found.</div>
+}
+else
+{
+    @Html.AntiForgeryToken()
+
+    <!-- Main Kiosk Information Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h3 class="mb-0"><i class="bi bi-display me-2"></i>@Model.Kiosk.Location</h3>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2"><i class="bi bi-info-circle me-2"></i>Kiosk Information</h6>
+                        <div class="small">
+                            <div class="mb-2">
+                                <strong>Location:</strong>
+                                <span class="ms-1">@Model.Kiosk.Location</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Browser Fingerprint:</strong>
+                                <span class="ms-1">
+                                    @if (string.IsNullOrEmpty(Model.Kiosk.BrowserFingerprint))
+                                    {
+                                        <span class="text-muted fst-italic">Not set</span>
+                                    }
+                                    else
+                                    {
+                                        <code class="small">@Model.Kiosk.BrowserFingerprint</code>
+                                    }
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Library:</strong>
+                                <span class="ms-1">
+                                    <a asp-page="/Libraries/Details" asp-route-id="@Model.Kiosk.LibraryId">
+                                        @Model.Kiosk.LibraryName
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kiosk ID (Technical) -->
+            <div class="mt-3 pt-2 border-top">
+                <small class="text-muted"><strong>Kiosk ID:</strong> <code>@Model.Kiosk.KioskId</code></small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Information -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h6 class="mb-0 text-muted"><i class="bi bi-clock-history me-2"></i>Audit Information</h6>
+        </div>
+        <div class="card-body">
+            <div class="row small text-muted">
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <strong>Created:</strong>
+                        <span class="ms-1">@Model.CreatedAt?.ToString("g")</span>
+                    </div>
+                    <div>
+                        <strong>Created by:</strong>
+                        <span class="ms-1">@Model.CreatedBy</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-2">
+                        <strong>Last Updated:</strong>
+                        <span class="ms-1">@Model.UpdatedAt?.ToString("g")</span>
+                    </div>
+                    <div>
+                        <strong>Updated by:</strong>
+                        <span class="ms-1">@(Model.UpdatedBy ?? "N/A")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+    <script>
+        async function makeCurrentComputerKiosk() {
+            const btn = document.getElementById('makeKioskBtn');
+
+            try {
+                // Disable button and show loading state
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Setting up...';
+
+                // Initialize FingerprintJS
+                const fp = await FingerprintJS.load();
+                const result = await fp.get();
+                const visitorId = result.visitorId;
+
+                // Get kiosk details from the page
+                const kioskId = @Model.Kiosk?.KioskId ?? 0;
+                const libraryId = '@Model.Kiosk?.LibraryId';
+
+                // Save to localStorage
+                localStorage.setItem('kioskId', kioskId);
+                localStorage.setItem('libraryId', libraryId);
+                localStorage.setItem('browserFingerprint', visitorId);
+
+                // Send fingerprint to server to update kiosk
+                const response = await fetch(`/Administration/Kiosks/Details/${libraryId}/${kioskId}?handler=UpdateFingerprint`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({
+                        kioskId: kioskId,
+                        browserFingerprint: visitorId
+                    })
+                });
+
+                if (response.ok) {
+                    // Show success message
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-outline-success');
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Kiosk Setup Complete!';
+
+                    // Reload page after 2 seconds to show updated fingerprint
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to update kiosk');
+                }
+            } catch (error) {
+                console.error('Error setting up kiosk:', error);
+                btn.disabled = false;
+                btn.classList.add('btn-danger');
+                btn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Setup Failed';
+
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-success');
+                    btn.innerHTML = '<i class="bi bi-pc-display me-2"></i>Make Current Computer a Kiosk';
+                }, 3000);
+            }
+        }
+    </script>
+}

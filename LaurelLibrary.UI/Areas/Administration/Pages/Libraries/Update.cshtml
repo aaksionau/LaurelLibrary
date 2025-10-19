@@ -1,0 +1,97 @@
+﻿@page "{libraryId:Guid?}"
+@model LaurelLibrary.UI.Areas.Administration.Pages.Libraries.UpdateModel
+
+<form method="post" enctype="multipart/form-data">
+    <div class="card">
+        <div class="card-header">
+            <h3>@Model.PageTitle</h3>
+        </div>
+
+        <div class="card-body">
+            <input asp-for="Library.LibraryId" hidden />
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.Name"></label>
+                <input class="form-control" asp-for="Library.Name"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.Name)" />
+                <span asp-validation-for="Library.Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.Alias"></label>
+                <input class="form-control" asp-for="Library.Alias"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.Alias)" />
+                <span asp-validation-for="Library.Alias" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.MacAddress"></label>
+                <input class="form-control" asp-for="Library.MacAddress"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.MacAddress)" />
+                <span asp-validation-for="Library.MacAddress" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.Address"></label>
+                <input class="form-control" asp-for="Library.Address"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.Address)" />
+                <span asp-validation-for="Library.Address" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Logo</label>
+                <input type="file" class="form-control" name="LogoFile" accept="image/*" />
+                <small class="form-text text-muted">Upload a logo image for the library (JPG, PNG, GIF)</small>
+                @if (!string.IsNullOrWhiteSpace(Model.Library?.Logo))
+                {
+                    <div class="mt-2">
+                        <small class="text-muted">Current logo:</small>
+                        <img src="@Model.Library.Logo" alt="Current Logo" class="d-block mt-1" style="max-height: 100px; max-width: 200px; object-fit: contain;" />
+                        <input asp-for="Library.Logo" type="hidden" />
+                    </div>
+                }
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.Description"></label>
+                <textarea class="form-control" asp-for="Library.Description" rows="3"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.Description)"></textarea>
+                <span asp-validation-for="Library.Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Library.CheckoutDurationDays"></label>
+                <input type="number" class="form-control" asp-for="Library.CheckoutDurationDays" min="1" max="365"
+                    placeholder="@Html.DisplayNameFor(m => m.Library.CheckoutDurationDays)" />
+                <span asp-validation-for="Library.CheckoutDurationDays" class="text-danger"></span>
+                <small class="form-text text-muted">Number of days books can be checked out (1-365 days)</small>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="float-start m-2">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
+                    Remove
+                </button>
+            </div>
+            <div class="float-end m-2">
+                <a type="button" class="btn btn-secondary ms-2" asp-page="/Libraries/List">Cancel</a>
+                <button type="submit" asp-page-handler="post" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form asp-page-handler="delete">
+    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Warning</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Removing library will remove all books that belongs to this library.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-danger" type="submit">Remove</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

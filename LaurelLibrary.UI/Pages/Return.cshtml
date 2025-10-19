@@ -1,0 +1,352 @@
+﻿@page
+@model LaurelLibrary.UI.Pages.ReturnModel
+@{
+    ViewData["Title"] = "Return Books";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a asp-page="/Index" asp-route-libraryId="@Model.LibraryId" asp-route-kioskId="@Model.KioskId"
+                asp-route-browserFingerprint="@Model.BrowserFingerprint" class="btn btn-secondary btn-lg">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+            <h1 class="mb-0">@ViewData["Title"]</h1>
+        </div>
+        @if (Model.CurrentReader != null || Model.ScannedBooks.Any())
+        {
+            <form method="post" asp-page-handler="StartOver">
+                <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-arrow-counterclockwise"></i> Start Over
+                </button>
+            </form>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successMessage" data-message="@Model.Message">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Step 1: Scan Reader -->
+    <div class="card mb-4">
+        <div class="card-body p-0">
+            <div class="d-flex">
+                <div class="d-flex flex-column align-items-center justify-content-center bg-primary text-white p-3"
+                    style="width: 140px;">
+                    <span class="badge bg-white text-primary fs-5 mb-2">Step 1</span>
+                    <span class="text-white text-center fw-semibold h4">Scan Reader Barcode</span>
+                </div>
+                <div class="flex-grow-1 p-3 d-flex align-items-center">
+                    @if (Model.CurrentReader == null)
+                    {
+                        <form method="post" asp-page-handler="ScanReader" class="w-100">
+                            <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                            <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                            <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="ReaderEan" name="ReaderEan"
+                                    placeholder="Scan or enter reader barcode" autofocus required />
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-upc-scan"></i> Find Reader
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0 w-100">
+                            <h6 class="mb-1"><i class="bi bi-person-check-fill"></i> Reader Selected</h6>
+                            <p class="mb-0">
+                                <strong>Name:</strong> @Model.CurrentReader.FullName<br />
+                                <strong>EAN:</strong> @Model.CurrentReader.Ean
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Scan Books -->
+    @if (Model.CurrentReader != null)
+    {
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div class="d-flex">
+                    <div class="d-flex flex-column align-items-center justify-content-center bg-info text-white p-3"
+                        style="width: 140px;">
+                        <span class="badge bg-white text-info fs-5 mb-2">Step 2</span>
+                        <span class="text-white text-center fw-semibold h4">Scan Books to Return</span>
+                    </div>
+                    <div class="flex-grow-1 p-3">
+                        <form method="post" asp-page-handler="ScanBook">
+                            <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                            <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                            <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="BookIsbn" name="BookIsbn"
+                                    placeholder="Scan or enter book ISBN" autofocus required />
+                                <div class="form-text">Scan the book barcode or enter the book ISBN</div>
+                            </div>
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-plus-circle"></i> Add Book
+                            </button>
+                        </form>
+
+                        @if (Model.ScannedBooks.Any())
+                        {
+                            <hr />
+                            <h6 class="mt-4">Scanned Books (@Model.ScannedBooks.Count)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Instance ID</th>
+                                            <th>Title</th>
+                                            <th>Authors</th>
+                                            <th>Borrowed By</th>
+                                            <th>Checked Out</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var book in Model.ScannedBooks)
+                                        {
+                                            var isOverdue = book.DueDate.HasValue && book.DueDate.Value < DateTimeOffset.UtcNow;
+                                            <tr>
+                                                <td>@book.BookInstanceId</td>
+                                                <td>@book.BookTitle</td>
+                                                <td>@book.BookAuthors</td>
+                                                <td>@book.BorrowedByReader</td>
+                                                <td>
+                                                    @if (book.CheckedOutDate.HasValue)
+                                                    {
+                                                        @book.CheckedOutDate.Value.ToString("yyyy-MM-dd")
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (book.DueDate.HasValue)
+                                                    {
+                                                        <span class="@(isOverdue ? "text-danger fw-bold" : "")">
+                                                            @book.DueDate.Value.ToString("yyyy-MM-dd")
+                                                            @if (isOverdue)
+                                                            {
+                                                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                                            }
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td><span class="badge bg-warning">@book.Status</span></td>
+                                                <td>
+                                                    <form method="post" asp-page-handler="RemoveBook" class="d-inline">
+                                                        <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                                                        <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                                                        <input type="hidden" name="BrowserFingerprint"
+                                                            value="@Model.BrowserFingerprint" />
+                                                        <input type="hidden" name="bookInstanceId" value="@book.BookInstanceId" />
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="bi bi-trash"></i> Remove
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="mt-4 d-flex justify-content-end">
+                                <form method="post" asp-page-handler="ReturnBooks">
+                                    <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                                    <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                                    <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
+                                    <button type="submit" class="btn btn-lg btn-primary">
+                                        <i class="bi bi-box-arrow-in-left"></i> Return Books
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mt-4">
+                                <i class="bi bi-info-circle"></i> No books scanned yet. Please scan book barcodes to add them to
+                                the return list.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Success Overlay -->
+<div id="successOverlay" class="success-overlay">
+    <div class="success-overlay-content">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="success-title">Success!</h2>
+        <p class="success-message" id="overlayMessage"></p>
+        <button class="btn btn-primary btn-lg mt-3" onclick="closeSuccessOverlay()">
+            <i class="bi bi-x-circle"></i> Close
+        </button>
+    </div>
+</div>
+
+<style>
+    .success-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .success-overlay.show {
+        display: flex;
+    }
+
+    .success-overlay-content {
+        background-color: white;
+        padding: 3rem;
+        border-radius: 1rem;
+        text-align: center;
+        max-width: 500px;
+        animation: slideIn 0.4s ease-out;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #198754;
+        margin-bottom: 1rem;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    .success-title {
+        color: #198754;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .success-message {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 0;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scaleIn {
+        0% {
+            transform: scale(0);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<script>
+    function closeSuccessOverlay() {
+        const overlay = document.getElementById('successOverlay');
+        overlay.classList.remove('show');
+    }
+
+    // Auto-focus on the appropriate input field
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if return was successful and show overlay
+        @if (Model.ShowReturnSuccess)
+        {
+            <text>
+            var successAlert = document.getElementById('successMessage');
+            if (successAlert) {
+                var message = successAlert.getAttribute('data-message');
+                if (message) {
+                    document.getElementById('overlayMessage').textContent = message;
+                    document.getElementById('successOverlay').classList.add('show');
+                    
+                    // Auto-close after 5 seconds
+                    window.setTimeout(function() {
+                        closeSuccessOverlay();
+                    }, 5000);
+                }
+            }
+            </text>
+        }
+
+        @if (Model.CurrentReader != null)
+            {
+                <text>
+                        // Focus on book input if reader is already selected
+                    const bookInput = document.getElementById('BookIsbn');
+                    if (bookInput) {
+                        bookInput.focus();
+                    // Keep focus on book input when it loses focus (for continuous scanning)
+                    bookInput.addEventListener('blur', function() {
+                        setTimeout(() => bookInput.focus(), 100);
+                            });
+                        }
+                </text>
+        }
+            else
+            {
+                <text>
+                        // Focus on reader input if no reader selected
+                    const readerInput = document.getElementById('ReaderEan');
+                    if (readerInput) {
+                        readerInput.focus();
+                    // Keep focus on reader input when it loses focus (for continuous scanning)
+                    readerInput.addEventListener('blur', function() {
+                        setTimeout(() => readerInput.focus(), 100);
+                            });
+                        }
+                </text>
+        }
+    });
+</script>

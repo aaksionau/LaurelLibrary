@@ -1,0 +1,88 @@
+using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Persistence;
+using LaurelLibrary.Persistence.Data;
+using LaurelLibrary.Persistence.Repositories;
+using LaurelLibrary.Services.Abstractions.Repositories;
+using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder
+    .Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<AppDbContext>();
+
+// Add Microsoft Authentication
+builder
+    .Services.AddAuthentication()
+    .AddMicrosoftAccount(microsoftOptions =>
+    {
+        microsoftOptions.ClientId =
+            builder.Configuration["Authentication:Microsoft:ClientId"]
+            ?? throw new InvalidOperationException("Microsoft ClientId not configured");
+        microsoftOptions.ClientSecret =
+            builder.Configuration["Authentication:Microsoft:ClientSecret"]
+            ?? throw new InvalidOperationException("Microsoft ClientSecret not configured");
+        // Explicitly set the callback path (default is /signin-microsoft)
+        microsoftOptions.CallbackPath = "/signin-microsoft";
+    });
+
+builder.Services.AddRazorPages();
+
+builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
+builder.Services.AddScoped<IBooksRepository, BooksRepository>();
+builder.Services.AddScoped<IBooksService, BooksService>();
+builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
+builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IReadersRepository, ReadersRepository>();
+builder.Services.AddScoped<IBarcodeService, BarcodeService>();
+builder.Services.AddScoped<IReadersService, ReadersService>();
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
+builder.Services.AddScoped<IKiosksService, KiosksService>();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["ISBNdb:BaseUrl"]
+            ?? throw new InvalidOperationException("Base URL not configured")
+    );
+    client.DefaultRequestHeaders.Add("Authorization", builder.Configuration["ISBNdb:ApiKey"]);
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseMigrationsEndPoint();
+}
+else
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapStaticAssets();
+app.MapRazorPages().WithStaticAssets();
+
+app.Run();

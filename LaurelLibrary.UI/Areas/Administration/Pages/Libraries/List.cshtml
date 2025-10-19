@@ -1,0 +1,71 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@model LaurelLibrary.UI.Areas.Administration.Pages.Libraries.ListModel;
+@{
+    ViewData["Title"] = "Libraries";
+}
+
+<style>
+    .clickable-row {
+        position: relative;
+        cursor: pointer;
+    }
+
+    .clickable-row:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+</style>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="d-inline">Libraries</h3>
+        <a class="btn btn-primary float-end d-inline" asp-area="Administration" asp-page="/Libraries/Update">Add
+            Library</a>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Address</th>
+                    <th>Alias</th>
+                    <th>Mac Address</th>
+                    <th>Books</th>
+                    <th>Students</th>
+                    <th>Administrators</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var library in Model.Libraries)
+                {
+                    <tr class="clickable-row">
+                        <td>
+                            <a asp-area="Administration" asp-page="/Libraries/Details" asp-route-id="@library.LibraryId"
+                                class="stretched-link text-decoration-none text-body"></a>
+                            @library.Name
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(library.Description) ? "-" : (library.Description.Length > 50 ?
+                                                    library.Description.Substring(0, 50) + "..." : library.Description))</td>
+                        <td>@library.Address</td>
+                        <td>@library.Alias</td>
+                        <td>@library.MacAddress</td>
+                        <td>@library.BooksCount</td>
+                        <td>@library.StudentsCount</td>
+                        <td>@library.AdministratorsCount</td>
+                        <td>@library.CreatedAt.ToString("g")</td>
+                        <td>@library.UpdatedAt?.ToString("g")</td>
+                        <td>
+                            <a class="btn btn-link text-primary p-0" asp-area="Administration" asp-page="/Libraries/Update"
+                                asp-route-libraryId="@library.LibraryId" title="Edit"
+                                style="position: relative; z-index: 10;"><i class="bi bi-pencil"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

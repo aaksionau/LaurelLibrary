@@ -1,0 +1,10 @@
+﻿@using LaurelLibrary.Services.Abstractions.Dtos
+@model IEnumerable<SelectListItem>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <form method="post" asp-page="/Index" asp-page-handler="SetCurrentLibrary" class="w-25">
+        <select class="form-select form-select-sm d-inline w-75" name="SelectedLibraryId" asp-items="Model"></select>
+        <button class="btn btn-primary btn-sm d-inline" type="submit">Update</button>
+    </form>
+}

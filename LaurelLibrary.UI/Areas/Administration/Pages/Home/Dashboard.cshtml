@@ -1,0 +1,109 @@
+﻿@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Home.DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Dashboard</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Currently Borrowed Books</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.BorrowedBooks.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
+                                <th>Author(s)</th>
+                                <th>Borrower</th>
+                                <th>Checked Out</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var instance in Model.BorrowedBooks)
+                            {
+                                var isOverdue = instance.DueDate.HasValue && instance.DueDate.Value < DateTimeOffset.Now;
+                                var dueSoon = instance.DueDate.HasValue && !isOverdue && instance.DueDate.Value < DateTimeOffset.Now.AddDays(3);
+                                
+                                <tr class="@(isOverdue ? "table-danger" : dueSoon ? "table-warning" : "")">
+                                    <td>
+                                        <a asp-area="Administration" asp-page="/Books/Details" asp-route-id="@instance.Book.BookId">
+                                            @instance.Book.Title
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (instance.Book.Authors?.Any() == true)
+                                        {
+                                            @string.Join(", ", instance.Book.Authors.Select(a => a.FullName))
+                                        }
+                                        else
+                                        {
+                                            <em>Unknown</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (instance.Reader != null)
+                                        {
+                                            <a asp-area="Administration" asp-page="/Readers/Details" asp-route-id="@instance.Reader.ReaderId">
+                                                @instance.Reader.FirstName @instance.Reader.LastName
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <em>Unknown</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (instance.CheckedOutDate.HasValue)
+                                        {
+                                            @instance.CheckedOutDate.Value.LocalDateTime.ToString("MM/dd/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <em>N/A</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (instance.DueDate.HasValue)
+                                        {
+                                            @instance.DueDate.Value.LocalDateTime.ToString("MM/dd/yyyy")
+                                        }
+                                        else
+                                        {
+                                            <em>N/A</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isOverdue)
+                                        {
+                                            <span class="badge bg-danger">Overdue</span>
+                                        }
+                                        else if (dueSoon)
+                                        {
+                                            <span class="badge bg-warning text-dark">Due Soon</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted mb-0">No books are currently borrowed from this library.</p>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+﻿@page "{bookId:guid?}"
+@model LaurelLibrary.UI.Areas.Administration.Pages.Books.UpdateModel
+
+<div class="container-fluid">
+    <form method="post" class="w-100">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Book.BookId" />
+        <div class="card mt-3 w-100">
+            <div class="card-header">
+                <h3>Create / Update Book</h3>
+            </div>
+
+            <div class="card-body">
+                <partial name="_BookFormContent" model="Model.Book" />
+                <div class="mb-3 text-end">
+                    <button id="saveBtn" type="submit" class="btn btn-success">Save</button>
+                    <a asp-page="./List" class="btn btn-secondary ms-2">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

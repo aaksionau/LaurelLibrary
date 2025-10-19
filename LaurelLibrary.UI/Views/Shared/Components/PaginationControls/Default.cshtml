@@ -1,0 +1,94 @@
+@using Microsoft.AspNetCore.WebUtilities
+@model LaurelLibrary.UI.ViewModels.PaginationViewModel
+
+@{
+    var query = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    foreach (var kv in Context.Request.Query)
+    {
+        if (kv.Key == null) continue;
+        query[kv.Key] = kv.Value.FirstOrDefault();
+    }
+
+    string BuildPageLink(int pageNumber, int pageSize)
+    {
+        var q = new Dictionary<string, string>(query, StringComparer.OrdinalIgnoreCase);
+        q["pageNumber"] = pageNumber.ToString();
+        q["pageSize"] = pageSize.ToString();
+        var path = Url.Page(Model.Page, new { area = Model.Area });
+        return QueryHelpers.AddQueryString(path, q);
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <form method="get" asp-area="@Model.Area" asp-page="@Model.Page" class="d-inline-block me-3"
+            aria-label="Page size selector">
+            <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+            @{
+                foreach (var kv in Context.Request.Query)
+                {
+                    var key = kv.Key;
+                    if (string.Equals(key, "pageNumber", StringComparison.OrdinalIgnoreCase) || string.Equals(key, "pageSize",
+                    StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    foreach (var v in kv.Value)
+                    {
+                        <input type="hidden" name="@key" value="@v" />
+                    }
+                }
+            }
+
+            <label class="me-2">Show
+                <select name="pageSize" class="form-select d-inline-block" style="width:auto; display:inline-block;"
+                    onchange="this.form.submit()" aria-label="Entries per page">
+                    @{
+                        var sizes = new[] { 10, 25, 50 };
+                    }
+                    @foreach (var s in sizes)
+                    {
+                        if (s == Model.PageSize)
+                        {
+                            <option value="@s" selected="selected">@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                </select>
+                entries
+            </label>
+        </form>
+    </div>
+
+    <div>
+        @{
+            var start = Model.TotalCount == 0 ? 0 : ((Model.PageNumber - 1) * Model.PageSize) + 1; var end =
+            Model.TotalCount == 0 ? 0 : Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount);
+        }
+        <small class="text-muted">Showing @start–@end of @Model.TotalCount</small>
+    </div>
+
+    <div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination mb-0">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link"
+                        href="@BuildPageLink(Math.Max(1, Model.PageNumber - 1), Model.PageSize)">Previous</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" href="@BuildPageLink(i, Model.PageSize)">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link"
+                        href="@BuildPageLink(Math.Min(Model.TotalPages, Model.PageNumber + 1), Model.PageSize)">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>

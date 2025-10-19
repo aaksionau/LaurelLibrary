@@ -1,0 +1,81 @@
+﻿@page "{id:int?}"
+@model LaurelLibrary.UI.Areas.Administration.Pages.Readers.UpdateModel
+
+@{
+    ViewData["Title"] = Model.PageTitle;
+}
+
+<form method="post">
+    <div class="card">
+        <div class="card-header">
+            <h3>@Model.PageTitle</h3>
+        </div>
+
+        <div class="card-body">
+            <input asp-for="Reader.ReaderId" hidden />
+            <div class="mb-3">
+                <label class="form-label" asp-for="Reader.FirstName"></label>
+                <input class="form-control" asp-for="Reader.FirstName"
+                    placeholder="@Html.DisplayNameFor(m => m.Reader.FirstName)" />
+                <span asp-validation-for="Reader.FirstName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Reader.LastName"></label>
+                <input class="form-control" asp-for="Reader.LastName"
+                    placeholder="@Html.DisplayNameFor(m => m.Reader.LastName)" />
+                <span asp-validation-for="Reader.LastName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Reader.DateOfBirth">Date of Birth</label>
+                <input type="date" class="form-control" asp-for="Reader.DateOfBirth" />
+                <span asp-validation-for="Reader.DateOfBirth" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="card-footer">
+            @if (Model.Reader.ReaderId > 0)
+            {
+                <div class="float-start m-2">
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
+                        Remove
+                    </button>
+                </div>
+            }
+            <div class="float-end m-2">
+                <a type="button" class="btn btn-secondary ms-2" asp-page="/Readers/List">Cancel</a>
+                <button type="submit" asp-page-handler="post" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@if (Model.Reader.ReaderId > 0)
+{
+    <form asp-page-handler="delete" asp-route-id="@Model.Reader.ReaderId">
+        <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Warning</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            Are you sure you want to remove this reader?
+                        </p>
+                        <p class="text-muted">
+                            This action cannot be undone.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-danger" type="submit">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

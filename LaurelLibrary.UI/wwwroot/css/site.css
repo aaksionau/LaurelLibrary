@@ -1,0 +1,232 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* Make the app take full viewport height so sidebar can stretch */
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Use flex column for page so header/footer are outside the flexible content */
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure the main container grows to fill available space between header and footer
+   so the footer does not overlap scrollable content. The site uses a plain
+   `container-fluid` as the page wrapper, so make it a flex item that can grow. */
+.container-fluid {
+  flex: 1 0 auto;
+}
+
+/* App layout: left sidebar (~15%) and main content */
+.app-layout-container {
+  max-width: 100%;
+  flex: 1 0 auto;
+  /* grow and shrink to fill space between header/footer */
+  display: flex;
+  align-items: stretch;
+  padding-left: 0;
+}
+
+.app-sidebar {
+  width: 15%;
+  min-width: 160px;
+  /* prevent too narrow on small desktop screens */
+  padding: 1.25rem 0.75rem;
+  background: #f8f9fa;
+  /* Classic light gray background */
+  box-shadow: none;
+  border-right: 1px solid #dee2e6;
+  /* Simple border */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+}
+
+.app-sidebar .nav-link {
+  color: #495057;
+  padding: 0.5rem 0.75rem;
+  margin: 0.125rem 0;
+  border-radius: 0;
+  font-weight: 400;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+  border-left: none;
+  border-bottom: 1px solid transparent;
+}
+
+.app-sidebar .nav-link:hover {
+  background-color: #e9ecef;
+  color: #212529;
+  border-left-color: transparent;
+  transform: none;
+  box-shadow: none;
+  border-bottom-color: #dee2e6;
+}
+
+.app-sidebar .nav-link.active {
+  background-color: #0d6efd;
+  color: #ffffff;
+  border-left-color: transparent;
+  font-weight: 500;
+}
+
+.app-main {
+  /* small comfortable internal margin so content doesn't touch edges */
+  padding: 0.75rem 1rem;
+  /* allow main to scroll if content overflows while sidebar stays full height */
+  overflow: auto;
+}
+
+/* Responsive: on small screens stack sidebar above content */
+@media (max-width: 767.98px) {
+  .app-sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .app-main {
+    /* slightly smaller padding on narrow screens */
+    padding: 0.6rem 0.75rem;
+  }
+}
+
+/* Fixed sidebar on wider screens */
+@media (min-width: 768px) {
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    /* fixed width */
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1040;
+    /* sit above content but below modals */
+    padding-top: 3.5rem;
+    /* leave space for the navbar height */
+  }
+
+  /* Reserve space for the fixed sidebar by shifting the main content
+       to the right using a left margin. This avoids adding extra width to
+       the page (which can combine with elements that use 100vw and cause
+       a horizontal scrollbar). */
+  body {
+    padding-left: 0;
+  }
+
+  /* Move main content over so it doesn't sit underneath the fixed sidebar */
+  .app-main {
+    margin-left: 200px;
+  }
+
+  /* Ensure nested row doesn't add extra horizontal margin */
+  .app-layout-container>.row {
+    margin-left: 0;
+  }
+
+  /* Header and footer should be full width but respect the left padding reserved for the fixed sidebar */
+  header .container,
+  footer .container {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+  }
+
+  /* Allow the app layout to fill the remaining viewport width (body already has left padding reserved) */
+  .app-layout-container {
+    width: 100%;
+    max-width: none;
+  }
+
+  .footer {
+    margin-left: 200px;
+    padding: 0 1rem;
+  }
+
+  .header {
+    margin-left: 200px;
+  }
+
+  .header nav div {
+    padding: 0 1rem;
+  }
+}
+
+/* Pulse animation for scan button */
+@keyframes scan-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+.scan-pulse {
+  animation: scan-pulse 2s infinite;
+  font-weight: 600;
+}
+
+.scan-pulse:hover {
+  animation: none;
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* No sidebar styling - when user is not authenticated */
+.app-main.no-sidebar {
+  margin-left: 0 !important;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+
+  /* Remove header margin when no sidebar is present */
+  body:has(.app-main.no-sidebar) .header {
+    margin-left: 0;
+  }
+
+  /* Center header content when no sidebar */
+  body:has(.app-main.no-sidebar) .header .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
