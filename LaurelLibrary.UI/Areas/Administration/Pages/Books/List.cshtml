@@ -59,7 +59,8 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="max-width: 70%;">Title</th>
+                        <th style="width: 80px;">Image</th>
+                        <th style="max-width: 60%;">Title</th>
                         <th class="text-start">Authors</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -68,7 +69,27 @@
                     @foreach (var book in Model.Books)
                 {
                     <tr class="book-row" style="cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">
-                        <td style="max-width: 70%; word-wrap: break-word;">@book.Title</td>
+                        <td style="width: 80px;">
+                            @if (!string.IsNullOrWhiteSpace(book.Image))
+                            {
+                                <img src="@book.Image" alt="@book.Title" class="img-thumbnail" style="max-width: 60px; max-height: 80px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="text-muted text-center" style="width: 60px; height: 80px; display: flex; align-items: center; justify-content: center; border: 1px solid #dee2e6; border-radius: 0.25rem;">
+                                    <i class="bi bi-book" style="font-size: 2rem;"></i>
+                                </div>
+                            }
+                        </td>
+                        <td style="max-width: 60%; word-wrap: break-word;">
+                            <div class="fw-semibold">@book.Title</div>
+                            @if (!string.IsNullOrWhiteSpace(book.Synopsis))
+                            {
+                                <div class="text-muted small mt-1" style="line-height: 1.4;">
+                                    @(book.Synopsis.Length > 120 ? book.Synopsis.Substring(0, 150) + "..." : book.Synopsis)
+                                </div>
+                            }
+                        </td>
                         <td class="text-start">@book.Authors</td>
                                 <td class="text-end" onclick="event.stopPropagation();">
                                     <a class="btn btn-link text-primary p-0 me-2" asp-page="/Books/Update" asp-route-bookId="@book.BookId" title="Edit"><i class="bi bi-pencil"></i></a>

@@ -15,6 +15,8 @@ public static class BookDtoExtensions
             Authors = string.Join(", ", book.Authors.Select(a => a.FullName)),
             Categories = string.Join(", ", book.Categories.Select(c => c.Name)),
             Publisher = book.Publisher,
+            Image = book.Image,
+            Synopsis = book.Synopsis,
         };
     }
 }

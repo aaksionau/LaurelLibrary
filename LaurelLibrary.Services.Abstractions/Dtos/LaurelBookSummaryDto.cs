@@ -9,5 +9,6 @@ public class LaurelBookSummaryDto
     public string? Publisher { get; set; }
     public string? Authors { get; set; }
     public string? Image { get; set; }
+    public string? Synopsis { get; set; }
     public string? Categories { get; set; }
 }
