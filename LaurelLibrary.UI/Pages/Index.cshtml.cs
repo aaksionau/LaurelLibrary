@@ -17,13 +17,15 @@ public class IndexModel : PageModel
     private readonly IUserService userService;
     private readonly ILibrariesRepository librariesRepository;
     private readonly IKiosksRepository kiosksRepository;
+    private readonly SignInManager<AppUser> signInManager;
 
     public IndexModel(
         ILogger<IndexModel> logger,
         UserManager<AppUser> manager,
         IUserService userService,
         ILibrariesRepository librariesRepository,
-        IKiosksRepository kiosksRepository
+        IKiosksRepository kiosksRepository,
+        SignInManager<AppUser> signInManager
     )
     {
         _logger = logger;
@@ -31,6 +33,7 @@ public class IndexModel : PageModel
         this.userService = userService;
         this.librariesRepository = librariesRepository;
         this.kiosksRepository = kiosksRepository;
+        this.signInManager = signInManager;
     }
 
     [BindProperty]
@@ -48,8 +51,14 @@ public class IndexModel : PageModel
     public Library? Library { get; set; }
     public Kiosk? Kiosk { get; set; }
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
+        // Redirect to dashboard if user is logged in
+        if (signInManager.IsSignedIn(User))
+        {
+            return RedirectToPage("/Home/Dashboard", new { area = "Administration" });
+        }
+
         if (LibraryId.HasValue)
         {
             Library = await librariesRepository.GetByIdWithDetailsAsync(LibraryId.Value);
@@ -59,6 +68,8 @@ public class IndexModel : PageModel
         {
             Kiosk = await kiosksRepository.GetByIdAsync(KioskId.Value);
         }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostSetCurrentLibraryAsync()

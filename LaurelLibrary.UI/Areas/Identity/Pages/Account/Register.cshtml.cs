@@ -116,12 +116,19 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             public string ConfirmPassword { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            // Redirect to dashboard if user is already logged in
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToPage("/Home/Dashboard", new { area = "Administration" });
+            }
+
             ReturnUrl = returnUrl;
             ExternalLogins = (
                 await _signInManager.GetExternalAuthenticationSchemesAsync()
             ).ToList();
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)

@@ -78,8 +78,14 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task<IActionResult> OnGetAsync(string returnUrl = null)
         {
+            // Redirect to dashboard if user is already logged in
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToPage("/Home/Dashboard", new { area = "Administration" });
+            }
+
             if (!string.IsNullOrEmpty(ErrorMessage))
             {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -95,6 +101,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             ).ToList();
 
             ReturnUrl = returnUrl;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
