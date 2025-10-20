@@ -1,6 +1,6 @@
+using System.ComponentModel.DataAnnotations;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,19 +11,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries;
 [Authorize]
 public class DetailsModel : PageModel
 {
-    private readonly ILibrariesRepository librariesRepository;
+    private readonly ILibrariesService librariesService;
     private readonly IUserService userService;
     private readonly IKiosksService kiosksService;
     private readonly IReadersService readersService;
 
     public DetailsModel(
-        ILibrariesRepository librariesRepository,
+        ILibrariesService librariesService,
         IUserService userService,
         IKiosksService kiosksService,
         IReadersService readersService
     )
     {
-        this.librariesRepository = librariesRepository;
+        this.librariesService = librariesService;
         this.userService = userService;
         this.kiosksService = kiosksService;
         this.readersService = readersService;
@@ -36,6 +36,11 @@ public class DetailsModel : PageModel
     [TempData]
     public string? StatusMessage { get; set; }
 
+    [BindProperty]
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    public string? AdministratorEmail { get; set; }
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         if (id == Guid.Empty)
@@ -46,7 +51,7 @@ public class DetailsModel : PageModel
 
         var user = await userService.GetAppUserAsync();
 
-        var library = await librariesRepository.GetByIdWithDetailsAsync(id);
+        var library = await librariesService.GetLibraryByIdWithDetailsAsync(id);
 
         if (library == null)
         {
@@ -80,6 +85,90 @@ public class DetailsModel : PageModel
     {
         await readersService.DeleteReaderAsync(readerId);
         StatusMessage = "Reader deleted successfully.";
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostAddAdministratorAsync(Guid id)
+    {
+        if (!ModelState.IsValid)
+        {
+            StatusMessage = "Please provide a valid email address.";
+            return RedirectToPage(new { id });
+        }
+
+        try
+        {
+            // Check if the current user has access to this library
+            var library = await librariesService.GetLibraryByIdWithDetailsAsync(id);
+            if (library == null)
+            {
+                StatusMessage = "Library not found.";
+                return RedirectToPage("List");
+            }
+
+            var currentUser = await userService.GetAppUserAsync();
+            if (!library.Administrators.Any(a => a.Id == currentUser.Id))
+            {
+                StatusMessage = "You do not have access to this library.";
+                return RedirectToPage("List");
+            }
+
+            // Add the administrator using the service
+            await librariesService.AddAdministratorByEmailAsync(id, AdministratorEmail!);
+            StatusMessage = $"Administrator '{AdministratorEmail}' added successfully.";
+        }
+        catch (KeyNotFoundException ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error adding administrator: {ex.Message}";
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostRemoveAdministratorAsync(Guid id, string userId)
+    {
+        try
+        {
+            // Check if the current user has access to this library
+            var library = await librariesService.GetLibraryByIdWithDetailsAsync(id);
+            if (library == null)
+            {
+                StatusMessage = "Library not found.";
+                return RedirectToPage("List");
+            }
+
+            var currentUser = await userService.GetAppUserAsync();
+            if (!library.Administrators.Any(a => a.Id == currentUser.Id))
+            {
+                StatusMessage = "You do not have access to this library.";
+                return RedirectToPage("List");
+            }
+
+            // Remove the administrator using the service
+            await librariesService.RemoveAdministratorAsync(id, userId);
+            StatusMessage = "Administrator removed successfully.";
+        }
+        catch (KeyNotFoundException ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error removing administrator: {ex.Message}";
+        }
+
         return RedirectToPage(new { id });
     }
 }

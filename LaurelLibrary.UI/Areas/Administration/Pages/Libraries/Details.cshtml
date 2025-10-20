@@ -57,274 +57,382 @@ else
                     }
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Basic Information -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2"><i class="bi bi-info-circle me-2"></i>Library Information</h6>
-                        <div class="small">
-                            <div class="mb-2">
-                                <strong>Name:</strong>
-                                <span class="ms-1">@Model.Library.Name</span>
-                            </div>
-                            <div class="mb-2">
-                                <strong>Alias:</strong>
-                                <span class="ms-1">
-                                    <code>@Model.Library.Alias</code>
-                                </span>
-                            </div>
-                            @if (!string.IsNullOrWhiteSpace(Model.Library.Address))
-                            {
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-3" id="libraryDetailsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-pane"
+                type="button" role="tab" aria-controls="details-pane" aria-selected="true">
+                <i class="bi bi-info-circle me-2"></i>Details
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="administrators-tab" data-bs-toggle="tab" data-bs-target="#administrators-pane" type="button"
+                role="tab" aria-controls="administrators-pane" aria-selected="false">
+                <i class="bi bi-people-fill me-2"></i>Administrators
+                @if (Model.Library.Administrators != null && Model.Library.Administrators.Any())
+                {
+                    <span class="badge bg-primary rounded-pill ms-1">@Model.Library.Administrators.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="kiosks-tab" data-bs-toggle="tab" data-bs-target="#kiosks-pane" type="button"
+                role="tab" aria-controls="kiosks-pane" aria-selected="false">
+                <i class="bi bi-display me-2"></i>Kiosks
+                @if (Model.Kiosks != null && Model.Kiosks.Any())
+                {
+                    <span class="badge bg-primary rounded-pill ms-1">@Model.Kiosks.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="students-tab" data-bs-toggle="tab" data-bs-target="#students-pane" type="button"
+                role="tab" aria-controls="students-pane" aria-selected="false">
+                <i class="bi bi-person-lines-fill me-2"></i>Students/Readers
+                @if (Model.Library.Students != null && Model.Library.Students.Any())
+                {
+                    <span class="badge bg-primary rounded-pill ms-1">@Model.Library.Students.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="audit-tab" data-bs-toggle="tab" data-bs-target="#audit-pane" type="button"
+                role="tab" aria-controls="audit-pane" aria-selected="false">
+                <i class="bi bi-clock-history me-2"></i>Audit Information
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="libraryDetailsTabContent">
+        <!-- Details Tab -->
+        <div class="tab-pane fade show active" id="details-pane" role="tabpanel" aria-labelledby="details-tab">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Library Information -->
+                    <div class="row g-4">
+                        <!-- Library Information -->
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3"><i class="bi bi-info-circle me-2"></i>Library Information</h5>
+                            <div>
                                 <div class="mb-2">
-                                    <strong>Address:</strong>
-                                    <span class="ms-1">@Model.Library.Address</span>
+                                    <strong>Name:</strong>
+                                    <span class="ms-1">@Model.Library.Name</span>
                                 </div>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(Model.Library.MacAddress))
-                            {
                                 <div class="mb-2">
-                                    <strong>MAC Address:</strong>
+                                    <strong>Alias:</strong>
                                     <span class="ms-1">
-                                        <code>@Model.Library.MacAddress</code>
+                                        <code>@Model.Library.Alias</code>
                                     </span>
                                 </div>
-                            }
+                                @if (!string.IsNullOrWhiteSpace(Model.Library.Address))
+                                {
+                                    <div class="mb-2">
+                                        <strong>Address:</strong>
+                                        <span class="ms-1">@Model.Library.Address</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Model.Library.MacAddress))
+                                {
+                                    <div class="mb-2">
+                                        <strong>MAC Address:</strong>
+                                        <span class="ms-1">
+                                            <code>@Model.Library.MacAddress</code>
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3"><i class="bi bi-graph-up me-2"></i>Statistics</h5>
+                            <div>
+                                <div class="mb-2">
+                                    <strong>Total Books:</strong>
+                                    <span class="ms-1 badge bg-primary">@Model.Library.Books.Count</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Total Students:</strong>
+                                    <span class="ms-1 badge bg-success">@Model.Library.Students.Count</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Total Administrators:</strong>
+                                    <span class="ms-1 badge bg-info">@Model.Library.Administrators.Count</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Total Kiosks:</strong>
+                                    <span class="ms-1 badge bg-secondary">@(Model.Kiosks?.Count ?? 0)</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2"><i class="bi bi-graph-up me-2"></i>Statistics</h6>
-                        <div class="small">
-                            <div class="mb-2">
-                                <strong>Total Books:</strong>
-                                <span class="ms-1 badge bg-primary">@Model.Library.Books.Count</span>
-                            </div>
-                            <div class="mb-2">
-                                <strong>Total Students:</strong>
-                                <span class="ms-1 badge bg-success">@Model.Library.Students.Count</span>
-                            </div>
-                            <div class="mb-2">
-                                <strong>Total Administrators:</strong>
-                                <span class="ms-1 badge bg-info">@Model.Library.Administrators.Count</span>
-                            </div>
-                        </div>
+
+                    <!-- Library ID (Technical) -->
+                    <div class="mt-4 pt-3 border-top">
+                        <small class="text-muted"><strong>Library ID:</strong> <code>@Model.Library.LibraryId</code></small>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Library ID (Technical) -->
-            <div class="mt-3 pt-2 border-top">
-                <small class="text-muted"><strong>Library ID:</strong> <code>@Model.Library.LibraryId</code></small>
+        <!-- Administrators Tab -->
+        <div class="tab-pane fade" id="administrators-pane" role="tabpanel" aria-labelledby="administrators-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Administrators</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Add Administrator Form -->
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <h6 class="mb-3"><i class="bi bi-person-plus me-2"></i>Add Administrator</h6>
+                        <form method="post" asp-page-handler="AddAdministrator" asp-route-id="@Model.Library.LibraryId">
+                            <div class="row g-2">
+                                <div class="col-md-9">
+                                    <input type="email" class="form-control" asp-for="AdministratorEmail"
+                                        placeholder="Enter user email address" required />
+                                    <span asp-validation-for="AdministratorEmail" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-plus-circle me-1"></i>Add
+                                    </button>
+                                </div>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i>Enter the email address of an existing user to add them as an administrator.
+                            </small>
+                        </form>
+                    </div>
+
+                    <!-- Administrators List -->
+                    @if (Model.Library.Administrators == null || !Model.Library.Administrators.Any())
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>No administrators found for this library.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Username</th>
+                                        <th style="width: 100px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var admin in Model.Library.Administrators)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <i class="bi bi-person-badge me-2 text-primary"></i>
+                                                <strong>@(admin.FirstName) @(admin.LastName)</strong>
+                                            </td>
+                                            <td>@admin.Email</td>
+                                            <td>@admin.UserName</td>
+                                            <td>
+                                                @if (Model.Library.Administrators.Count > 1)
+                                                {
+                                                    <form method="post" asp-page-handler="RemoveAdministrator"
+                                                        asp-route-id="@Model.Library.LibraryId"
+                                                        asp-route-userId="@admin.Id"
+                                                        class="d-inline"
+                                                        onsubmit="return confirm('Are you sure you want to remove @admin.Email as an administrator?');">
+                                                        <button type="submit" class="btn btn-link text-danger p-1" title="Remove">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small" title="Cannot remove the last administrator">
+                                                        <i class="bi bi-lock"></i>
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Administrators Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <h4 class="mb-0"><i class="bi bi-people-fill me-2"></i>Administrators</h4>
-        </div>
-        <div class="card-body">
-            @if (Model.Library.Administrators == null || !Model.Library.Administrators.Any())
-            {
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>No administrators found for this library.
+        <!-- Kiosks Tab -->
+        <div class="tab-pane fade" id="kiosks-pane" role="tabpanel" aria-labelledby="kiosks-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Kiosks</h5>
+                    <a class="btn btn-sm btn-primary" asp-page="/Kiosks/Update" asp-route-libraryId="@Model.Library.LibraryId">
+                        <i class="bi bi-plus-circle me-1"></i>Add Kiosk
+                    </a>
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Username</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var admin in Model.Library.Administrators)
-                            {
-                                <tr>
-                                    <td>
-                                        <i class="bi bi-person-badge me-2 text-primary"></i>
-                                        <strong>@(admin.FirstName) @(admin.LastName)</strong>
-                                    </td>
-                                    <td>@admin.Email</td>
-                                    <td>@admin.UserName</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="card-body">
+                    @if (Model.Kiosks == null || !Model.Kiosks.Any())
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>No kiosks configured for this library.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Location</th>
+                                        <th>Browser Fingerprint</th>
+                                        <th style="width: 150px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var kiosk in Model.Kiosks)
+                                    {
+                                        <tr style="cursor: pointer;"
+                                            onclick="window.location='@Url.Page("/Kiosks/Details", new { libraryId = Model.Library.LibraryId, kioskId = kiosk.KioskId })'">
+                                            <td>
+                                                <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                                <strong>@kiosk.Location</strong>
+                                            </td>
+                                            <td>
+                                                @if (string.IsNullOrEmpty(kiosk.BrowserFingerprint))
+                                                {
+                                                    <span class="text-muted fst-italic">Not set</span>
+                                                }
+                                                else
+                                                {
+                                                    <code class="small">@kiosk.BrowserFingerprint</code>
+                                                }
+                                            </td>
+                                            <td onclick="event.stopPropagation();">
+                                                <div class="d-flex gap-1">
+                                                    <a class="btn btn-link text-primary p-1" asp-page="/Kiosks/Update"
+                                                        asp-route-libraryId="@Model.Library.LibraryId" asp-route-kioskId="@kiosk.KioskId"
+                                                        title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form method="post" asp-page-handler="DeleteKiosk"
+                                                        asp-route-id="@Model.Library.LibraryId" asp-route-kioskId="@kiosk.KioskId"
+                                                        class="d-inline"
+                                                        onsubmit="return confirm('Are you sure you want to delete this kiosk?');">
+                                                        <button type="submit" class="btn btn-link text-danger p-1" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
         </div>
-    </div>
 
-    <!-- Kiosks Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-display me-2"></i>Kiosks</h4>
-            <a class="btn btn-sm btn-primary" asp-page="/Kiosks/Update" asp-route-libraryId="@Model.Library.LibraryId">
-                <i class="bi bi-plus-circle me-1"></i>Add Kiosk
-            </a>
-        </div>
-        <div class="card-body">
-            @if (Model.Kiosks == null || !Model.Kiosks.Any())
-            {
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>No kiosks configured for this library.
+        <!-- Students/Readers Tab -->
+        <div class="tab-pane fade" id="students-pane" role="tabpanel" aria-labelledby="students-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Students/Readers</h5>
+                    <a class="btn btn-sm btn-primary" asp-area="Administration" asp-page="/Readers/Update">
+                        <i class="bi bi-plus-circle me-1"></i>Add Reader
+                    </a>
                 </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Location</th>
-                                <th>Browser Fingerprint</th>
-                                <th style="width: 150px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var kiosk in Model.Kiosks)
-                            {
-                                <tr style="cursor: pointer;"
-                                    onclick="window.location='@Url.Page("/Kiosks/Details", new { libraryId = Model.Library.LibraryId, kioskId = kiosk.KioskId })'">
-                                    <td>
-                                        <i class="bi bi-geo-alt me-2 text-primary"></i>
-                                        <strong>@kiosk.Location</strong>
-                                    </td>
-                                    <td>
-                                        @if (string.IsNullOrEmpty(kiosk.BrowserFingerprint))
-                                        {
-                                            <span class="text-muted fst-italic">Not set</span>
-                                        }
-                                        else
-                                        {
-                                            <code class="small">@kiosk.BrowserFingerprint</code>
-                                        }
-                                    </td>
-                                    <td onclick="event.stopPropagation();">
-                                        <div class="d-flex gap-1">
-                                            <a class="btn btn-link text-primary p-1" asp-page="/Kiosks/Update"
-                                                asp-route-libraryId="@Model.Library.LibraryId" asp-route-kioskId="@kiosk.KioskId"
-                                                title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form method="post" asp-page-handler="DeleteKiosk"
-                                                asp-route-id="@Model.Library.LibraryId" asp-route-kioskId="@kiosk.KioskId"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Are you sure you want to delete this kiosk?');">
-                                                <button type="submit" class="btn btn-link text-danger p-1" title="Delete">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="card-body">
+                    @if (Model.Library.Students == null || !Model.Library.Students.Any())
+                    {
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>No students found for this library.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Name</th>
+                                        <th>Date of Birth</th>
+                                        <th>EAN</th>
+                                        <th style="width: 150px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Library.Students.Count; i++)
+                                    {
+                                        var student = Model.Library.Students.ElementAt(i);
+                                        <tr style="cursor: pointer;"
+                                            onclick="window.location='@Url.Page("/Readers/Details", new { area = "Administration", id = student.ReaderId })'">
+                                            <td>@(i + 1)</td>
+                                            <td>
+                                                <i class="bi bi-person me-2 text-success"></i>
+                                                <strong>@(student.FirstName) @(student.LastName)</strong>
+                                            </td>
+                                            <td>@student.DateOfBirth.ToString("d")</td>
+                                            <td>@(string.IsNullOrWhiteSpace(student.Ean) ? "N/A" : student.Ean)</td>
+                                            <td onclick="event.stopPropagation();">
+                                                <div class="d-flex gap-1">
+                                                    <a class="btn btn-link text-primary p-1" asp-area="Administration"
+                                                        asp-page="/Readers/Update" asp-route-readerId="@student.ReaderId" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form method="post" asp-page-handler="DeleteReader"
+                                                        asp-route-id="@Model.Library.LibraryId" asp-route-readerId="@student.ReaderId"
+                                                        class="d-inline"
+                                                        onsubmit="return confirm('Are you sure you want to delete this reader?');">
+                                                        <button type="submit" class="btn btn-link text-danger p-1" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
-            }
+            </div>
         </div>
-    </div>
 
-    <!-- Students/Readers Section -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Students/Readers</h4>
-            <a class="btn btn-sm btn-primary" asp-area="Administration" asp-page="/Readers/Update">
-                <i class="bi bi-plus-circle me-1"></i>Add Reader
-            </a>
-        </div>
-        <div class="card-body">
-            @if (Model.Library.Students == null || !Model.Library.Students.Any())
-            {
-                <div class="alert alert-info mb-0">
-                    <i class="bi bi-info-circle me-2"></i>No students found for this library.
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>Name</th>
-                                <th>Date of Birth</th>
-                                <th>EAN</th>
-                                <th style="width: 150px;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (int i = 0; i < Model.Library.Students.Count; i++)
-                            {
-                                var student = Model.Library.Students.ElementAt(i);
-                                <tr style="cursor: pointer;"
-                                    onclick="window.location='@Url.Page("/Readers/Details", new { area = "Administration", id = student.ReaderId })'">
-                                    <td>@(i + 1)</td>
-                                    <td>
-                                        <i class="bi bi-person me-2 text-success"></i>
-                                        <strong>@(student.FirstName) @(student.LastName)</strong>
-                                    </td>
-                                    <td>@student.DateOfBirth.ToString("d")</td>
-                                    <td>@(string.IsNullOrWhiteSpace(student.Ean) ? "N/A" : student.Ean)</td>
-                                    <td onclick="event.stopPropagation();">
-                                        <div class="d-flex gap-1">
-                                            <a class="btn btn-link text-primary p-1" asp-area="Administration"
-                                                asp-page="/Readers/Update" asp-route-readerId="@student.ReaderId" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form method="post" asp-page-handler="DeleteReader"
-                                                asp-route-id="@Model.Library.LibraryId" asp-route-readerId="@student.ReaderId"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Are you sure you want to delete this reader?');">
-                                                <button type="submit" class="btn btn-link text-danger p-1" title="Delete">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Audit Information -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h6 class="mb-0 text-muted"><i class="bi bi-clock-history me-2"></i>Audit Information</h6>
-        </div>
-        <div class="card-body">
-            <div class="row small text-muted">
-                <div class="col-md-6">
-                    <div class="mb-2">
-                        <strong>Created:</strong>
-                        <span class="ms-1">@Model.Library.CreatedAt.ToString("g")</span>
-                    </div>
-                    <div>
-                        <strong>Created by:</strong>
-                        <span class="ms-1">@Model.Library.CreatedBy</span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-2">
-                        <strong>Last Updated:</strong>
-                        <span class="ms-1">@Model.Library.UpdatedAt.ToString("g")</span>
-                    </div>
-                    <div>
-                        <strong>Updated by:</strong>
-                        <span class="ms-1">@(Model.Library.UpdatedBy ?? "N/A")</span>
+        <!-- Audit Information Tab -->
+        <div class="tab-pane fade" id="audit-pane" role="tabpanel" aria-labelledby="audit-tab">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Created:</strong>
+                                <span class="ms-1">@Model.Library.CreatedAt.ToString("g")</span>
+                            </div>
+                            <div>
+                                <strong>Created by:</strong>
+                                <span class="ms-1">@Model.Library.CreatedBy</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Last Updated:</strong>
+                                <span class="ms-1">@Model.Library.UpdatedAt.ToString("g")</span>
+                            </div>
+                            <div>
+                                <strong>Updated by:</strong>
+                                <span class="ms-1">@(Model.Library.UpdatedBy ?? "N/A")</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -113,4 +113,59 @@ public class LibrariesRepository : ILibrariesRepository
         _dbContext.Libraries.Remove(existingLibrary);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task AddAdministratorAsync(Guid libraryId, string userId)
+    {
+        _memoryCache.Remove(CacheKey);
+        var library = await _dbContext
+            .Libraries.Include(l => l.Administrators)
+            .FirstOrDefaultAsync(l => l.LibraryId == libraryId);
+
+        if (library == null)
+        {
+            throw new KeyNotFoundException($"Library with ID {libraryId} not found.");
+        }
+
+        var user = await _dbContext.Users.FindAsync(userId);
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found.");
+        }
+
+        if (!library.Administrators.Any(a => a.Id == userId))
+        {
+            library.Administrators.Add(user);
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation(
+                "Added administrator {UserId} to library {LibraryId}",
+                userId,
+                libraryId
+            );
+        }
+    }
+
+    public async Task RemoveAdministratorAsync(Guid libraryId, string userId)
+    {
+        _memoryCache.Remove(CacheKey);
+        var library = await _dbContext
+            .Libraries.Include(l => l.Administrators)
+            .FirstOrDefaultAsync(l => l.LibraryId == libraryId);
+
+        if (library == null)
+        {
+            throw new KeyNotFoundException($"Library with ID {libraryId} not found.");
+        }
+
+        var administrator = library.Administrators.FirstOrDefault(a => a.Id == userId);
+        if (administrator != null)
+        {
+            library.Administrators.Remove(administrator);
+            await _dbContext.SaveChangesAsync();
+            _logger.LogInformation(
+                "Removed administrator {UserId} from library {LibraryId}",
+                userId,
+                libraryId
+            );
+        }
+    }
 }

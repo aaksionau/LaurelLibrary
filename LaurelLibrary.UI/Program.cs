@@ -39,6 +39,7 @@ builder
 builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
+builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
