@@ -11,30 +11,18 @@ namespace LaurelLibrary.Persistence.Repositories;
 
 public class LibrariesRepository : ILibrariesRepository
 {
-    private static readonly string CacheKey = "AllLibraries";
     private readonly AppDbContext _dbContext;
-    private readonly IMemoryCache _memoryCache;
     private readonly ILogger<LibrariesRepository> _logger;
 
-    public LibrariesRepository(
-        AppDbContext dbContext,
-        IMemoryCache memoryCache,
-        ILogger<LibrariesRepository> logger
-    )
+    public LibrariesRepository(AppDbContext dbContext, ILogger<LibrariesRepository> logger)
     {
         _dbContext = dbContext;
-        _memoryCache = memoryCache;
         _logger = logger;
     }
 
     // Get list of libraries that belongs to a specific user
     public async Task<List<LibrarySummaryDto>?> GetAllAsync(string userId)
     {
-        if (_memoryCache.TryGetValue(CacheKey, out List<LibrarySummaryDto>? cachedData))
-        {
-            return cachedData;
-        }
-
         var libraries = await _dbContext
             .Libraries.Where(l => l.Administrators.Select(x => x.Id).Contains(userId))
             .Select(l => new LibrarySummaryDto
@@ -52,14 +40,11 @@ public class LibrariesRepository : ILibrariesRepository
                 UpdatedAt = l.UpdatedAt,
             })
             .ToListAsync();
-
-        _memoryCache.Set(CacheKey, libraries, TimeSpan.FromMinutes(30));
         return libraries;
     }
 
     public async Task<Library> CreateAsync(Library library)
     {
-        _memoryCache.Remove("AllLibraries");
         library.LibraryId = Guid.NewGuid();
         _dbContext.Libraries.Add(library);
         await _dbContext.SaveChangesAsync();
@@ -90,7 +75,6 @@ public class LibrariesRepository : ILibrariesRepository
     // Update an existing library
     public async Task<Library?> UpdateAsync(Library library)
     {
-        _memoryCache.Remove(CacheKey);
         var existingLibrary = await GetByIdAsync(library.LibraryId);
         existingLibrary.Name = library.Name;
         existingLibrary.Address = library.Address;
@@ -107,16 +91,13 @@ public class LibrariesRepository : ILibrariesRepository
 
     public async Task RemoveAsync(Guid libraryId)
     {
-        _memoryCache.Remove(CacheKey);
         var existingLibrary = await GetByIdAsync(libraryId);
-
         _dbContext.Libraries.Remove(existingLibrary);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddAdministratorAsync(Guid libraryId, string userId)
     {
-        _memoryCache.Remove(CacheKey);
         var library = await _dbContext
             .Libraries.Include(l => l.Administrators)
             .FirstOrDefaultAsync(l => l.LibraryId == libraryId);
@@ -146,7 +127,6 @@ public class LibrariesRepository : ILibrariesRepository
 
     public async Task RemoveAdministratorAsync(Guid libraryId, string userId)
     {
-        _memoryCache.Remove(CacheKey);
         var library = await _dbContext
             .Libraries.Include(l => l.Administrators)
             .FirstOrDefaultAsync(l => l.LibraryId == libraryId);

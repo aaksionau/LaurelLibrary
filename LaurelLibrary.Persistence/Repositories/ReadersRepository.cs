@@ -2,6 +2,7 @@ using System;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Services.Abstractions.Repositories;
+using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaurelLibrary.Persistence.Repositories;
@@ -9,10 +10,21 @@ namespace LaurelLibrary.Persistence.Repositories;
 public class ReadersRepository : IReadersRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUserService _userService;
 
-    public ReadersRepository(AppDbContext dbContext)
+    public ReadersRepository(AppDbContext dbContext, IUserService userService)
     {
         _dbContext = dbContext;
+        _userService = userService;
+    }
+
+    private async Task<List<Guid>> GetUserAdministeredLibraryIdsAsync()
+    {
+        var currentUser = await _userService.GetAppUserAsync();
+        return await _dbContext
+            .Libraries.Where(l => l.Administrators.Any(a => a.Id == currentUser.Id))
+            .Select(l => l.LibraryId)
+            .ToListAsync();
     }
 
     public async Task AddReaderAsync(Reader reader)
@@ -28,7 +40,14 @@ public class ReadersRepository : IReadersRepository
 
     public async Task UpdateEanAsync(int readerId, string ean)
     {
-        var reader = await _dbContext.Readers.FindAsync(readerId);
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
+        var reader = await _dbContext
+            .Readers.Include(r => r.Libraries)
+            .FirstOrDefaultAsync(r =>
+                r.ReaderId == readerId && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
+            );
+
         if (reader != null)
         {
             reader.Ean = ean;
@@ -38,7 +57,14 @@ public class ReadersRepository : IReadersRepository
 
     public async Task UpdateBarcodeImageUrlAsync(int readerId, string barcodeImageUrl)
     {
-        var reader = await _dbContext.Readers.FindAsync(readerId);
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
+        var reader = await _dbContext
+            .Readers.Include(r => r.Libraries)
+            .FirstOrDefaultAsync(r =>
+                r.ReaderId == readerId && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
+            );
+
         if (reader != null)
         {
             reader.BarcodeImageUrl = barcodeImageUrl;
@@ -53,10 +79,14 @@ public class ReadersRepository : IReadersRepository
             throw new ArgumentNullException(nameof(reader));
         }
 
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var existing = await _dbContext
             .Readers.Include(r => r.Libraries)
             .FirstOrDefaultAsync(r =>
-                r.ReaderId == reader.ReaderId && r.Libraries.Any(l => l.LibraryId == libraryId)
+                r.ReaderId == reader.ReaderId
+                && r.Libraries.Any(l => l.LibraryId == libraryId)
+                && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
             );
 
         if (existing == null)
@@ -88,10 +118,14 @@ public class ReadersRepository : IReadersRepository
 
     public async Task<Reader?> GetByIdAsync(int readerId, Guid libraryId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         return await _dbContext
             .Readers.Include(r => r.Libraries)
             .FirstOrDefaultAsync(r =>
-                r.ReaderId == readerId && r.Libraries.Any(l => l.LibraryId == libraryId)
+                r.ReaderId == readerId
+                && r.Libraries.Any(l => l.LibraryId == libraryId)
+                && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
             );
     }
 
@@ -114,9 +148,14 @@ public class ReadersRepository : IReadersRepository
         string? searchName = null
     )
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var query = _dbContext
             .Readers.Include(r => r.Libraries)
-            .Where(r => r.Libraries.Any(l => l.LibraryId == libraryId));
+            .Where(r =>
+                r.Libraries.Any(l => l.LibraryId == libraryId)
+                && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
+            );
 
         if (!string.IsNullOrWhiteSpace(searchName))
         {
@@ -133,7 +172,12 @@ public class ReadersRepository : IReadersRepository
 
     public async Task<int> GetReadersCountAsync(Guid libraryId, string? searchName = null)
     {
-        var query = _dbContext.Readers.Where(r => r.Libraries.Any(l => l.LibraryId == libraryId));
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
+        var query = _dbContext.Readers.Where(r =>
+            r.Libraries.Any(l => l.LibraryId == libraryId)
+            && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
+        );
 
         if (!string.IsNullOrWhiteSpace(searchName))
         {
@@ -148,10 +192,14 @@ public class ReadersRepository : IReadersRepository
 
     public async Task<bool> DeleteReaderAsync(int readerId, Guid libraryId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var existing = await _dbContext
             .Readers.Include(r => r.Libraries)
             .FirstOrDefaultAsync(r =>
-                r.ReaderId == readerId && r.Libraries.Any(l => l.LibraryId == libraryId)
+                r.ReaderId == readerId
+                && r.Libraries.Any(l => l.LibraryId == libraryId)
+                && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
             );
 
         if (existing == null)

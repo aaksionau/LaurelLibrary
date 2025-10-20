@@ -4,6 +4,7 @@ using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
+using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaurelLibrary.Persistence.Repositories;
@@ -11,10 +12,21 @@ namespace LaurelLibrary.Persistence.Repositories;
 public class BooksRepository : IBooksRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly IUserService _userService;
 
-    public BooksRepository(AppDbContext dbContext)
+    public BooksRepository(AppDbContext dbContext, IUserService userService)
     {
         _dbContext = dbContext;
+        _userService = userService;
+    }
+
+    private async Task<List<Guid>> GetUserAdministeredLibraryIdsAsync()
+    {
+        var currentUser = await _userService.GetAppUserAsync();
+        return await _dbContext
+            .Libraries.Where(l => l.Administrators.Any(a => a.Id == currentUser.Id))
+            .Select(l => l.LibraryId)
+            .ToListAsync();
     }
 
     public async Task AddBookAsync(Book book)
@@ -35,10 +47,14 @@ public class BooksRepository : IBooksRepository
             throw new ArgumentNullException(nameof(book));
         }
 
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var existing = await _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.BookId == book.BookId);
+            .FirstOrDefaultAsync(b =>
+                b.BookId == book.BookId && userLibraryIds.Contains(b.LibraryId)
+            );
 
         if (existing == null)
         {
@@ -89,10 +105,12 @@ public class BooksRepository : IBooksRepository
         string? searchTitle = null
     )
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var query = _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
-            .Where(b => b.LibraryId == libraryId);
+            .Where(b => b.LibraryId == libraryId && userLibraryIds.Contains(b.LibraryId));
 
         if (authorId.HasValue)
         {
@@ -129,20 +147,24 @@ public class BooksRepository : IBooksRepository
 
     public async Task<Book?> GetByIdAsync(Guid bookId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         return await _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.BookId == bookId);
+            .FirstOrDefaultAsync(b => b.BookId == bookId && userLibraryIds.Contains(b.LibraryId));
     }
 
     public async Task<Book?> GetWithInstancesByIdAsync(Guid bookId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         return await _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
             .Include(b => b.BookInstances)
             .ThenInclude(bi => bi.Reader)
-            .FirstOrDefaultAsync(b => b.BookId == bookId);
+            .FirstOrDefaultAsync(b => b.BookId == bookId && userLibraryIds.Contains(b.LibraryId));
     }
 
     public async Task<Book?> GetByIsbnAsync(string? isbn, Guid libraryId)
@@ -150,12 +172,18 @@ public class BooksRepository : IBooksRepository
         if (string.IsNullOrWhiteSpace(isbn))
             return null;
 
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var trimmed = isbn.Trim();
         return await _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
             .Include(b => b.BookInstances)
-            .FirstOrDefaultAsync(b => b.LibraryId == libraryId && b.Isbn == trimmed);
+            .FirstOrDefaultAsync(b =>
+                b.LibraryId == libraryId
+                && b.Isbn == trimmed
+                && userLibraryIds.Contains(b.LibraryId)
+            );
     }
 
     public async Task AddBookInstanceAsync(LaurelLibrary.Domain.Entities.BookInstance instance)
@@ -198,6 +226,8 @@ public class BooksRepository : IBooksRepository
 
     public async Task<BookInstance?> GetBorrowedBookInstanceByIsbnAsync(string isbn, Guid libraryId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         return await _dbContext
             .BookInstances.Include(bi => bi.Book)
             .ThenInclude(b => b.Authors)
@@ -207,6 +237,7 @@ public class BooksRepository : IBooksRepository
             .Where(bi =>
                 bi.Book.Isbn == isbn
                 && bi.Book.LibraryId == libraryId
+                && userLibraryIds.Contains(bi.Book.LibraryId)
                 && bi.Status == Domain.Enums.BookInstanceStatus.Borrowed
             )
             .FirstOrDefaultAsync();
@@ -217,7 +248,10 @@ public class BooksRepository : IBooksRepository
         if (bookInstance == null)
             throw new ArgumentNullException(nameof(bookInstance));
 
-        var existing = await _dbContext.BookInstances.FindAsync(bookInstance.BookInstanceId);
+        var existing = await _dbContext
+            .BookInstances.Include(bi => bi.Book)
+            .FirstOrDefaultAsync(bi => bi.BookInstanceId == bookInstance.BookInstanceId);
+
         if (existing == null)
             return null;
 
@@ -232,12 +266,15 @@ public class BooksRepository : IBooksRepository
 
     public async Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         return await _dbContext
             .BookInstances.Include(bi => bi.Book)
             .ThenInclude(b => b.Authors)
             .Include(bi => bi.Reader)
             .Where(bi =>
                 bi.Book.LibraryId == libraryId
+                && userLibraryIds.Contains(bi.Book.LibraryId)
                 && bi.Status == Domain.Enums.BookInstanceStatus.Borrowed
             )
             .OrderBy(bi => bi.DueDate)
@@ -258,11 +295,13 @@ public class BooksRepository : IBooksRepository
 
     public async Task<bool> DeleteBookAsync(Guid bookId)
     {
+        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
+
         var existing = await _dbContext
             .Books.Include(b => b.BookInstances)
             .Include(b => b.Authors)
             .Include(b => b.Categories)
-            .FirstOrDefaultAsync(b => b.BookId == bookId);
+            .FirstOrDefaultAsync(b => b.BookId == bookId && userLibraryIds.Contains(b.LibraryId));
 
         if (existing == null)
             return false;
