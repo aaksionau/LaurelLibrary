@@ -26,10 +26,6 @@
                     </div>
                 }
                 <h1 class="display-4 mb-3">@Model.Library.Name</h1>
-                @if (!string.IsNullOrEmpty(Model.Library.Description))
-                {
-                    <p class="lead text-muted">@Model.Library.Description</p>
-                }
                 @if (Model.Kiosk != null)
                 {
                     <p class="text-muted"><small><i class="bi bi-geo-alt-fill"></i> Kiosk Location:
@@ -71,9 +67,10 @@ else
 }
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script>
-        // Check if we need to redirect with localStorage parameters
-        (function () {
+        // Initialize FingerprintJS and handle redirect with localStorage parameters
+        (async function () {
             const urlParams = new URLSearchParams(window.location.search);
             const hasLibraryId = urlParams.has('libraryId');
             const hasKioskId = urlParams.has('kioskId');
@@ -84,10 +81,29 @@ else
                 return;
             }
 
-            // Get parameters from localStorage
+            // Get or generate browserFingerprint
+            let browserFingerprint = localStorage.getItem('browserFingerprint');
+
+            if (!browserFingerprint) {
+                try {
+                    // Initialize FingerprintJS
+                    const fp = await FingerprintJS.load();
+                    const result = await fp.get();
+                    browserFingerprint = result.visitorId;
+
+                    // Save to localStorage
+                    localStorage.setItem('browserFingerprint', browserFingerprint);
+                } catch (error) {
+                    console.error('Error generating fingerprint:', error);
+                    // Fallback to a random ID if FingerprintJS fails
+                    browserFingerprint = 'fallback-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('browserFingerprint', browserFingerprint);
+                }
+            }
+
+            // Get other parameters from localStorage
             const libraryId = localStorage.getItem('libraryId');
             const kioskId = localStorage.getItem('kioskId');
-            const browserFingerprint = localStorage.getItem('browserFingerprint');
 
             // If we have all required parameters in localStorage, redirect
             if (libraryId && kioskId && browserFingerprint) {

@@ -138,7 +138,6 @@ else
                 // Save to localStorage
                 localStorage.setItem('kioskId', kioskId);
                 localStorage.setItem('libraryId', libraryId);
-                localStorage.setItem('browserFingerprint', visitorId);
 
                 // Send fingerprint to server to update kiosk
                 const response = await fetch(`/Administration/Kiosks/Details/${libraryId}/${kioskId}?handler=UpdateFingerprint`, {

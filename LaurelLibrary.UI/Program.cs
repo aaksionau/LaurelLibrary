@@ -6,6 +6,7 @@ using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,9 +18,7 @@ var connectionString =
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder
-    .Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddDefaultIdentity<AppUser>().AddEntityFrameworkStores<AppDbContext>();
 
 // Add Microsoft Authentication
 builder
@@ -51,6 +50,8 @@ builder.Services.AddScoped<IReadersService, ReadersService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
 builder.Services.AddScoped<IKiosksService, KiosksService>();
+builder.Services.AddScoped<IAzureQueueMailService, AzureQueueMailService>();
+builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 
 builder.Services.AddHttpContextAccessor();
 
