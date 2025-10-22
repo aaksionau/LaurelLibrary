@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
@@ -41,7 +43,10 @@ public class EmailSenderService : IEmailSender
             };
 
             // Serialize to JSON for queue message
-            var messageJson = JsonSerializer.Serialize(emailMessage);
+            var messageJson = JsonSerializer.Serialize(
+                emailMessage,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
 
             _logger.LogDebug(
                 "Serialized email message to JSON. Length: {Length}",

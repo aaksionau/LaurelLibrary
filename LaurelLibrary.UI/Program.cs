@@ -52,6 +52,7 @@ builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
 builder.Services.AddScoped<IKiosksService, KiosksService>();
 builder.Services.AddScoped<IAzureQueueMailService, AzureQueueMailService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 builder.Services.AddHttpContextAccessor();
 

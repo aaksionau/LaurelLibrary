@@ -6,6 +6,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -20,11 +22,17 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public ForgotPasswordModel(UserManager<AppUser> userManager, IEmailSender emailSender)
+        public ForgotPasswordModel(
+            UserManager<AppUser> userManager,
+            IEmailSender emailSender,
+            IEmailTemplateService emailTemplateService
+        )
         {
             _userManager = userManager;
             _emailSender = emailSender;
+            _emailTemplateService = emailTemplateService;
         }
 
         [BindProperty]
@@ -57,10 +65,24 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
                     protocol: Request.Scheme
                 );
 
+                // Create the email model
+                var emailModel = new PasswordResetEmailDto
+                {
+                    UserName = $"{user.FirstName} {user.LastName}".Trim(),
+                    Email = user.Email!,
+                    ResetUrl = callbackUrl!,
+                    RequestedAt = DateTime.UtcNow,
+                };
+
+                // Render the email template
+                var emailBody = await _emailTemplateService.RenderPasswordResetEmailAsync(
+                    emailModel
+                );
+
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
+                    "Reset Your Laurel Library Password",
+                    emailBody
                 );
 
                 return RedirectToPage("./ForgotPasswordConfirmation");

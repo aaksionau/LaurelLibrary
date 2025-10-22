@@ -6,8 +6,14 @@
     <UserSecretsId>aspnet-LaurelLibrary.UI-4571a069-11ee-4dc1-9342-63d869c8dd57</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference
+      Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
+      Version="9.0.10"
+    />
+    <PackageReference
+      Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore"
+      Version="9.0.9"
+    />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
@@ -21,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../LaurelLibrary.Services/LaurelLibrary.Services.csproj" />
+    <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
     <ProjectReference Include="..\LaurelLibrary.Persistence\LaurelLibrary.Persistence.csproj" />
     <ProjectReference Include="..\LaurelLibrary.Domain\LaurelLibrary.Domain.csproj" />
   </ItemGroup>
