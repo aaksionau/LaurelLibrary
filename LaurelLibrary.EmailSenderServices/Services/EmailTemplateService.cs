@@ -1,8 +1,8 @@
-using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Razor.Templating.Core;
 
-namespace LaurelLibrary.Services.Services
+namespace LaurelLibrary.EmailSenderServices.Services
 {
     public class EmailTemplateService : IEmailTemplateService
     {

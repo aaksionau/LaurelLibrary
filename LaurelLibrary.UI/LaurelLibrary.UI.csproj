@@ -26,6 +26,7 @@
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../LaurelLibrary.EmailSenderServices/LaurelLibrary.EmailSenderServices.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services/LaurelLibrary.Services.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
     <ProjectReference Include="..\LaurelLibrary.Persistence\LaurelLibrary.Persistence.csproj" />

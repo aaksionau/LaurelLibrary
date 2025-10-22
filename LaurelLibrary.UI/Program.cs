@@ -1,4 +1,6 @@
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.EmailSenderServices.Services;
 using LaurelLibrary.Persistence;
 using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Persistence.Repositories;
@@ -50,9 +52,15 @@ builder.Services.AddScoped<IReadersService, ReadersService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
 builder.Services.AddScoped<IKiosksService, KiosksService>();
-builder.Services.AddScoped<IAzureQueueMailService, AzureQueueMailService>();
+builder.Services.AddScoped<
+    LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService,
+    AzureQueueMailService
+>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
-builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<
+    LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService,
+    EmailTemplateService
+>();
 
 builder.Services.AddHttpContextAccessor();
 

@@ -1,12 +1,12 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Services.Services;
+namespace LaurelLibrary.EmailSenderServices.Services;
 
 public class EmailSenderService : IEmailSender
 {

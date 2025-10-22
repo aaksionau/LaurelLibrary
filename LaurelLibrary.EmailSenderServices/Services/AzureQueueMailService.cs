@@ -1,10 +1,10 @@
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
-using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Services.Services;
+namespace LaurelLibrary.EmailSenderServices.Services;
 
 public class AzureQueueMailService : IAzureQueueMailService
 {

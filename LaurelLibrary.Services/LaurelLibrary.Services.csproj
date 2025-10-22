@@ -7,12 +7,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.26.0" />
-    <PackageReference Include="Azure.Storage.Queues" Version="12.22.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.3.0" />
-    <PackageReference Include="Razor.Templating.Core" Version="2.1.0" />
     <PackageReference Include="SkiaSharp" Version="3.119.1" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
     <PackageReference Include="ZXing.Net" Version="0.16.10" />
@@ -21,8 +19,5 @@
   <ItemGroup>
     <ProjectReference Include="../LaurelLibrary.Domain/LaurelLibrary.Domain.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Views/**/*.cshtml" />
   </ItemGroup>
 </Project>
