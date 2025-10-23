@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="3.119.1" />
-    <PackageReference Include="LaurelLibrary.EmailSenderServices" Version="1.0.0" />
+    <PackageReference Include="LaurelLibrary.EmailSenderServices" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../LaurelLibrary.Services/LaurelLibrary.Services.csproj" />

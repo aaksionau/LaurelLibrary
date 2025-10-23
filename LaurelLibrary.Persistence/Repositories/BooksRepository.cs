@@ -213,9 +213,6 @@ public class BooksRepository : IBooksRepository
     {
         return await _dbContext
             .BookInstances.Include(bi => bi.Book)
-            .ThenInclude(b => b.Authors)
-            .Include(bi => bi.Book)
-            .ThenInclude(b => b.Categories)
             .Where(bi =>
                 bi.Book.Isbn == isbn
                 && bi.Book.LibraryId == libraryId
@@ -226,18 +223,12 @@ public class BooksRepository : IBooksRepository
 
     public async Task<BookInstance?> GetBorrowedBookInstanceByIsbnAsync(string isbn, Guid libraryId)
     {
-        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
-
         return await _dbContext
             .BookInstances.Include(bi => bi.Book)
-            .ThenInclude(b => b.Authors)
-            .Include(bi => bi.Book)
-            .ThenInclude(b => b.Categories)
             .Include(bi => bi.Reader)
             .Where(bi =>
                 bi.Book.Isbn == isbn
                 && bi.Book.LibraryId == libraryId
-                && userLibraryIds.Contains(bi.Book.LibraryId)
                 && bi.Status == Domain.Enums.BookInstanceStatus.Borrowed
             )
             .FirstOrDefaultAsync();

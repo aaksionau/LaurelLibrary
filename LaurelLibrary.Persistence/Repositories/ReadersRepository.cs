@@ -127,14 +127,10 @@ public class ReadersRepository : IReadersRepository
 
     public async Task<Reader?> GetByIdAsync(int readerId, Guid libraryId)
     {
-        var userLibraryIds = await GetUserAdministeredLibraryIdsAsync();
-
         return await _dbContext
             .Readers.Include(r => r.Libraries)
             .FirstOrDefaultAsync(r =>
-                r.ReaderId == readerId
-                && r.Libraries.Any(l => l.LibraryId == libraryId)
-                && r.Libraries.Any(l => userLibraryIds.Contains(l.LibraryId))
+                r.ReaderId == readerId && r.Libraries.Any(l => l.LibraryId == libraryId)
             );
     }
 

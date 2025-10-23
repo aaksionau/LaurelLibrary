@@ -1,4 +1,7 @@
+using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
@@ -13,8 +16,11 @@ public class BooksService : IBooksService
     private readonly IAuthorsRepository _authorsRepository;
     private readonly ICategoriesRepository _categoriesRepository;
     private readonly ILibrariesRepository _librariesRepository;
+    private readonly IReadersRepository _readersRepository;
     private readonly IUserService _userService;
     private readonly IIsbnService _isbnService;
+    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService _emailTemplateService;
+    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService _mailService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -22,8 +28,11 @@ public class BooksService : IBooksService
         IAuthorsRepository authorsRepository,
         ICategoriesRepository categoriesRepository,
         ILibrariesRepository librariesRepository,
+        IReadersRepository readersRepository,
         IUserService userService,
         IIsbnService isbnService,
+        LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService emailTemplateService,
+        LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService mailService,
         ILogger<BooksService> logger
     )
     {
@@ -31,8 +40,11 @@ public class BooksService : IBooksService
         _authorsRepository = authorsRepository;
         _categoriesRepository = categoriesRepository;
         _librariesRepository = librariesRepository;
+        _readersRepository = readersRepository;
         _userService = userService;
         _isbnService = isbnService;
+        _emailTemplateService = emailTemplateService;
+        _mailService = mailService;
         _logger = logger;
     }
 
@@ -292,8 +304,17 @@ public class BooksService : IBooksService
             return false;
         }
 
+        // Get the reader information
+        var reader = await _readersRepository.GetByIdAsync(readerId, libraryId);
+        if (reader == null)
+        {
+            _logger.LogWarning("Cannot checkout books: reader {ReaderId} not found", readerId);
+            return false;
+        }
+
         var checkoutDate = DateTimeOffset.UtcNow;
         var dueDate = checkoutDate.AddDays(library.CheckoutDurationDays);
+        var checkedOutBooks = new List<CheckedOutBookDto>();
 
         foreach (var instanceId in bookInstanceIds)
         {
@@ -310,6 +331,17 @@ public class BooksService : IBooksService
             bookInstance.Status = Domain.Enums.BookInstanceStatus.Borrowed;
 
             await _booksRepository.UpdateBookInstanceAsync(bookInstance);
+
+            // Collect book information for the email
+            checkedOutBooks.Add(
+                new CheckedOutBookDto
+                {
+                    Title = bookInstance.Book.Title,
+                    Authors = string.Join(", ", bookInstance.Book.Authors.Select(a => a.FullName)),
+                    Isbn = bookInstance.Book.Isbn,
+                    Publisher = bookInstance.Book.Publisher,
+                }
+            );
         }
 
         _logger.LogInformation(
@@ -319,6 +351,61 @@ public class BooksService : IBooksService
             dueDate,
             library.CheckoutDurationDays
         );
+
+        // Send checkout confirmation email to the reader
+        if (!string.IsNullOrEmpty(reader.Email) && checkedOutBooks.Any())
+        {
+            try
+            {
+                var emailModel = new BookCheckoutEmailDto
+                {
+                    ReaderName = $"{reader.FirstName} {reader.LastName}",
+                    LibraryName = library.Name,
+                    LibraryAddress = library.Address,
+                    LibraryDescription = library.Description,
+                    CheckedOutDate = checkoutDate.DateTime,
+                    DueDate = dueDate.DateTime,
+                    Books = checkedOutBooks,
+                };
+
+                // Render the email template
+                var emailBody = await _emailTemplateService.RenderTemplateAsync(
+                    "BookCheckoutEmail",
+                    emailModel
+                );
+
+                var emailMessage = new LaurelLibrary.EmailSenderServices.Dtos.EmailMessageDto
+                {
+                    To = reader.Email,
+                    Subject = $"Books Checked Out from {library.Name}",
+                    Body = emailBody,
+                    Timestamp = DateTime.UtcNow,
+                };
+
+                // Serialize to JSON for queue message
+                var messageJson = JsonSerializer.Serialize(
+                    emailMessage,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                await _mailService.SendMessageAsync(messageJson);
+
+                _logger.LogInformation(
+                    "Checkout confirmation email sent to reader {ReaderId} at {Email}",
+                    readerId,
+                    reader.Email
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to send checkout confirmation email to reader {ReaderId}",
+                    readerId
+                );
+                // Don't fail the checkout if email fails
+            }
+        }
 
         return true;
     }
