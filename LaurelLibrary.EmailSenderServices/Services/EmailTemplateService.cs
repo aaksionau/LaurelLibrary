@@ -11,6 +11,11 @@ namespace LaurelLibrary.EmailSenderServices.Services
             return await RenderTemplateAsync("PasswordResetEmail", model);
         }
 
+        public async Task<string> RenderEmailConfirmationAsync(EmailConfirmationDto model)
+        {
+            return await RenderTemplateAsync("EmailConfirmation", model);
+        }
+
         public async Task<string> RenderTemplateAsync<T>(string templateName, T model)
         {
             try

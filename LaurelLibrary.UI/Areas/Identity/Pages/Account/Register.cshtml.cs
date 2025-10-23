@@ -11,6 +11,8 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -30,13 +32,15 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IEmailTemplateService _emailTemplateService;
 
         public RegisterModel(
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             SignInManager<AppUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender
+            IEmailSender emailSender,
+            IEmailTemplateService emailTemplateService
         )
         {
             _userManager = userManager;
@@ -45,6 +49,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _emailTemplateService = emailTemplateService;
         }
 
         /// <summary>
@@ -166,10 +171,24 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
                         protocol: Request.Scheme
                     );
 
+                    // Create the email model
+                    var emailModel = new EmailConfirmationDto
+                    {
+                        UserName = $"{user.FirstName} {user.LastName}".Trim(),
+                        Email = user.Email!,
+                        ConfirmationUrl = callbackUrl!,
+                        CreatedAt = DateTime.UtcNow,
+                    };
+
+                    // Render the email template
+                    var emailBody = await _emailTemplateService.RenderEmailConfirmationAsync(
+                        emailModel
+                    );
+
                     await _emailSender.SendEmailAsync(
                         Input.Email,
-                        "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
+                        "Welcome to Laurel Library - Confirm Your Email",
+                        emailBody
                     );
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)

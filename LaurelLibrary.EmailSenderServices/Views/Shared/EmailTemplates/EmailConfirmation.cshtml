@@ -1,0 +1,250 @@
+@model LaurelLibrary.EmailSenderServices.Dtos.EmailConfirmationDto
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Email - Laurel Library</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            color: #555555;
+        }
+
+        .confirm-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            margin: 20px 0;
+        }
+
+        .confirm-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .alternative-link {
+            background-color: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 14px;
+            color: #6c757d;
+            word-break: break-all;
+        }
+
+        .alternative-link strong {
+            color: #495057;
+        }
+
+        .welcome-note {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .welcome-note .icon {
+            color: #0c5460;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .footer .library-info {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .footer .support-info {
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .features-list {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .features-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .features-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #495057;
+        }
+
+        .features-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .security-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">📚</span>
+            <h1>Welcome to Laurel Library</h1>
+            <p>Confirm Your Email Address</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Hello @Model.UserName,
+            </div>
+
+            <div class="message">
+                Thank you for joining Laurel Library! We're excited to have you as part of our reading community.
+                To get started and access all the features of your account, please confirm your email address
+                <strong>@Model.Email</strong> by clicking the button below.
+            </div>
+
+            <div class="button-container">
+                <a href="@Model.ConfirmationUrl" class="confirm-button">
+                    Confirm My Email Address
+                </a>
+            </div>
+
+            <div class="alternative-link">
+                <strong>Can't click the button?</strong><br>
+                Copy and paste this link into your browser:<br>
+                @Model.ConfirmationUrl
+            </div>
+
+            <div class="welcome-note">
+                <span class="icon">🎉</span>
+                <strong>What's Next?</strong> Once your email is confirmed, you'll be able to:
+            </div>
+
+            <div class="features-list">
+                <ul>
+                    <li>Browse and search our extensive book collection</li>
+                    <li>Borrow books from any of our library locations</li>
+                    <li>Manage your reading list and track borrowed items</li>
+                    <li>Receive notifications about due dates and new arrivals</li>
+                    <li>Access your personalized library dashboard</li>
+                </ul>
+            </div>
+
+            <div class="security-note">
+                <strong>🔒 Security Notice:</strong> If you didn't create an account with Laurel Library,
+                you can safely ignore this email. No account will be activated without email confirmation.
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="library-info">
+                Laurel Library System
+            </div>
+            <div>
+                This is an automated message from the Laurel Library system.
+                Please do not reply to this email.
+            </div>
+            <div class="support-info">
+                Need help? Contact our support team for assistance with your library account.
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: #adb5bd;">
+                © @DateTime.Now.Year Laurel Library. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
