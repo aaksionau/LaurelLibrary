@@ -44,6 +44,14 @@ else
                     <strong>Date of Birth:</strong>
                     <span class="ms-1">@Model.Reader.DateOfBirth.ToString("MMMM dd, yyyy")</span>
                 </p>
+                @if (!string.IsNullOrWhiteSpace(Model.Reader.Email))
+                {
+                    <p class="mb-2">
+                        <i class="bi bi-envelope text-primary me-2"></i>
+                        <strong>Email:</strong>
+                        <span class="ms-1">@Model.Reader.Email</span>
+                    </p>
+                }
                 @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
                 {
                     <p class="mb-2">

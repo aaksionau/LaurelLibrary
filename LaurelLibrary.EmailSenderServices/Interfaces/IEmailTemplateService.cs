@@ -6,6 +6,7 @@ namespace LaurelLibrary.EmailSenderServices.Interfaces
     {
         Task<string> RenderPasswordResetEmailAsync(PasswordResetEmailDto model);
         Task<string> RenderEmailConfirmationAsync(EmailConfirmationDto model);
+        Task<string> RenderReaderVerificationEmailAsync(ReaderVerificationEmailDto model);
         Task<string> RenderTemplateAsync<T>(string templateName, T model);
     }
 }

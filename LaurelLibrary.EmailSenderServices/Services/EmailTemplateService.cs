@@ -16,6 +16,13 @@ namespace LaurelLibrary.EmailSenderServices.Services
             return await RenderTemplateAsync("EmailConfirmation", model);
         }
 
+        public async Task<string> RenderReaderVerificationEmailAsync(
+            ReaderVerificationEmailDto model
+        )
+        {
+            return await RenderTemplateAsync("ReaderVerificationEmail", model);
+        }
+
         public async Task<string> RenderTemplateAsync<T>(string templateName, T model)
         {
             try

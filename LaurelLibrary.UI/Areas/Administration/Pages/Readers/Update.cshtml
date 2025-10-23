@@ -30,6 +30,24 @@
                 <input type="date" class="form-control" asp-for="Reader.DateOfBirth" />
                 <span asp-validation-for="Reader.DateOfBirth" class="text-danger"></span>
             </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Reader.Email">Email Address</label>
+                <input type="email" class="form-control" asp-for="Reader.Email" placeholder="reader@example.com" />
+                <span asp-validation-for="Reader.Email" class="text-danger"></span>
+                <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>Required for reader login verification
+                </div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
+            {
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Reader.Ean">EAN Barcode</label>
+                    <input type="text" class="form-control" asp-for="Reader.Ean" disabled readonly />
+                    <div class="form-text">
+                        <i class="bi bi-lock-fill me-1"></i>EAN is auto-generated and cannot be modified
+                    </div>
+                </div>
+            }
         </div>
         <div class="card-footer">
             @if (Model.Reader.ReaderId > 0)

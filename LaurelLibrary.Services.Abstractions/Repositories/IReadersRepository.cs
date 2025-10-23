@@ -9,7 +9,9 @@ public interface IReadersRepository
     Task UpdateEanAsync(int readerId, string ean);
     Task UpdateBarcodeImageUrlAsync(int readerId, string barcodeImageUrl);
     Task<Reader?> GetByIdAsync(int readerId, Guid libraryId);
+    Task<Reader?> GetByIdWithoutLibraryAsync(int readerId);
     Task<Reader?> GetByEanAsync(string ean, Guid libraryId);
+    Task<Reader?> GetByEanWithoutLibraryAsync(string ean);
     Task<List<Reader>> GetAllReadersAsync(
         Guid libraryId,
         int page = 1,

@@ -98,8 +98,17 @@ public class ReadersRepository : IReadersRepository
         existing.FirstName = reader.FirstName;
         existing.LastName = reader.LastName;
         existing.DateOfBirth = reader.DateOfBirth;
-        existing.Ean = reader.Ean;
-        existing.BarcodeImageUrl = reader.BarcodeImageUrl;
+        existing.Email = reader.Email;
+        // Only update EAN if it's provided (not null or empty)
+        if (!string.IsNullOrWhiteSpace(reader.Ean))
+        {
+            existing.Ean = reader.Ean;
+        }
+        // Only update BarcodeImageUrl if it's provided
+        if (!string.IsNullOrWhiteSpace(reader.BarcodeImageUrl))
+        {
+            existing.BarcodeImageUrl = reader.BarcodeImageUrl;
+        }
 
         // Replace libraries
         existing.Libraries.Clear();
@@ -129,6 +138,13 @@ public class ReadersRepository : IReadersRepository
             );
     }
 
+    public async Task<Reader?> GetByIdWithoutLibraryAsync(int readerId)
+    {
+        return await _dbContext
+            .Readers.Include(r => r.Libraries)
+            .FirstOrDefaultAsync(r => r.ReaderId == readerId);
+    }
+
     public async Task<Reader?> GetByEanAsync(string ean, Guid libraryId)
     {
         if (string.IsNullOrWhiteSpace(ean))
@@ -139,6 +155,16 @@ public class ReadersRepository : IReadersRepository
             .FirstOrDefaultAsync(r =>
                 r.Ean == ean.Trim() && r.Libraries.Any(l => l.LibraryId == libraryId)
             );
+    }
+
+    public async Task<Reader?> GetByEanWithoutLibraryAsync(string ean)
+    {
+        if (string.IsNullOrWhiteSpace(ean))
+            return null;
+
+        return await _dbContext
+            .Readers.Include(r => r.Libraries)
+            .FirstOrDefaultAsync(r => r.Ean == ean.Trim());
     }
 
     public async Task<List<Reader>> GetAllReadersAsync(

@@ -55,6 +55,17 @@ public class ReadersService : IReadersService
         return MapReaderToDto(entity);
     }
 
+    public async Task<ReaderDto?> GetReaderByIdWithoutUserContextAsync(int readerId)
+    {
+        var entity = await _readersRepository.GetByIdWithoutLibraryAsync(readerId);
+        if (entity == null)
+        {
+            return null;
+        }
+
+        return MapReaderToDto(entity);
+    }
+
     public async Task<ReaderDto?> GetReaderByEanAsync(string ean, Guid libraryId)
     {
         var entity = await _readersRepository.GetByEanAsync(ean, libraryId);
@@ -250,6 +261,7 @@ public class ReadersService : IReadersService
             FirstName = entity.FirstName,
             LastName = entity.LastName,
             DateOfBirth = entity.DateOfBirth,
+            Email = entity.Email,
             Ean = entity.Ean,
             BarcodeImageUrl = entity.BarcodeImageUrl,
             LibraryIds = entity.Libraries.Select(l => l.LibraryId).ToList(),
@@ -269,6 +281,7 @@ public class ReadersService : IReadersService
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             DateOfBirth = dto.DateOfBirth,
+            Email = dto.Email,
         };
 
         // Attach libraries if specified

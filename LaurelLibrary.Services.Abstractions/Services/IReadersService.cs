@@ -10,6 +10,7 @@ public interface IReadersService
     /// </summary>
     Task<bool> CreateOrUpdateReaderAsync(ReaderDto readerDto);
     Task<ReaderDto?> GetReaderByIdAsync(int readerId);
+    Task<ReaderDto?> GetReaderByIdWithoutUserContextAsync(int readerId);
     Task<ReaderDto?> GetReaderByEanAsync(string ean, Guid libraryId);
     Task<List<ReaderDto>> GetAllReadersAsync(
         int page = 1,

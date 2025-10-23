@@ -1,0 +1,75 @@
+@page
+@model LaurelLibrary.UI.Pages.ReaderLoginModel
+@{
+    ViewData["Title"] = "Reader Login";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-book-fill me-2"></i>Reader Login
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <p class="text-muted mb-4">
+                        Please enter your EAN number and date of birth to access your borrowed books.
+                    </p>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="Ean" class="form-label">
+                                <i class="bi bi-upc-scan me-1"></i>EAN Number
+                            </label>
+                            <input asp-for="Ean" class="form-control" placeholder="Enter your EAN number" autofocus />
+                            <span asp-validation-for="Ean" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="DateOfBirth" class="form-label">
+                                <i class="bi bi-calendar-event me-1"></i>Date of Birth
+                            </label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Continue
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-shield-check me-1"></i>
+                            A verification code will be sent to your registered email address.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a asp-page="/Index" class="text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

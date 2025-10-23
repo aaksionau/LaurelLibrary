@@ -16,6 +16,10 @@ public class ReaderDto
     [Required]
     public required DateOnly DateOfBirth { get; set; }
 
+    [Required(ErrorMessage = "Email address is required")]
+    [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+    public required string Email { get; set; }
+
     public string FullName => $"{FirstName} {LastName}".Trim();
     public string? Ean { get; set; }
     public string? BarcodeImageUrl { get; set; }
