@@ -62,4 +62,33 @@ public class DetailsModel : PageModel
 
         return Page();
     }
+
+    public async Task<IActionResult> OnPostRegenerateBarcodeAsync(int id)
+    {
+        if (id <= 0)
+        {
+            StatusMessage = "Invalid reader identifier.";
+            return RedirectToPage("List");
+        }
+
+        var user = await userService.GetAppUserAsync();
+        if (!user.CurrentLibraryId.HasValue)
+        {
+            StatusMessage = "No library selected.";
+            return RedirectToPage("List");
+        }
+
+        var success = await readersService.RegenerateBarcodeAsync(id);
+
+        if (success)
+        {
+            StatusMessage = "Barcode regenerated successfully.";
+        }
+        else
+        {
+            StatusMessage = "Failed to regenerate barcode.";
+        }
+
+        return RedirectToPage(new { id });
+    }
 }

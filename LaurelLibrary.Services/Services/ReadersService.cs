@@ -177,25 +177,14 @@ public class ReadersService : IReadersService
             // Generate and save barcode image to Azure Blob Storage
             if (!string.IsNullOrEmpty(entity.Ean) && currentLibrary != null)
             {
-                var blobName = $"{currentLibrary.LibraryId}-{entity.Ean}.png";
-                _logger.LogInformation("Uploading barcode with blob name: {BlobName}", blobName);
-
-                var barcodeUrl = await _barcodeService.GenerateBarcodeImageAsync(
+                var barcodeUrl = await GenerateAndUploadBarcodeAsync(
                     entity.Ean,
-                    blobName
+                    currentLibrary.LibraryId,
+                    entity.ReaderId
                 );
 
-                if (barcodeUrl == null)
+                if (barcodeUrl != null)
                 {
-                    _logger.LogWarning(
-                        "Failed to generate barcode for reader {ReaderId}",
-                        entity.ReaderId
-                    );
-                }
-                else
-                {
-                    _logger.LogInformation("Barcode uploaded successfully to {Url}", barcodeUrl);
-
                     // Update reader with barcode URL
                     await _readersRepository.UpdateBarcodeImageUrlAsync(
                         entity.ReaderId,
@@ -312,6 +301,43 @@ public class ReadersService : IReadersService
         return displayName;
     }
 
+    private async Task<string?> GenerateAndUploadBarcodeAsync(
+        string ean,
+        Guid libraryId,
+        int readerId
+    )
+    {
+        var currentLibrary = await _librariesRepository.GetByIdAsync(libraryId);
+        if (currentLibrary == null)
+        {
+            _logger.LogWarning("Library {LibraryId} not found for barcode generation", libraryId);
+            return null;
+        }
+
+        var blobName = $"{currentLibrary.LibraryId}-{ean}.png";
+        _logger.LogInformation(
+            "Uploading barcode for reader {ReaderId} with blob name: {BlobName}",
+            readerId,
+            blobName
+        );
+
+        var barcodeUrl = await _barcodeService.GenerateBarcodeImageAsync(ean, blobName);
+
+        if (barcodeUrl == null)
+        {
+            _logger.LogWarning("Failed to generate barcode for reader {ReaderId}", readerId);
+            return null;
+        }
+
+        _logger.LogInformation(
+            "Barcode uploaded successfully for reader {ReaderId} to {Url}",
+            readerId,
+            barcodeUrl
+        );
+
+        return barcodeUrl;
+    }
+
     public async Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(int readerId)
     {
         var bookInstances = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(readerId);
@@ -330,5 +356,52 @@ public class ReadersService : IReadersService
                     && bi.ReaderId == readerId,
             })
             .ToList();
+    }
+
+    public async Task<bool> RegenerateBarcodeAsync(int readerId)
+    {
+        var currentUser = await _userService.GetAppUserAsync();
+        if (currentUser?.CurrentLibraryId == null)
+        {
+            throw new InvalidOperationException("Current user library not found.");
+        }
+
+        var reader = await _readersRepository.GetByIdAsync(
+            readerId,
+            currentUser.CurrentLibraryId.Value
+        );
+        if (reader == null)
+        {
+            _logger.LogWarning("Reader {ReaderId} not found for barcode regeneration", readerId);
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(reader.Ean))
+        {
+            _logger.LogWarning(
+                "Reader {ReaderId} does not have an EAN, cannot regenerate barcode",
+                readerId
+            );
+            return false;
+        }
+
+        // Generate and save barcode image to Azure Blob Storage
+        var barcodeUrl = await GenerateAndUploadBarcodeAsync(
+            reader.Ean,
+            currentUser.CurrentLibraryId.Value,
+            readerId
+        );
+
+        if (barcodeUrl == null)
+        {
+            return false;
+        }
+
+        _logger.LogInformation("Barcode regenerated successfully for reader {ReaderId}", readerId);
+
+        // Update reader with new barcode URL
+        await _readersRepository.UpdateBarcodeImageUrlAsync(readerId, barcodeUrl);
+
+        return true;
     }
 }

@@ -20,4 +20,5 @@ public interface IReadersService
     Task<int> GetReadersCountAsync(string? searchName = null);
     Task<bool> DeleteReaderAsync(int readerId);
     Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(int readerId);
+    Task<bool> RegenerateBarcodeAsync(int readerId);
 }

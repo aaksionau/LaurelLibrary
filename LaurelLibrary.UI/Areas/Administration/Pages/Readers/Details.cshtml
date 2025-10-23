@@ -171,6 +171,17 @@ else
                                 {
                                     <p class="text-muted font-monospace fs-5">@Model.Reader.Ean</p>
                                 }
+                                <div class="d-flex gap-2 justify-content-center mt-4">
+                                    <form method="post" asp-page-handler="RegenerateBarcode" asp-route-id="@Model.Reader.ReaderId" onsubmit="return confirm('Are you sure you want to regenerate the barcode? This will create a new barcode image.');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-warning">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Regenerate Barcode
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-primary" onclick="printBarcode()">
+                                        <i class="bi bi-printer me-1"></i>Print Barcode
+                                    </button>
+                                </div>
                             }
                             else if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
                             {
@@ -178,6 +189,14 @@ else
                                     <i class="bi bi-info-circle me-2"></i>
                                     <div>Barcode image not generated</div>
                                     <div class="font-monospace mt-3 fs-5">@Model.Reader.Ean</div>
+                                </div>
+                                <div class="d-flex gap-2 justify-content-center mt-3">
+                                    <form method="post" asp-page-handler="RegenerateBarcode" asp-route-id="@Model.Reader.ReaderId">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-arrow-clockwise me-1"></i>Generate Barcode
+                                        </button>
+                                    </form>
                                 </div>
                             }
                             else
@@ -328,4 +347,88 @@ else
             </div>
         </div>
     </div>
+
+    <!-- Hidden print area -->
+    <div id="printArea" style="display: none;">
+        <style>
+            @@media print {
+                @@page {
+                    size: auto;
+                    margin: 10mm;
+                }
+                body {
+                    margin: 0;
+                }
+                .print-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                }
+                .print-barcode-card {
+                    page-break-inside: avoid;
+                    width: calc(50% - 10px);
+                    border: 1px solid #ddd;
+                    padding: 15px;
+                    text-align: center;
+                    box-sizing: border-box;
+                }
+                .print-barcode-card h4 {
+                    margin: 10px 0 5px 0;
+                    font-size: 16px;
+                }
+                .print-barcode-card p {
+                    margin: 5px 0;
+                    font-size: 12px;
+                }
+                .print-barcode-card img {
+                    max-width: 100%;
+                    height: auto;
+                }
+            }
+        </style>
+        <div class="print-container">
+            @if (!string.IsNullOrEmpty(Model.Reader.BarcodeImageUrl))
+            {
+                <div class="print-barcode-card">
+                    <h4>@Model.Reader.FirstName @Model.Reader.LastName</h4>
+                    <p><strong>EAN:</strong> @Model.Reader.Ean</p>
+                    <p><strong>Library:</strong> @string.Join(", ", Model.Reader.LibraryNames)</p>
+                    <img src="@Model.Reader.BarcodeImageUrl" alt="Barcode for @Model.Reader.FullName" />
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function printBarcode() {
+            // Clone the print area
+            var printContent = document.getElementById('printArea').innerHTML;
+            
+            // Create a new window for printing
+            var printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>Print Barcode</title>');
+            printWindow.document.write('<style>');
+            printWindow.document.write('@@page { size: auto; margin: 10mm; }');
+            printWindow.document.write('body { margin: 0; font-family: Arial, sans-serif; }');
+            printWindow.document.write('.print-container { display: flex; flex-wrap: wrap; gap: 15px; }');
+            printWindow.document.write('.print-barcode-card { page-break-inside: avoid; width: calc(50% - 10px); border: 1px solid #ddd; padding: 15px; text-align: center; box-sizing: border-box; }');
+            printWindow.document.write('.print-barcode-card h4 { margin: 10px 0 5px 0; font-size: 16px; }');
+            printWindow.document.write('.print-barcode-card p { margin: 5px 0; font-size: 12px; }');
+            printWindow.document.write('.print-barcode-card img { max-width: 100%; height: auto; }');
+            printWindow.document.write('</style>');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(printContent);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            
+            // Wait for images to load before printing
+            printWindow.onload = function() {
+                printWindow.focus();
+                printWindow.print();
+                printWindow.close();
+            };
+        }
+    </script>
 }
