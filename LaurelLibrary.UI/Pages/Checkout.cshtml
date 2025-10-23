@@ -45,9 +45,9 @@
     <div class="card mb-4">
         <div class="card-body p-0">
             <div class="d-flex">
-                <div class="d-flex flex-column align-items-center justify-content-center bg-primary text-white p-3"
-                    style="width: 140px;">
-                    <span class="badge bg-white text-primary fs-5 mb-2">Step 1</span>
+                <div class="d-flex flex-column align-items-center justify-content-center text-white p-3"
+                    style="width: 140px; background-color: #7ba7d1;">
+                    <span class="badge bg-white fs-5 mb-2" style="color: #7ba7d1;">Step 1</span>
                     <span class="text-white text-center fw-semibold h4">Scan Reader Barcode</span>
                 </div>
                 <div class="flex-grow-1 p-3 d-flex align-items-center">
@@ -87,8 +87,8 @@
         <div class="card mb-4">
                 <div class="card-body p-0">
                     <div class="d-flex">
-                        <div class="d-flex flex-column align-items-center justify-content-center bg-success text-white p-3" style="width: 140px;">
-                            <span class="badge bg-white text-success fs-5 mb-2">Step 2</span>
+                        <div class="d-flex flex-column align-items-center justify-content-center text-white p-3" style="width: 140px; background-color: #8fc5a2;">
+                            <span class="badge bg-white fs-5 mb-2" style="color: #8fc5a2;">Step 2</span>
                             <span class="text-white text-center fw-semibold h4">Scan Books to Checkout</span>
                         </div>
                         <div class="flex-grow-1 p-3">
@@ -101,7 +101,7 @@
                                     placeholder="Scan or enter book ISBN" autofocus required />
                                 <div class="form-text">Scan the book barcode or enter the book ISBN</div>
                             </div>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success" style="background-color: #8fc5a2; border-color: #7eb591;">
                                 <i class="bi bi-plus-circle"></i> Add Book
                             </button>
                         </form>
@@ -128,7 +128,7 @@
                                                 <td>@book.BookInstanceId</td>
                                                 <td>@book.BookTitle</td>
                                                 <td>@book.BookAuthors</td>
-                                                <td><span class="badge bg-success">@book.Status</span></td>
+                                                <td><span class="badge" style="background-color: #8fc5a2;">@book.Status</span></td>
                                                 <td>
                                                     <form method="post" asp-page-handler="RemoveBook" class="d-inline">
                                                         <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
@@ -218,13 +218,13 @@
 
         .success-icon {
             font-size: 5rem;
-            color: #198754;
+            color: #8fc5a2;
             margin-bottom: 1rem;
             animation: scaleIn 0.5s ease-out;
         }
 
         .success-title {
-            color: #198754;
+            color: #8fc5a2;
             font-weight: bold;
             margin-bottom: 1rem;
         }
