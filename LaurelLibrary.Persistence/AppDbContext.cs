@@ -27,4 +27,5 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<BookInstance> BookInstances { get; set; }
     public DbSet<Reader> Readers { get; set; }
     public DbSet<Kiosk> Kiosks { get; set; }
+    public DbSet<ImportHistory> ImportHistories { get; set; }
 }

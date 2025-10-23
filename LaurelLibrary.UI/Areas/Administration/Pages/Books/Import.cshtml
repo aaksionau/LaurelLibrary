@@ -1,0 +1,118 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Books.ImportModel
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-upload"></i> Bulk Import Books from CSV
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Instructions</h6>
+                        <p class="mb-0">
+                            Upload a CSV file containing ISBN numbers (up to 1000). The file can contain:
+                        </p>
+                        <ul class="mb-0">
+                            <li>One ISBN per line</li>
+                            <li>Multiple ISBNs per line separated by commas</li>
+                            <li>ISBN-10 or ISBN-13 format (with or without hyphens)</li>
+                            <li>Optional header row (will be automatically detected and skipped)</li>
+                        </ul>
+                        <p class="mt-2 mb-0">
+                            <strong>Example CSV format:</strong><br/>
+                            <code>
+                                9781492666868<br/>
+                                9781616555719<br/>
+                                978-0-123456-78-9
+                            </code>
+                        </p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Message))
+                    {
+                        <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")" role="alert">
+                            <i class="fas @(Model.IsSuccess ? "fa-check-circle" : "fa-exclamation-triangle")"></i>
+                            @Model.Message
+                        </div>
+
+                        @if (Model.IsSuccess && Model.TotalIsbns > 0)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">Import Summary</h6>
+                                    <div class="row text-center">
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <i class="fas fa-list-ol fa-2x text-primary"></i>
+                                            </div>
+                                            <h4 class="mb-0">@Model.TotalIsbns</h4>
+                                            <small class="text-muted">Total ISBNs</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                                            </div>
+                                            <h4 class="mb-0">@Model.SuccessCount</h4>
+                                            <small class="text-muted">Successfully Imported</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-2">
+                                                <i class="fas fa-times-circle fa-2x text-danger"></i>
+                                            </div>
+                                            <h4 class="mb-0">@Model.FailedCount</h4>
+                                            <small class="text-muted">Failed</small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <a asp-page="ImportHistory" class="btn btn-primary">
+                                            <i class="fas fa-history"></i> View Import History
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="csvFile" class="form-label">
+                                <i class="fas fa-file-csv"></i> Select CSV File
+                            </label>
+                            <input class="form-control" type="file" id="csvFile" asp-for="CsvFile" accept=".csv" required />
+                            <div class="form-text">Maximum file size: 5MB. Supported format: CSV only.</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload and Import
+                            </button>
+                            <a asp-page="List" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Books
+                            </a>
+                            <a asp-page="ImportHistory" class="btn btn-outline-primary">
+                                <i class="fas fa-history"></i> Import History
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Show file name when selected
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                var fileName = e.target.files[0].name;
+                var fileSize = (e.target.files[0].size / 1024).toFixed(2);
+                console.log('Selected file: ' + fileName + ' (' + fileSize + ' KB)');
+            }
+        });
+    </script>
+}

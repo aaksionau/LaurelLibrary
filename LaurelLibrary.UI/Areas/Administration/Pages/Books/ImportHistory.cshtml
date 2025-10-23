@@ -1,0 +1,170 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Books.ImportHistoryModel
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history"></i> Book Import History
+                    </h5>
+                    <a asp-page="Import" class="btn btn-primary">
+                        <i class="fas fa-file-upload"></i> New Import
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.ImportHistories.Count == 0)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle"></i> No import history found. Start by importing books from CSV.
+                        </div>
+                        <a asp-page="Import" class="btn btn-primary">
+                            <i class="fas fa-file-upload"></i> Import Books
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>File Name</th>
+                                        <th>Total ISBNs</th>
+                                        <th>Success</th>
+                                        <th>Failed</th>
+                                        <th>Success Rate</th>
+                                        <th>Imported By</th>
+                                        <th>Failed ISBNs</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var history in Model.ImportHistories)
+                                    {
+                                        var successRate = history.TotalIsbns > 0 
+                                            ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1") 
+                                            : "0";
+                                        var progressBarClass = history.SuccessCount == history.TotalIsbns 
+                                            ? "bg-success" 
+                                            : history.SuccessCount > history.FailedCount 
+                                                ? "bg-warning" 
+                                                : "bg-danger";
+
+                                        <tr>
+                                            <td>
+                                                <span data-bs-toggle="tooltip" title="@history.ImportedAt.ToString("F")">
+                                                    @history.ImportedAt.ToString("g")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-file-csv text-success"></i>
+                                                @history.FileName
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">@history.TotalIsbns</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> @history.SuccessCount
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> @history.FailedCount
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="min-width: 100px;">
+                                                    <div class="progress-bar @progressBarClass" 
+                                                         role="progressbar" 
+                                                         style="width: @successRate%" 
+                                                         aria-valuenow="@successRate" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                        @successRate%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-user"></i> @history.CreatedBy
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrWhiteSpace(history.FailedIsbns))
+                                                {
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#failedModal_@history.ImportHistoryId">
+                                                        <i class="fas fa-list"></i> View
+                                                    </button>
+
+                                                    <!-- Modal for Failed ISBNs -->
+                                                    <div class="modal fade" 
+                                                         id="failedModal_@history.ImportHistoryId" 
+                                                         tabindex="-1" 
+                                                         aria-labelledby="failedModalLabel_@history.ImportHistoryId" 
+                                                         aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="failedModalLabel_@history.ImportHistoryId">
+                                                                        Failed ISBNs - @history.FileName
+                                                                    </h5>
+                                                                    <button type="button" 
+                                                                            class="btn-close" 
+                                                                            data-bs-dismiss="modal" 
+                                                                            aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p class="text-muted">
+                                                                        The following ISBNs were not found or failed to import:
+                                                                    </p>
+                                                                    <div class="alert alert-warning">
+                                                                        @foreach (var isbn in history.FailedIsbns.Split(',').Select(s => s.Trim()))
+                                                                        {
+                                                                            <span class="badge bg-warning text-dark me-1">@isbn</span>
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" 
+                                                                            class="btn btn-secondary" 
+                                                                            data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-3">
+                            <a asp-page="List" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Books
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
+}

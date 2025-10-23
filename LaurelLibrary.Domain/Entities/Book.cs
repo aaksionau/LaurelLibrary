@@ -18,7 +18,6 @@ public class Book : Audit
     [StringLength(512)]
     public string? Publisher { get; set; }
 
-    [StringLength(2056)]
     public string? Synopsis { get; set; }
 
     [StringLength(64)]
