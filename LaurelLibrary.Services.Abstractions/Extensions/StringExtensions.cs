@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace LaurelLibrary.Services.Extensions;
+namespace LaurelLibrary.Services.Abstractions.Extensions;
 
 public static class StringExtensions
 {

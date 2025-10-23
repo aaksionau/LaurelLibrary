@@ -19,4 +19,29 @@ public static class BookDtoExtensions
             Synopsis = book.Synopsis,
         };
     }
+
+    /// <summary>
+    /// Converts an IsbnBookDto to a LaurelBookDto.
+    /// </summary>
+    public static LaurelBookDto ToLaurelBookDto(this IsbnBookDto isbnBook)
+    {
+        return new LaurelBookDto
+        {
+            BookId = Guid.Empty,
+            Title = isbnBook.TitleLong ?? isbnBook.Title,
+            Publisher = isbnBook.Publisher,
+            Synopsis = isbnBook.Synopsis.StripHtml(),
+            Language = isbnBook.Language,
+            Image = isbnBook.Image,
+            ImageOriginal = isbnBook.ImageOriginal,
+            Edition = isbnBook.Edition,
+            Pages = isbnBook.Pages,
+            DatePublished = isbnBook.DatePublished,
+            Isbn = isbnBook.Isbn13 ?? isbnBook.Isbn ?? isbnBook.Isbn10,
+            Binding = isbnBook.Binding,
+            Authors = isbnBook.Authors != null ? string.Join(", ", isbnBook.Authors) : string.Empty,
+            Categories =
+                isbnBook.Subjects != null ? string.Join(", ", isbnBook.Subjects) : string.Empty,
+        };
+    }
 }

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
-using LaurelLibrary.Services.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace LaurelLibrary.Services.Services;
@@ -83,7 +83,7 @@ public class BookImportService : IBookImportService
             try
             {
                 // Map IsbnBookDto to LaurelBookDto
-                var laurelBookDto = MapToLaurelBookDto(bookData);
+                var laurelBookDto = bookData.ToLaurelBookDto();
 
                 // Save book
                 await _booksService.CreateOrUpdateBookAsync(laurelBookDto);
@@ -193,27 +193,5 @@ public class BookImportService : IBookImportService
         }
 
         return isbns.ToList();
-    }
-
-    private LaurelBookDto MapToLaurelBookDto(IsbnBookDto isbnBook)
-    {
-        return new LaurelBookDto
-        {
-            BookId = Guid.Empty, // New book
-            Title = isbnBook.TitleLong ?? isbnBook.Title,
-            Publisher = isbnBook.Publisher,
-            Synopsis = isbnBook.Synopsis.StripHtml(),
-            Language = isbnBook.Language,
-            Image = isbnBook.Image,
-            ImageOriginal = isbnBook.ImageOriginal,
-            Edition = isbnBook.Edition,
-            Pages = isbnBook.Pages,
-            DatePublished = isbnBook.DatePublished,
-            Isbn = isbnBook.Isbn13 ?? isbnBook.Isbn10 ?? isbnBook.Isbn,
-            Binding = isbnBook.Binding,
-            Authors = isbnBook.Authors != null ? string.Join(", ", isbnBook.Authors) : string.Empty,
-            Categories =
-                isbnBook.Subjects != null ? string.Join(", ", isbnBook.Subjects) : string.Empty,
-        };
     }
 }

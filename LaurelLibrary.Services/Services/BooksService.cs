@@ -1,8 +1,8 @@
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
-using LaurelLibrary.Services.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace LaurelLibrary.Services.Services;
@@ -249,32 +249,8 @@ public class BooksService : IBooksService
             return null;
         }
 
-        LaurelBookDto book = MapIsbnBookDtoToLaurelBookDto(isbnResult);
+        LaurelBookDto book = isbnResult.ToLaurelBookDto();
 
-        return book;
-    }
-
-    private static LaurelBookDto MapIsbnBookDtoToLaurelBookDto(IsbnBookDto isbnResult)
-    {
-        var book = new LaurelBookDto();
-        book.Title = string.IsNullOrWhiteSpace(isbnResult.TitleLong)
-            ? isbnResult.Title
-            : isbnResult.TitleLong;
-        book.Publisher = isbnResult.Publisher;
-        book.Synopsis = isbnResult.Synopsis.StripHtml();
-        book.Language = isbnResult.Language;
-        book.Image = isbnResult.Image;
-        book.ImageOriginal = isbnResult.ImageOriginal;
-        book.Edition = isbnResult.Edition;
-        book.Pages = isbnResult.Pages;
-        book.DatePublished = isbnResult.DatePublished;
-        book.Authors =
-            isbnResult.Authors != null ? string.Join(", ", isbnResult.Authors) : string.Empty;
-        book.Categories =
-            isbnResult.Subjects != null ? string.Join(", ", isbnResult.Subjects) : string.Empty;
-        book.Binding = isbnResult.Binding;
-        // prefer isbn13 then isbn then isbn10
-        book.Isbn = isbnResult.Isbn13 ?? isbnResult.Isbn ?? isbnResult.Isbn10;
         return book;
     }
 
