@@ -3,8 +3,28 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- NuGet Package Information -->
+    <PackageId>LaurelLibrary.Domain</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Aliaksei Aksionau</Authors>
+    <Company>Laurel</Company>
+    <Product>Laurel Library Management System</Product>
+    <Description>Domain layer for the Laurel Library Management System containing core business entities, enums, and domain logic.</Description>
+    <PackageTags>library;domain;entities;ddd;management</PackageTags>
+    <PackageProjectUrl>https://github.com/aaksionau/LaurelLibrary.Domain</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/aaksionau/LaurelLibrary.Domain</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

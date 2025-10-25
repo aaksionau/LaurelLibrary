@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <!-- NuGet Package Metadata -->
+    <PackageId>LaurelLibrary.EmailSenderServices</PackageId>
+    <Authors>Laurel Library</Authors>
+    <Company>Laurel Library</Company>
+    <Description>Email sender services library for Laurel Library applications providing Azure Queue Mail Service and Email Template Service functionality.</Description>
+    <PackageTags>email;azure;queue;templates;library</PackageTags>
+    <PackageProjectUrl>https://dev.azure.com/a2ksionau/LaurelLibrary</PackageProjectUrl>
+    <RepositoryUrl>https://dev.azure.com/a2ksionau/LaurelLibrary</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Queues" Version="12.22.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.9" />
+    <PackageReference Include="Razor.Templating.Core" Version="2.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Views/**/*.cshtml" />
+  </ItemGroup>
+</Project>

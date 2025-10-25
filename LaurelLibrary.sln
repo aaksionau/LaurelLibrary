@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Domain", "LaurelLibrary.Domain\LaurelLibrary.Domain.csproj", "{27472954-3BB9-4D6B-B592-D195161D17B3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Services", "LaurelLibrary.Services\LaurelLibrary.Services.csproj", "{4DEE15DF-1B04-4561-96A3-F4CAD6EB3ABA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Persistence", "LaurelLibrary.Persistence\LaurelLibrary.Persistence.csproj", "{544E215F-1B11-451D-B61D-E7CA50B5AA6E}"
@@ -13,16 +11,20 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Services.Abst
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.UI", "LaurelLibrary.UI\LaurelLibrary.UI.csproj", "{7830F126-4C52-4DAF-8128-B8F787CF712B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Domain", "LaurelLibrary.Domain\LaurelLibrary.Domain.csproj", "{F5DFE9BF-F138-48E3-906C-09DB32702437}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "functions", "functions", "{46899413-A1AD-7709-F42F-DC74916C2577}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.EmailSender.Func", "functions\LaurelLibrary.EmailSender.Func\LaurelLibrary.EmailSender.Func.csproj", "{516F3917-9F39-46C1-BEFA-A37335EF39E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.EmailSenderServices", "LaurelLibrary.EmailSenderServices\LaurelLibrary.EmailSenderServices.csproj", "{50B92308-86D8-4D4D-834F-47A9743AC7E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{27472954-3BB9-4D6B-B592-D195161D17B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27472954-3BB9-4D6B-B592-D195161D17B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27472954-3BB9-4D6B-B592-D195161D17B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27472954-3BB9-4D6B-B592-D195161D17B3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4DEE15DF-1B04-4561-96A3-F4CAD6EB3ABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4DEE15DF-1B04-4561-96A3-F4CAD6EB3ABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DEE15DF-1B04-4561-96A3-F4CAD6EB3ABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,11 +41,26 @@ Global
 		{7830F126-4C52-4DAF-8128-B8F787CF712B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7830F126-4C52-4DAF-8128-B8F787CF712B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7830F126-4C52-4DAF-8128-B8F787CF712B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5DFE9BF-F138-48E3-906C-09DB32702437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5DFE9BF-F138-48E3-906C-09DB32702437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5DFE9BF-F138-48E3-906C-09DB32702437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5DFE9BF-F138-48E3-906C-09DB32702437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{516F3917-9F39-46C1-BEFA-A37335EF39E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{516F3917-9F39-46C1-BEFA-A37335EF39E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{516F3917-9F39-46C1-BEFA-A37335EF39E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{516F3917-9F39-46C1-BEFA-A37335EF39E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50B92308-86D8-4D4D-834F-47A9743AC7E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50B92308-86D8-4D4D-834F-47A9743AC7E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50B92308-86D8-4D4D-834F-47A9743AC7E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50B92308-86D8-4D4D-834F-47A9743AC7E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2A32BCB0-0520-451A-8BBB-C218A0EEC3A4}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{516F3917-9F39-46C1-BEFA-A37335EF39E8} = {46899413-A1AD-7709-F42F-DC74916C2577}
 	EndGlobalSection
 EndGlobal

@@ -64,6 +64,7 @@ builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
 builder.Services.AddScoped<IKiosksService, KiosksService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<IBookImportService, BookImportService>();
+builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<
     LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService,
     AzureQueueMailService

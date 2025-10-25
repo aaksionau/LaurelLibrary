@@ -1,0 +1,384 @@
+@model LaurelLibrary.EmailSenderServices.Dtos.BookCheckoutEmailDto
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Checkout Confirmation - Laurel Library</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+            color: #555555;
+        }
+
+        .due-date-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        }
+
+        .due-date-box .label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .due-date-box .date {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .checkout-info {
+            background-color: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .checkout-info .info-row {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkout-info .label {
+            font-weight: 600;
+            color: #0d47a1;
+        }
+
+        .checkout-info .value {
+            color: #1565c0;
+        }
+
+        .books-section {
+            margin: 30px 0;
+        }
+
+        .books-section h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .book-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .book-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-item .book-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .book-item .book-authors {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .book-item .book-details {
+            font-size: 13px;
+            color: #868e96;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #dee2e6;
+        }
+
+        .book-item .book-details span {
+            margin-right: 15px;
+        }
+
+        .reminder-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .reminder-box .icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .reminder-box strong {
+            color: #533f03;
+        }
+
+        .library-info-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .library-info-box h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .library-info-box p {
+            margin: 8px 0;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .library-info-box .library-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .footer .library-info {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .footer .support-info {
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .tips-section {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .tips-section h3 {
+            margin-top: 0;
+            color: #155724;
+            font-size: 16px;
+        }
+
+        .tips-section ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .tips-section li {
+            color: #155724;
+            margin: 8px 0;
+        }
+
+        .book-count {
+            background-color: #667eea;
+            color: white;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">📚</span>
+            <h1>Book Checkout Confirmation</h1>
+            <p>Your books are ready!</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Hello @Model.ReaderName,
+            </div>
+
+            <div class="message">
+                Thank you for checking out books from <strong>@Model.LibraryName</strong>!
+                This email confirms your recent book checkout. Please review the details below
+                and make note of the due date to avoid any late fees.
+            </div>
+
+            <div class="checkout-info">
+                <div class="info-row">
+                    <span class="label">Checkout Date:</span>
+                    <span class="value">@Model.CheckedOutDate.ToString("MMMM dd, yyyy 'at' h:mm tt")</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Total Books:</span>
+                    <span class="value">@Model.Books.Count</span>
+                </div>
+            </div>
+
+            <div class="due-date-box">
+                <div class="label">Please Return By</div>
+                <div class="date">@Model.DueDate.ToString("MMMM dd, yyyy")</div>
+            </div>
+
+            <div class="books-section">
+                <h2>
+                    Checked Out Books
+                    <span class="book-count">@Model.Books.Count @(Model.Books.Count == 1 ? "Book" : "Books")</span>
+                </h2>
+
+                @foreach (var book in Model.Books)
+                {
+                    <div class="book-item">
+                        <div class="book-title">📖 @book.Title</div>
+                        <div class="book-authors">by @book.Authors</div>
+                        @if (!string.IsNullOrEmpty(book.Isbn) || !string.IsNullOrEmpty(book.Publisher))
+                        {
+                            <div class="book-details">
+                                @if (!string.IsNullOrEmpty(book.Isbn))
+                                {
+                                    <span><strong>ISBN:</strong> @book.Isbn</span>
+                                }
+                                @if (!string.IsNullOrEmpty(book.Publisher))
+                                {
+                                    <span><strong>Publisher:</strong> @book.Publisher</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="reminder-box">
+                <span class="icon">⏰</span>
+                <strong>Important Reminder:</strong>
+                Please return all books by <strong>@Model.DueDate.ToString("MMMM dd, yyyy")</strong>
+                to avoid late fees. You can renew your books online if you need more time,
+                subject to availability and renewal limits.
+            </div>
+
+            <div class="tips-section">
+                <h3>📌 Quick Tips</h3>
+                <ul>
+                    <li>Keep your books in good condition to avoid replacement fees</li>
+                    <li>Set a reminder a few days before the due date</li>
+                    <li>You can return books to any of our library locations</li>
+                    <li>Check your account online to manage your checkouts and renewals</li>
+                    <li>Contact us if you need to report a damaged or lost book</li>
+                </ul>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.LibraryAddress) || !string.IsNullOrEmpty(Model.LibraryDescription))
+            {
+                <div class="library-info-box">
+                    <h3>Library Information</h3>
+                    <div class="library-name">@Model.LibraryName</div>
+                    @if (!string.IsNullOrEmpty(Model.LibraryDescription))
+                    {
+                        <p>@Model.LibraryDescription</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.LibraryAddress))
+                    {
+                        <p><strong>Address:</strong> @Model.LibraryAddress</p>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="footer">
+            <div class="library-info">
+                @Model.LibraryName
+            </div>
+            <div>
+                This is an automated message from the Laurel Library system.
+                Please do not reply to this email.
+            </div>
+            <div class="support-info">
+                Need help? Contact our support team for assistance with your library account.
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: #adb5bd;">
+                © @DateTime.Now.Year Laurel Library. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

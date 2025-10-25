@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using LaurelLibrary.Domain.Enums;
 
 namespace LaurelLibrary.Domain.Entities;
 
@@ -23,5 +24,13 @@ public class ImportHistory : Audit
     [StringLength(4000)]
     public string? FailedIsbns { get; set; }
 
+    public ImportStatus Status { get; set; } = ImportStatus.Pending;
+
+    public int TotalChunks { get; set; }
+
+    public int ProcessedChunks { get; set; }
+
     public DateTimeOffset ImportedAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public DateTimeOffset? CompletedAt { get; set; }
 }
