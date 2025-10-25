@@ -6,7 +6,7 @@ This document provides examples of properly formatted JSON messages for the emai
 
 ```json
 {
-  "email": "user@example.com",
+  "email": "useremail@example.com",
   "subject": "Welcome to Laurel Library",
   "message": "Thank you for joining our library system. Your account has been created successfully.",
   "timestamp": "2025-10-20T15:30:00Z"
