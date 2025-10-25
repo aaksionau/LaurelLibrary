@@ -1,0 +1,46 @@
+name: Deploy EmailSender Azure Function
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "functions/LaurelLibrary.EmailSender.Func/**"
+            - "LaurelLibrary.EmailSenderServices/**"
+            - "LaurelLibrary.Domain/**"
+            - ".github/workflows/deploy-emailsender-func.yml"
+    workflow_dispatch:
+
+env:
+    AZURE_FUNCTIONAPP_NAME: "laurellibrary-emailsender-func"
+    AZURE_FUNCTIONAPP_PACKAGE_PATH: "./functions/LaurelLibrary.EmailSender.Func"
+    DOTNET_VERSION: "9.0.x"
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: "Checkout GitHub Action"
+              uses: actions/checkout@v4
+
+            - name: Setup .NET ${{ env.DOTNET_VERSION }}
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+
+            - name: "Restore dependencies"
+              run: dotnet restore ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/LaurelLibrary.EmailSender.Func.csproj
+
+            - name: "Build project"
+              run: dotnet build ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/LaurelLibrary.EmailSender.Func.csproj --configuration Release --no-restore
+
+            - name: "Publish project"
+              run: dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/LaurelLibrary.EmailSender.Func.csproj --configuration Release --output ./output
+
+            - name: "Deploy to Azure Functions"
+              uses: Azure/functions-action@v1
+              with:
+                  app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+                  package: "./output"
+                  publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
