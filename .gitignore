@@ -409,3 +409,4 @@ appsettings.Development.json
 appsettings.*.json
 !appsettings.json
 launchSettings.json
+local.settings.json
