@@ -162,18 +162,6 @@ Navigate to `https://localhost:5001` in your browser.
 
 ## 📦 Database Migrations
 
-The project includes several migrations that implement key features:
-
-- **AddIdentity**: ASP.NET Core Identity tables
-- **AddBookRelatedEntities**: Books, Authors, Categories, BookInstances
-- **AddCurrentLibrary**: Library management
-- **AddReaderEan**: EAN barcode support for readers
-- **AddBarcodeImageUrl**: Azure Blob Storage URL for barcode images
-- **AddReaderDateOfBirth**: Date of birth field for readers
-- **AddLibraryLogoAndDescription**: Library branding support
-- **AddKiosks**: Kiosk terminal management
-- **AddCheckoutDuration**: Configurable loan periods
-
 To create a new migration:
 
 ```bash

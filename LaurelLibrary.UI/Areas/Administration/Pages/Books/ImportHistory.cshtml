@@ -31,6 +31,7 @@
                                     <tr>
                                         <th>Date</th>
                                         <th>File Name</th>
+                                        <th>Status</th>
                                         <th>Total ISBNs</th>
                                         <th>Success</th>
                                         <th>Failed</th>
@@ -42,14 +43,14 @@
                                 <tbody>
                                     @foreach (var history in Model.ImportHistories)
                                     {
-                                        var successRate = history.TotalIsbns > 0 
-                                            ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1") 
-                                            : "0";
-                                        var progressBarClass = history.SuccessCount == history.TotalIsbns 
-                                            ? "bg-success" 
-                                            : history.SuccessCount > history.FailedCount 
-                                                ? "bg-warning" 
-                                                : "bg-danger";
+                                        var successRate = history.TotalIsbns > 0
+                                        ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1")
+                                        : "0";
+                                        var progressBarClass = history.SuccessCount == history.TotalIsbns
+                                        ? "bg-success"
+                                        : history.SuccessCount > history.FailedCount
+                                        ? "bg-warning"
+                                        : "bg-danger";
 
                                         <tr>
                                             <td>
@@ -60,6 +61,50 @@
                                             <td>
                                                 <i class="fas fa-file-csv text-success"></i>
                                                 @history.FileName
+                                            </td>
+                                            <td>
+                                                @switch (history.Status)
+                                                {
+                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Pending:
+                                                        <span class="badge bg-secondary">
+                                                            <i class="fas fa-clock"></i> Pending
+                                                        </span>
+                                                        break;
+                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Processing:
+                                                        <span class="badge bg-info">
+                                                            <i class="fas fa-spinner fa-spin"></i> Processing
+                                                            (@history.ProcessedChunks/@history.TotalChunks chunks)
+                                                        </span>
+                                                        @if (history.TotalChunks > 0)
+                                                        {
+                                                            var chunkProgress = (history.ProcessedChunks * 100.0 /
+                                                            history.TotalChunks).ToString("F0");
+                                                            <div class="progress mt-1" style="height: 5px; min-width: 100px;">
+                                                                <div class="progress-bar bg-info" role="progressbar"
+                                                                    style="width: @chunkProgress%" aria-valuenow="@chunkProgress"
+                                                                    aria-valuemin="0" aria-valuemax="100">
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        break;
+                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Completed:
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check-circle"></i> Completed
+                                                        </span>
+                                                        @if (history.CompletedAt.HasValue)
+                                                        {
+                                                            <small class="text-muted d-block" data-bs-toggle="tooltip"
+                                                                title="@history.CompletedAt.Value.ToString("F")">
+                                                                @history.CompletedAt.Value.ToString("g")
+                                                            </small>
+                                                        }
+                                                        break;
+                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Failed:
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-exclamation-circle"></i> Failed
+                                                        </span>
+                                                        break;
+                                                }
                                             </td>
                                             <td>
                                                 <span class="badge bg-primary">@history.TotalIsbns</span>
@@ -76,12 +121,9 @@
                                             </td>
                                             <td>
                                                 <div class="progress" style="min-width: 100px;">
-                                                    <div class="progress-bar @progressBarClass" 
-                                                         role="progressbar" 
-                                                         style="width: @successRate%" 
-                                                         aria-valuenow="@successRate" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="100">
+                                                    <div class="progress-bar @progressBarClass" role="progressbar"
+                                                        style="width: @successRate%" aria-valuenow="@successRate"
+                                                        aria-valuemin="0" aria-valuemax="100">
                                                         @successRate%
                                                     </div>
                                                 </div>
@@ -92,45 +134,41 @@
                                             <td>
                                                 @if (!string.IsNullOrWhiteSpace(history.FailedIsbns))
                                                 {
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-outline-danger" 
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#failedModal_@history.ImportHistoryId">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#failedModal_@history.ImportHistoryId">
                                                         <i class="fas fa-list"></i> View
                                                     </button>
 
                                                     <!-- Modal for Failed ISBNs -->
-                                                    <div class="modal fade" 
-                                                         id="failedModal_@history.ImportHistoryId" 
-                                                         tabindex="-1" 
-                                                         aria-labelledby="failedModalLabel_@history.ImportHistoryId" 
-                                                         aria-hidden="true">
+                                                    <div class="modal fade" id="failedModal_@history.ImportHistoryId" tabindex="-1"
+                                                        aria-labelledby="failedModalLabel_@history.ImportHistoryId"
+                                                        aria-hidden="true">
                                                         <div class="modal-dialog modal-lg">
                                                             <div class="modal-content">
                                                                 <div class="modal-header">
-                                                                    <h5 class="modal-title" id="failedModalLabel_@history.ImportHistoryId">
+                                                                    <h5 class="modal-title"
+                                                                        id="failedModalLabel_@history.ImportHistoryId">
                                                                         Failed ISBNs - @history.FileName
                                                                     </h5>
-                                                                    <button type="button" 
-                                                                            class="btn-close" 
-                                                                            data-bs-dismiss="modal" 
-                                                                            aria-label="Close"></button>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                        aria-label="Close"></button>
                                                                 </div>
                                                                 <div class="modal-body">
                                                                     <p class="text-muted">
                                                                         The following ISBNs were not found or failed to import:
                                                                     </p>
                                                                     <div class="alert alert-warning">
-                                                                        @foreach (var isbn in history.FailedIsbns.Split(',').Select(s => s.Trim()))
+                                                                        @foreach (var isbn in
+                                                                                                                                    history.FailedIsbns.Split(',').Select(s => s.Trim()))
                                                                         {
                                                                             <span class="badge bg-warning text-dark me-1">@isbn</span>
                                                                         }
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
-                                                                    <button type="button" 
-                                                                            class="btn btn-secondary" 
-                                                                            data-bs-dismiss="modal">Close</button>
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">Close</button>
                                                                 </div>
                                                             </div>
                                                         </div>
