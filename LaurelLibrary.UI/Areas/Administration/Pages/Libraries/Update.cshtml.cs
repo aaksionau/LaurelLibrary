@@ -12,13 +12,13 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
     public class UpdateModel : PageModel
     {
         private readonly ILibrariesRepository librariesRepository;
-        private readonly IUserService userService;
+        private readonly IAuthenticationService userService;
         private readonly IBlobStorageService blobStorageService;
         private readonly IConfiguration configuration;
 
         public UpdateModel(
             ILibrariesRepository librariesRepository,
-            IUserService userService,
+            IAuthenticationService userService,
             IBlobStorageService blobStorageService,
             IConfiguration configuration
         )

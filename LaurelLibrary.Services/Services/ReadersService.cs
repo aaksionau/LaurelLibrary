@@ -13,6 +13,7 @@ public class ReadersService : IReadersService
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IBooksRepository _booksRepository;
     private readonly IUserService _userService;
+    private readonly IAuthenticationService _authenticationService;
     private readonly IBarcodeService _barcodeService;
     private readonly ILogger<ReadersService> _logger;
     private readonly string? _wwwrootPath;
@@ -22,6 +23,7 @@ public class ReadersService : IReadersService
         ILibrariesRepository librariesRepository,
         IBooksRepository booksRepository,
         IUserService userService,
+        IAuthenticationService authenticationService,
         IBarcodeService barcodeService,
         ILogger<ReadersService> logger
     )
@@ -30,6 +32,7 @@ public class ReadersService : IReadersService
         _librariesRepository = librariesRepository;
         _booksRepository = booksRepository;
         _userService = userService;
+        _authenticationService = authenticationService;
         _barcodeService = barcodeService;
         _logger = logger;
         _wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "reader-eans");
@@ -37,7 +40,7 @@ public class ReadersService : IReadersService
 
     public async Task<ReaderDto?> GetReaderByIdAsync(int readerId)
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user library not found.");
@@ -83,7 +86,7 @@ public class ReadersService : IReadersService
         string? searchName = null
     )
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user library not found.");
@@ -100,7 +103,7 @@ public class ReadersService : IReadersService
 
     public async Task<int> GetReadersCountAsync(string? searchName = null)
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user library not found.");
@@ -117,7 +120,7 @@ public class ReadersService : IReadersService
         if (readerDto == null)
             throw new ArgumentNullException(nameof(readerDto));
 
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser == null)
         {
             throw new InvalidOperationException("Current user not found.");
@@ -221,7 +224,7 @@ public class ReadersService : IReadersService
 
     public async Task<bool> DeleteReaderAsync(int readerId)
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user library not found.");
@@ -291,7 +294,7 @@ public class ReadersService : IReadersService
 
     private async Task<string> GetUserFullNameAsync()
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         var displayName =
             string.IsNullOrWhiteSpace(currentUser?.FirstName)
             && string.IsNullOrWhiteSpace(currentUser?.LastName)
@@ -360,7 +363,7 @@ public class ReadersService : IReadersService
 
     public async Task<bool> RegenerateBarcodeAsync(int readerId)
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user library not found.");

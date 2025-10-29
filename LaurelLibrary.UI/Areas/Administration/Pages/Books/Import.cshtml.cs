@@ -23,6 +23,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         public int TotalIsbns { get; set; }
         public int SuccessCount { get; set; }
         public int FailedCount { get; set; }
+        public Guid? ImportHistoryId { get; set; }
 
         public void OnGet() { }
 
@@ -60,18 +61,18 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     CsvFile.FileName
                 );
 
+                ImportHistoryId = importHistory.ImportHistoryId;
                 TotalIsbns = importHistory.TotalIsbns;
                 SuccessCount = importHistory.SuccessCount;
                 FailedCount = importHistory.FailedCount;
 
                 Message =
-                    $"Import completed successfully! {SuccessCount} books imported, {FailedCount} failed out of {TotalIsbns} ISBNs.";
+                    $"Import started successfully! Processing {TotalIsbns} ISBNs in the background.";
                 IsSuccess = true;
 
                 _logger.LogInformation(
-                    "Bulk import completed: {ImportId}, {Success}/{Total} books",
+                    "Bulk import started: {ImportId}, Total ISBNs: {Total}",
                     importHistory.ImportHistoryId,
-                    SuccessCount,
                     TotalIsbns
                 );
             }

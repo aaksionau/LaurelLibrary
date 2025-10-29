@@ -9,16 +9,19 @@ public class LibrariesService : ILibrariesService
 {
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IUserService _userService;
+    private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<LibrariesService> _logger;
 
     public LibrariesService(
         ILibrariesRepository librariesRepository,
         IUserService userService,
+        IAuthenticationService authenticationService,
         ILogger<LibrariesService> logger
     )
     {
         _librariesRepository = librariesRepository;
         _userService = userService;
+        _authenticationService = authenticationService;
         _logger = logger;
     }
 
@@ -104,7 +107,7 @@ public class LibrariesService : ILibrariesService
             }
 
             // Get current user
-            var currentUser = await _userService.GetAppUserAsync();
+            var currentUser = await _authenticationService.GetAppUserAsync();
 
             // Prevent removing the last administrator
             if (library.Administrators.Count <= 1)

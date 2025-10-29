@@ -12,6 +12,10 @@ public class ImportHistory : Audit
     public virtual required Library Library { get; set; }
 
     [Required]
+    [StringLength(450)] // Standard ASP.NET Identity user ID length
+    public required string UserId { get; set; }
+
+    [Required]
     [StringLength(256)]
     public required string FileName { get; set; }
 
@@ -33,4 +37,7 @@ public class ImportHistory : Audit
     public DateTimeOffset ImportedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public DateTimeOffset? CompletedAt { get; set; }
+
+    [Timestamp]
+    public byte[] RowVersion { get; set; }
 }

@@ -14,21 +14,6 @@ public class IsbnImportQueueMessage
     public Guid ImportHistoryId { get; set; }
 
     /// <summary>
-    /// The Library ID where books will be imported.
-    /// </summary>
-    public Guid LibraryId { get; set; }
-
-    /// <summary>
-    /// Original CSV filename.
-    /// </summary>
-    public required string FileName { get; set; }
-
-    /// <summary>
-    /// User who initiated the import.
-    /// </summary>
-    public required string CreatedBy { get; set; }
-
-    /// <summary>
     /// ISBNs in this chunk to be processed.
     /// </summary>
     public required List<string> Isbns { get; set; }

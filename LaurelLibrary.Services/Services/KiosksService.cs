@@ -10,16 +10,19 @@ public class KiosksService : IKiosksService
 {
     private readonly IKiosksRepository _kiosksRepository;
     private readonly IUserService _userService;
+    private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<KiosksService> _logger;
 
     public KiosksService(
         IKiosksRepository kiosksRepository,
         IUserService userService,
+        IAuthenticationService authenticationService,
         ILogger<KiosksService> logger
     )
     {
         _kiosksRepository = kiosksRepository;
         _userService = userService;
+        _authenticationService = authenticationService;
         _logger = logger;
     }
 
@@ -50,7 +53,7 @@ public class KiosksService : IKiosksService
     {
         try
         {
-            var currentUser = await _userService.GetAppUserAsync();
+            var currentUser = await _authenticationService.GetAppUserAsync();
             var displayName =
                 string.IsNullOrWhiteSpace(currentUser?.FirstName)
                 && string.IsNullOrWhiteSpace(currentUser?.LastName)

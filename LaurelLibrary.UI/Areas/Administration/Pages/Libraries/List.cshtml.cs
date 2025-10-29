@@ -11,9 +11,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
     public class ListModel : PageModel
     {
         private readonly ILibrariesRepository librariesRepository;
-        private readonly IUserService userService;
+        private readonly IAuthenticationService userService;
 
-        public ListModel(ILibrariesRepository librariesRepository, IUserService userService)
+        public ListModel(
+            ILibrariesRepository librariesRepository,
+            IAuthenticationService userService
+        )
         {
             this.librariesRepository = librariesRepository;
             this.userService = userService;

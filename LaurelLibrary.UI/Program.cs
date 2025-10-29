@@ -7,6 +7,7 @@ using LaurelLibrary.Persistence.Repositories;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
+using LaurelLibrary.UI.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,10 @@ builder
 
 builder.Services.AddRazorPages();
 
+builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
+
 builder.Services.AddMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -55,6 +60,7 @@ builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
 builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IReadersRepository, ReadersRepository>();
 builder.Services.AddScoped<IBarcodeService, BarcodeService>();
 builder.Services.AddScoped<IReadersService, ReadersService>();
@@ -109,6 +115,8 @@ app.UseSession();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+app.MapControllers();
 app.MapRazorPages().WithStaticAssets();
+app.MapHub<ImportProgressHub>("/hubs/importProgress");
 
 app.Run();

@@ -12,11 +12,17 @@ public class DetailsModel : PageModel
 {
     private readonly IBooksRepository booksRepository;
     private readonly IUserService userService;
+    private readonly IAuthenticationService authenticationService;
 
-    public DetailsModel(IBooksRepository booksRepository, IUserService userService)
+    public DetailsModel(
+        IBooksRepository booksRepository,
+        IUserService userService,
+        IAuthenticationService authenticationService
+    )
     {
         this.booksRepository = booksRepository;
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
     public Book? Book { get; set; }
@@ -32,7 +38,7 @@ public class DetailsModel : PageModel
             return RedirectToPage("List");
         }
 
-        var user = await userService.GetAppUserAsync();
+        var user = await authenticationService.GetAppUserAsync();
         if (!user.CurrentLibraryId.HasValue)
         {
             StatusMessage = "No library selected.";

@@ -8,10 +8,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     public class WizardModel : PageModel
     {
         private readonly IBooksService _booksService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public WizardModel(IBooksService booksService)
+        public WizardModel(IBooksService booksService, IAuthenticationService authenticationService)
         {
             _booksService = booksService;
+            _authenticationService = authenticationService;
         }
 
         [BindProperty]
@@ -49,8 +51,26 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     && !string.IsNullOrWhiteSpace(Book.Isbn)
                 )
                 {
+                    // Get current user and library
+                    var currentUser = await _authenticationService.GetAppUserAsync();
+                    if (currentUser?.CurrentLibraryId == null)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            "Current user or library not found."
+                        );
+                        return Page();
+                    }
+
+                    var userFullName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+
                     // Save current book
-                    await _booksService.CreateOrUpdateBookAsync(Book);
+                    await _booksService.CreateOrUpdateBookAsync(
+                        Book,
+                        currentUser.Id,
+                        userFullName,
+                        currentUser.CurrentLibraryId.Value
+                    );
                 }
 
                 // Now perform the search by ISBN

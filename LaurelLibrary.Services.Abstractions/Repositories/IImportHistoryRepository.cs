@@ -14,6 +14,7 @@ public interface IImportHistoryRepository
         Guid importHistoryId,
         int successCount,
         int failedCount,
-        List<string> failedIsbns
+        List<string> failedIsbns,
+        int? maxRetries = 3
     );
 }

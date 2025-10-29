@@ -39,41 +39,64 @@
                             @Model.Message
                         </div>
 
-                        @if (Model.IsSuccess && Model.TotalIsbns > 0)
+                        @if (Model.IsSuccess && Model.ImportHistoryId.HasValue)
                         {
-                            <div class="card mb-3">
+                            <div class="card mb-3" id="progressCard">
                                 <div class="card-body">
-                                    <h6 class="card-title">Import Summary</h6>
-                                    <div class="row text-center">
-                                        <div class="col-md-4">
+                                    <h6 class="card-title">
+                                        <span id="statusTitle">Import Progress</span>
+                                        <span id="statusBadge" class="badge bg-info ms-2">Processing</span>
+                                    </h6>
+                                    
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                            <span id="progressText">0%</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-center mb-3">
+                                        <div class="col-md-3">
+                                            <div class="mb-2">
+                                                <i class="fas fa-tasks fa-2x text-info"></i>
+                                            </div>
+                                            <h4 class="mb-0">
+                                                <span id="processedChunks">0</span> / <span id="totalChunks">0</span>
+                                            </h4>
+                                            <small class="text-muted">Chunks Processed</small>
+                                        </div>
+                                        <div class="col-md-3">
                                             <div class="mb-2">
                                                 <i class="fas fa-list-ol fa-2x text-primary"></i>
                                             </div>
-                                            <h4 class="mb-0">@Model.TotalIsbns</h4>
+                                            <h4 class="mb-0" id="totalIsbns">@Model.TotalIsbns</h4>
                                             <small class="text-muted">Total ISBNs</small>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <div class="mb-2">
                                                 <i class="fas fa-check-circle fa-2x text-success"></i>
                                             </div>
-                                            <h4 class="mb-0">@Model.SuccessCount</h4>
+                                            <h4 class="mb-0" id="successCount">0</h4>
                                             <small class="text-muted">Successfully Imported</small>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-3">
                                             <div class="mb-2">
                                                 <i class="fas fa-times-circle fa-2x text-danger"></i>
                                             </div>
-                                            <h4 class="mb-0">@Model.FailedCount</h4>
+                                            <h4 class="mb-0" id="failedCount">0</h4>
                                             <small class="text-muted">Failed</small>
                                         </div>
                                     </div>
-                                    <div class="mt-3">
+
+                                    <div id="completedActions" class="mt-3" style="display: none;">
                                         <a asp-page="ImportHistory" class="btn btn-primary">
                                             <i class="fas fa-history"></i> View Import History
                                         </a>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <input type="hidden" id="importHistoryId" value="@Model.ImportHistoryId" />
                         }
                     }
 
@@ -105,6 +128,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         // Show file name when selected
         document.getElementById('csvFile').addEventListener('change', function(e) {
@@ -114,5 +138,165 @@
                 console.log('Selected file: ' + fileName + ' (' + fileSize + ' KB)');
             }
         });
+
+        // SignalR connection for real-time import progress
+        const importHistoryIdElement = document.getElementById('importHistoryId');
+        if (importHistoryIdElement) {
+            const importHistoryId = importHistoryIdElement.value;
+            
+            // Build SignalR connection
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/importProgress")
+                .withAutomaticReconnect()
+                .build();
+
+            // Handle receiving progress updates
+            connection.on("ReceiveImportProgress", (data) => {
+                console.log("Progress update:", data);
+                
+                // Update progress bar
+                const progressBar = document.getElementById('progressBar');
+                const progressText = document.getElementById('progressText');
+                progressBar.style.width = data.progress + '%';
+                progressBar.setAttribute('aria-valuenow', data.progress);
+                progressText.textContent = data.progress + '%';
+                
+                // Update statistics
+                document.getElementById('processedChunks').textContent = data.processedChunks;
+                document.getElementById('totalChunks').textContent = data.totalChunks;
+                document.getElementById('successCount').textContent = data.successCount;
+                document.getElementById('failedCount').textContent = data.failedCount;
+                document.getElementById('totalIsbns').textContent = data.totalIsbns;
+                
+                // Update status badge
+                const statusBadge = document.getElementById('statusBadge');
+                const statusTitle = document.getElementById('statusTitle');
+                
+                if (data.status === 'Completed') {
+                    statusBadge.className = 'badge bg-success ms-2';
+                    statusBadge.textContent = 'Completed';
+                    statusTitle.textContent = 'Import Completed';
+                    progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                    progressBar.classList.add('bg-success');
+                    document.getElementById('completedActions').style.display = 'block';
+                    
+                    // Disconnect after completion
+                    connection.stop();
+                } else if (data.status === 'Failed') {
+                    statusBadge.className = 'badge bg-danger ms-2';
+                    statusBadge.textContent = 'Failed';
+                    statusTitle.textContent = 'Import Failed';
+                    progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                    progressBar.classList.add('bg-danger');
+                    
+                    // Disconnect after failure
+                    connection.stop();
+                } else if (data.status === 'Processing') {
+                    statusBadge.className = 'badge bg-info ms-2';
+                    statusBadge.textContent = 'Processing';
+                }
+            });
+
+            // Start connection and join the import group
+            connection.start()
+                .then(() => {
+                    console.log("SignalR connected");
+                    return connection.invoke("JoinImportGroup", importHistoryId);
+                })
+                .then(() => {
+                    console.log("Joined import group:", importHistoryId);
+                    
+                    // Start polling for updates
+                    pollImportStatus(importHistoryId, connection);
+                })
+                .catch(err => {
+                    console.error("SignalR connection error:", err);
+                    // Fallback to polling if SignalR fails
+                    startPolling(importHistoryId);
+                });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("LeaveImportGroup", importHistoryId)
+                        .then(() => connection.stop());
+                }
+            });
+        }
+
+        // Polling function to fetch status and push to SignalR
+        function pollImportStatus(importHistoryId, connection) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/ImportStatus/${importHistoryId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch status');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Send update through SignalR hub
+                    await connection.invoke("SendImportProgress",
+                        importHistoryId,
+                        data.status,
+                        data.processedChunks,
+                        data.totalChunks,
+                        data.successCount,
+                        data.failedCount,
+                        data.totalIsbns
+                    );
+                    
+                    // Stop polling if completed or failed
+                    if (data.status === 'Completed' || data.status === 'Failed') {
+                        clearInterval(pollInterval);
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                }
+            }, 2000); // Poll every 2 seconds
+        }
+
+        // Fallback polling without SignalR
+        function startPolling(importHistoryId) {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/ImportStatus/${importHistoryId}`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch status');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Update UI directly
+                    const progressBar = document.getElementById('progressBar');
+                    const progressText = document.getElementById('progressText');
+                    progressBar.style.width = data.progress + '%';
+                    progressBar.setAttribute('aria-valuenow', data.progress);
+                    progressText.textContent = data.progress + '%';
+                    
+                    document.getElementById('processedChunks').textContent = data.processedChunks;
+                    document.getElementById('totalChunks').textContent = data.totalChunks;
+                    document.getElementById('successCount').textContent = data.successCount;
+                    document.getElementById('failedCount').textContent = data.failedCount;
+                    
+                    // Stop polling if completed or failed
+                    if (data.status === 'Completed' || data.status === 'Failed') {
+                        clearInterval(pollInterval);
+                        
+                        const statusBadge = document.getElementById('statusBadge');
+                        if (data.status === 'Completed') {
+                            statusBadge.className = 'badge bg-success ms-2';
+                            statusBadge.textContent = 'Completed';
+                            document.getElementById('completedActions').style.display = 'block';
+                        } else {
+                            statusBadge.className = 'badge bg-danger ms-2';
+                            statusBadge.textContent = 'Failed';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                }
+            }, 2000);
+        }
     </script>
 }

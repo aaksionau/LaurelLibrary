@@ -17,10 +17,9 @@ public class BooksService : IBooksService
     private readonly ICategoriesRepository _categoriesRepository;
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IReadersRepository _readersRepository;
-    private readonly IUserService _userService;
     private readonly IIsbnService _isbnService;
-    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService _emailTemplateService;
-    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService _mailService;
+    private readonly IEmailTemplateService _emailTemplateService;
+    private readonly IAzureQueueMailService _mailService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -29,10 +28,9 @@ public class BooksService : IBooksService
         ICategoriesRepository categoriesRepository,
         ILibrariesRepository librariesRepository,
         IReadersRepository readersRepository,
-        IUserService userService,
         IIsbnService isbnService,
-        LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService emailTemplateService,
-        LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService mailService,
+        IEmailTemplateService emailTemplateService,
+        IAzureQueueMailService mailService,
         ILogger<BooksService> logger
     )
     {
@@ -41,7 +39,6 @@ public class BooksService : IBooksService
         _categoriesRepository = categoriesRepository;
         _librariesRepository = librariesRepository;
         _readersRepository = readersRepository;
-        _userService = userService;
         _isbnService = isbnService;
         _emailTemplateService = emailTemplateService;
         _mailService = mailService;
@@ -83,25 +80,34 @@ public class BooksService : IBooksService
         };
     }
 
-    public async Task<bool> CreateOrUpdateBookAsync(LaurelBookDto bookDto)
+    public async Task<bool> CreateOrUpdateBookAsync(
+        LaurelBookDto bookDto,
+        string currentUserId,
+        string currentUserFullName,
+        Guid libraryId
+    )
     {
         if (bookDto == null)
             throw new ArgumentNullException(nameof(bookDto));
 
-        var currentUser = await _userService.GetAppUserAsync();
+        if (string.IsNullOrWhiteSpace(currentUserId))
+            throw new ArgumentException(
+                "Current user ID cannot be null or empty.",
+                nameof(currentUserId)
+            );
 
-        if (currentUser?.CurrentLibraryId == null)
-        {
-            throw new InvalidOperationException("Current user or library not found.");
-        }
-        var libraryId = currentUser.CurrentLibraryId.Value;
+        if (string.IsNullOrWhiteSpace(currentUserFullName))
+            throw new ArgumentException(
+                "Current user full name cannot be null or empty.",
+                nameof(currentUserFullName)
+            );
+
         // Map DTO to entity
         var entity = MapDtoToEntity(bookDto, libraryId);
 
         // Set creator/updater from current user
-        string displayName = await GetUserFullNameAsync();
-        entity.CreatedBy = displayName;
-        entity.UpdatedBy = displayName;
+        entity.CreatedBy = currentUserFullName;
+        entity.UpdatedBy = currentUserFullName;
         entity.UpdatedAt = DateTimeOffset.UtcNow;
 
         // Map authors (create or reuse) via helper
@@ -131,18 +137,6 @@ public class BooksService : IBooksService
             libraryId
         );
         return true;
-    }
-
-    private async Task<string> GetUserFullNameAsync()
-    {
-        var currentUser = await _userService.GetAppUserAsync();
-        var displayName =
-            string.IsNullOrWhiteSpace(currentUser?.FirstName)
-            && string.IsNullOrWhiteSpace(currentUser?.LastName)
-                ? currentUser?.UserName ?? string.Empty
-                : $"{currentUser.FirstName} {currentUser.LastName}".Trim();
-
-        return displayName;
     }
 
     private async Task<bool> CreateNewBookAsync(LaurelBookDto bookDto, Guid libraryId, Book entity)

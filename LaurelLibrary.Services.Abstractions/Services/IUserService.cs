@@ -6,7 +6,6 @@ namespace LaurelLibrary.Services.Abstractions.Services;
 
 public interface IUserService
 {
-    Task<AppUser> GetAppUserAsync();
     Task<AppUser?> FindUserByEmailAsync(string email);
     Task<AppUser?> FindUserByIdAsync(string userId);
     Task<bool> SetCurrentLibraryAsync(string userId, Guid? libraryId);

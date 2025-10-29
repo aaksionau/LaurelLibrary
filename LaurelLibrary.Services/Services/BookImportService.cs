@@ -22,6 +22,7 @@ public class BookImportService : IBookImportService
     private readonly IBooksService _booksService;
     private readonly IImportHistoryRepository _importHistoryRepository;
     private readonly IUserService _userService;
+    private readonly IAuthenticationService _authenticationService;
     private readonly IAzureQueueService _queueService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BookImportService> _logger;
@@ -35,6 +36,7 @@ public class BookImportService : IBookImportService
         IBooksService booksService,
         IImportHistoryRepository importHistoryRepository,
         IUserService userService,
+        IAuthenticationService authenticationService,
         IAzureQueueService queueService,
         IConfiguration configuration,
         ILogger<BookImportService> logger
@@ -44,6 +46,7 @@ public class BookImportService : IBookImportService
         _booksService = booksService;
         _importHistoryRepository = importHistoryRepository;
         _userService = userService;
+        _authenticationService = authenticationService;
         _queueService = queueService;
         _configuration = configuration;
         _logger = logger;
@@ -58,13 +61,14 @@ public class BookImportService : IBookImportService
 
     public async Task<ImportHistory> ImportBooksFromCsvAsync(Stream csvStream, string fileName)
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user or library not found.");
         }
 
         var libraryId = currentUser.CurrentLibraryId.Value;
+        var userId = currentUser.Id;
         var userName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
         if (string.IsNullOrWhiteSpace(userName))
         {
@@ -91,6 +95,7 @@ public class BookImportService : IBookImportService
             ImportHistoryId = Guid.NewGuid(),
             LibraryId = libraryId,
             Library = null!, // Will be set by EF Core
+            UserId = userId,
             FileName = fileName,
             TotalIsbns = totalIsbns,
             Status = ImportStatus.Pending,
@@ -124,9 +129,6 @@ public class BookImportService : IBookImportService
             var message = new IsbnImportQueueMessage
             {
                 ImportHistoryId = importHistory.ImportHistoryId,
-                LibraryId = libraryId,
-                FileName = fileName,
-                CreatedBy = userName,
                 Isbns = chunk.ToList(),
                 ChunkNumber = chunkNumber,
                 TotalChunks = totalChunks,
@@ -157,7 +159,7 @@ public class BookImportService : IBookImportService
                     chunk.Length
                 );
             }
-
+            Thread.Sleep(1000); // Slight delay to avoid overwhelming the queue
             chunkNumber++;
         }
 
@@ -172,7 +174,7 @@ public class BookImportService : IBookImportService
 
     public async Task<List<ImportHistory>> GetImportHistoryAsync()
     {
-        var currentUser = await _userService.GetAppUserAsync();
+        var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
             throw new InvalidOperationException("Current user or library not found.");
@@ -216,7 +218,7 @@ public class BookImportService : IBookImportService
             var values = line.Split(',');
             foreach (var value in values)
             {
-                var isbn = value.Trim().Trim('"', '\'');
+                var isbn = value.Replace("-", "").Trim().Trim('"', '\'');
 
                 // Basic validation: ISBN should be 10 or 13 digits (can include hyphens)
                 var digits = new string(isbn.Where(char.IsDigit).ToArray());

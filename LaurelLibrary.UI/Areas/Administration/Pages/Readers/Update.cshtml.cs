@@ -10,9 +10,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Readers
     public class UpdateModel : PageModel
     {
         private readonly IReadersService readersService;
-        private readonly IUserService userService;
+        private readonly IAuthenticationService userService;
 
-        public UpdateModel(IReadersService readersService, IUserService userService)
+        public UpdateModel(IReadersService readersService, IAuthenticationService userService)
         {
             this.readersService = readersService;
             this.userService = userService;

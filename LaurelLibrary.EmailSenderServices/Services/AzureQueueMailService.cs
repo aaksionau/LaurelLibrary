@@ -18,7 +18,7 @@ public class AzureQueueMailService : IAzureQueueMailService
     {
         _logger = logger;
 
-        var connectionString = configuration.GetConnectionString("AzureStorage");
+        var connectionString = configuration["AzureStorage"];
         var queueName = configuration["AzureStorage:QueueName"] ?? "emails";
 
         if (string.IsNullOrEmpty(connectionString))

@@ -12,13 +12,13 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries;
 public class DetailsModel : PageModel
 {
     private readonly ILibrariesService librariesService;
-    private readonly IUserService userService;
+    private readonly IAuthenticationService userService;
     private readonly IKiosksService kiosksService;
     private readonly IReadersService readersService;
 
     public DetailsModel(
         ILibrariesService librariesService,
-        IUserService userService,
+        IAuthenticationService userService,
         IKiosksService kiosksService,
         IReadersService readersService
     )

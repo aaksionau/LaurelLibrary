@@ -7,16 +7,19 @@ using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace LaurelLibrary.Persistence.Repositories;
 
 public class ImportHistoryRepository : IImportHistoryRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<ImportHistoryRepository> _logger;
 
-    public ImportHistoryRepository(AppDbContext dbContext)
+    public ImportHistoryRepository(AppDbContext dbContext, ILogger<ImportHistoryRepository> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task<ImportHistory> AddAsync(ImportHistory importHistory)
@@ -52,24 +55,24 @@ public class ImportHistoryRepository : IImportHistoryRepository
         Guid importHistoryId,
         int successCount,
         int failedCount,
-        List<string> failedIsbns
+        List<string> failedIsbns,
+        int? maxRetries = 3
     )
     {
-        var importHistory = await _dbContext
-            .Set<ImportHistory>()
-            .FirstOrDefaultAsync(i => i.ImportHistoryId == importHistoryId);
-
-        if (importHistory == null)
-        {
-            throw new InvalidOperationException(
-                $"ImportHistory with ID {importHistoryId} not found."
-            );
-        }
-
         // Use a transaction and row versioning to handle concurrent updates
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
+            var importHistory = await _dbContext
+                .Set<ImportHistory>()
+                .FirstOrDefaultAsync(i => i.ImportHistoryId == importHistoryId);
+
+            _logger.LogInformation(
+                "Updating ImportHistory {ImportHistoryId}: +{SuccessCount} success, +{FailedCount} failed",
+                importHistoryId,
+                successCount,
+                failedCount
+            );
             // Increment processed chunks
             importHistory.ProcessedChunks++;
             importHistory.SuccessCount += successCount;
@@ -111,10 +114,60 @@ public class ImportHistoryRepository : IImportHistoryRepository
 
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
+            _logger.LogInformation(
+                "ImportHistory {ImportHistoryId} updated successfully",
+                importHistoryId
+            );
         }
-        catch
+        catch (DbUpdateConcurrencyException dbEx)
         {
             await transaction.RollbackAsync();
+            _logger.LogWarning(
+                dbEx,
+                "Concurrency conflict when updating ImportHistory {ImportHistoryId}, retrying...",
+                importHistoryId
+            );
+            if (maxRetries.HasValue && maxRetries.Value > 0)
+            {
+                foreach (var entry in dbEx.Entries)
+                {
+                    if (entry.Entity is ImportHistory)
+                    {
+                        // Using "Database Wins" strategy:
+                        var databaseValues = entry.GetDatabaseValues();
+                        entry.OriginalValues.SetValues(databaseValues);
+                        entry.CurrentValues.SetValues(databaseValues);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(
+                            "Concurrency conflict for " + entry.Metadata.Name
+                        );
+                    }
+                }
+                await UpdateChunkProgressAsync(
+                    importHistoryId,
+                    successCount,
+                    failedCount,
+                    failedIsbns,
+                    maxRetries - 1
+                );
+            }
+            else
+            {
+                _logger.LogError(
+                    "Max retry attempts reached for ImportHistory {ImportHistoryId}, update failed",
+                    importHistoryId
+                );
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                "Error updating ImportHistory {ImportHistoryId}, rolling back transaction",
+                importHistoryId
+            );
             throw;
         }
     }

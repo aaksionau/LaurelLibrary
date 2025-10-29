@@ -12,14 +12,17 @@ namespace LaurelLibrary.UI.ViewComponents;
 public class CurrentUserLibrariesViewComponent : ViewComponent
 {
     private readonly IUserService userService;
+    private readonly IAuthenticationService authenticationService;
     private readonly ILibrariesRepository librariesRepository;
 
     public CurrentUserLibrariesViewComponent(
         IUserService userService,
+        IAuthenticationService authenticationService,
         ILibrariesRepository librariesRepository
     )
     {
         this.userService = userService;
+        this.authenticationService = authenticationService;
         this.librariesRepository = librariesRepository;
     }
 
@@ -30,7 +33,7 @@ public class CurrentUserLibrariesViewComponent : ViewComponent
             return View(Enumerable.Empty<SelectListItem>());
         }
 
-        var user = await this.userService.GetAppUserAsync();
+        var user = await this.authenticationService.GetAppUserAsync();
         var libraries =
             await this.librariesRepository.GetAllAsync(user.Id)
             ?? Enumerable.Empty<LibrarySummaryDto>();

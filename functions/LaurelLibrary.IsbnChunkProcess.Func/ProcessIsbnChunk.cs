@@ -31,7 +31,9 @@ public class ProcessIsbnChunk
     }
 
     [Function("ProcessIsbnChunk")]
-    public async Task Run([QueueTrigger("isbns-to-import")] QueueMessage queueMessage)
+    public async Task Run(
+        [QueueTrigger("isbns-to-import", Connection = "AzureStorage")] QueueMessage queueMessage
+    )
     {
         _logger.LogInformation(
             "Processing ISBN import chunk. MessageId: {MessageId}",
@@ -59,17 +61,34 @@ public class ProcessIsbnChunk
                 message.Isbns.Count
             );
 
-            // Fetch book data from ISBN API in bulk
+            // Get ImportHistory to retrieve user and library information
+            var importHistory = await _importHistoryRepository.GetByIdAsync(
+                message.ImportHistoryId
+            );
+            if (importHistory == null)
+            {
+                _logger.LogError(
+                    "ImportHistory {ImportHistoryId} not found",
+                    message.ImportHistoryId
+                );
+                throw new InvalidOperationException(
+                    $"ImportHistory {message.ImportHistoryId} not found"
+                );
+            }
+
+            var libraryId = importHistory.LibraryId;
+            var userId = importHistory.UserId;
+            var userFullName = importHistory.CreatedBy ?? "System";
+
             var bookDataByIsbn = await _isbnService.GetBooksByIsbnBulkAsync(message.Isbns);
 
             // Process and save books
             var successCount = 0;
             var failedIsbns = new List<string>();
 
-            foreach (var kvp in bookDataByIsbn)
+            foreach (var isbn in bookDataByIsbn.Keys)
             {
-                var isbn = kvp.Key;
-                var bookData = kvp.Value;
+                var bookData = bookDataByIsbn[isbn];
 
                 if (bookData == null)
                 {
@@ -83,8 +102,13 @@ public class ProcessIsbnChunk
                     // Map IsbnBookDto to LaurelBookDto
                     var laurelBookDto = bookData.ToLaurelBookDto();
 
-                    // Save book for the specific library
-                    await _booksService.CreateOrUpdateBookAsync(laurelBookDto);
+                    // Save book using the new overload with user and library context
+                    await _booksService.CreateOrUpdateBookAsync(
+                        laurelBookDto,
+                        userId,
+                        userFullName,
+                        libraryId
+                    );
                     successCount++;
                 }
                 catch (Exception ex)

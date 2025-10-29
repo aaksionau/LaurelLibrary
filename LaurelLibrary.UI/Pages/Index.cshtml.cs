@@ -14,7 +14,7 @@ public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
     private readonly UserManager<AppUser> manager;
-    private readonly IUserService userService;
+    private readonly IAuthenticationService userService;
     private readonly ILibrariesRepository librariesRepository;
     private readonly IKiosksRepository kiosksRepository;
     private readonly SignInManager<AppUser> signInManager;
@@ -22,7 +22,7 @@ public class IndexModel : PageModel
     public IndexModel(
         ILogger<IndexModel> logger,
         UserManager<AppUser> manager,
-        IUserService userService,
+        IAuthenticationService userService,
         ILibrariesRepository librariesRepository,
         IKiosksRepository kiosksRepository,
         SignInManager<AppUser> signInManager

@@ -8,10 +8,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     public class UpdateModel : PageModel
     {
         private readonly IBooksService booksService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public UpdateModel(IBooksService booksService)
+        public UpdateModel(IBooksService booksService, IAuthenticationService authenticationService)
         {
             this.booksService = booksService;
+            _authenticationService = authenticationService;
         }
 
         [BindProperty]
@@ -50,7 +52,22 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
 
             try
             {
-                var wasUpdated = await booksService.CreateOrUpdateBookAsync(Book);
+                // Get current user and library
+                var currentUser = await _authenticationService.GetAppUserAsync();
+                if (currentUser?.CurrentLibraryId == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Current user or library not found.");
+                    return Page();
+                }
+
+                var userFullName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+
+                var wasUpdated = await booksService.CreateOrUpdateBookAsync(
+                    Book,
+                    currentUser.Id,
+                    userFullName,
+                    currentUser.CurrentLibraryId.Value
+                );
                 // Always redirect to the list after successful save
                 return RedirectToPage("/Books/List", new { area = "Administration" });
             }
