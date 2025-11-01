@@ -47,6 +47,12 @@
                             <i class="bi bi-people-fill me-2"></i>Readers
                         </a>
                     </nav>
+                    <hr class="my-3">
+                    <nav class="nav flex-column">
+                        <a class="nav-link" asp-area="Administration" asp-page="/Books/Import">
+                            <i class="bi bi-file-arrow-up"></i> Bulk Books Import
+                        </a>
+                    </nav>
                 </aside>
             }
             <main role="main" class="col app-main pb-3 @(User.Identity?.IsAuthenticated == true ? "" : "no-sidebar")">

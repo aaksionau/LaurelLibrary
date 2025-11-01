@@ -14,7 +14,10 @@ public static class BookDtoExtensions
             Title = book.Title,
             Authors = string.Join(", ", book.Authors.Select(a => a.FullName)),
             Categories = string.Join(", ", book.Categories.Select(c => c.Name)),
-            Publisher = book.Publisher,
+            AgeRange =
+                book.MinAge != 0 && book.MaxAge != 0
+                    ? $"{book.MinAge} - {book.MaxAge}"
+                    : string.Empty,
             Image = book.Image,
             Synopsis = book.Synopsis,
         };

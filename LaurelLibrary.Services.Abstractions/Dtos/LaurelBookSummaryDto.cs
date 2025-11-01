@@ -11,4 +11,5 @@ public class LaurelBookSummaryDto
     public string? Image { get; set; }
     public string? Synopsis { get; set; }
     public string? Categories { get; set; }
+    public string? AgeRange { get; set; }
 }

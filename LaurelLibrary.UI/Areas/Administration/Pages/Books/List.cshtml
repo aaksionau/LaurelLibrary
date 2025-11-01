@@ -9,9 +9,6 @@
     <div class="card-header">
         <h3 class="d-inline">Books</h3>
         <div class="float-end">
-            <a class="btn btn-success me-2" asp-area="Administration" asp-page="/Books/Import">
-                <i class="fas fa-file-upload"></i> Bulk Import
-            </a>
             <a class="btn btn-info me-2" asp-area="Administration" asp-page="/Books/Wizard">Add Books</a>
         </div>
     </div>
@@ -64,6 +61,7 @@
                     <tr>
                         <th style="width: 80px;">Image</th>
                         <th style="max-width: 60%;">Title</th>
+                        <th class="text-start">Age Range</th>
                         <th class="text-start">Authors</th>
                         <th class="text-end">Actions</th>
                     </tr>
@@ -89,10 +87,11 @@
                             @if (!string.IsNullOrWhiteSpace(book.Synopsis))
                             {
                                 <div class="text-muted small mt-1" style="line-height: 1.4;">
-                                    @(book.Synopsis.Length > 120 ? book.Synopsis.Substring(0, 150) + "..." : book.Synopsis)
+                                    @(book.Synopsis.Length > 250 ? book.Synopsis.Substring(0, 250) + "..." : book.Synopsis)
                                 </div>
                             }
                         </td>
+                        <td>@book.AgeRange</td>
                         <td class="text-start">@book.Authors</td>
                                 <td class="text-end" onclick="event.stopPropagation();">
                                     <a class="btn btn-link text-primary p-0 me-2" asp-page="/Books/Update" asp-route-bookId="@book.BookId" title="Edit"><i class="bi bi-pencil"></i></a>
