@@ -131,6 +131,17 @@ else
                                 <div class="mb-2"><strong>Pages:</strong> <span class="ms-1">@Model.Book.Pages</span></div>
                                 <div class="mb-2"><strong>Dimensions:</strong> <span
                                         class="ms-1">@Model.Book.Dimensions</span></div>
+                                @if (Model.Book.MinAge != 0 && Model.Book.MaxAge != 0)
+                                {
+                                    <div class="mb-2"><strong>Age Range:</strong>
+                                        <italic>(AI classification)</italic> <span class="ms-1">@Model.Book.MinAge -
+                                            @Model.Book.MaxAge</span>
+                                    </div>
+                                    <div>
+                                        <strong>Age Classification Reasoning:</strong>
+                                        <p>@Model.Book.ClassificationReasoning</p>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>

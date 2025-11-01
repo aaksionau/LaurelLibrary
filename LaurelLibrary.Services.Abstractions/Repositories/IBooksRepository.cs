@@ -26,6 +26,6 @@ public interface IBooksRepository
     Task<BookInstance?> UpdateBookInstanceAsync(BookInstance bookInstance);
     Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId);
     Task<List<BookInstance>> GetBorrowingHistoryByReaderIdAsync(int readerId);
-
     Task<bool> DeleteBookAsync(Guid bookId);
+    Task UpdateAppropriateAgeBookAsync(Guid bookId, int minAge, int maxAge, string reasoning);
 }

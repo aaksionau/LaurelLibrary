@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.EmailSenderSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.IsbnChunkProcess.Func", "functions\LaurelLibrary.IsbnChunkProcess.Func\LaurelLibrary.IsbnChunkProcess.Func.csproj", "{2978367A-A5DF-47D3-AC6A-F8FDFB4E61D9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Functions", "LaurelLibrary.Functions\LaurelLibrary.Functions.csproj", "{3481A5C5-0948-4941-B303-53EF56A2C15B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{2978367A-A5DF-47D3-AC6A-F8FDFB4E61D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2978367A-A5DF-47D3-AC6A-F8FDFB4E61D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2978367A-A5DF-47D3-AC6A-F8FDFB4E61D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3481A5C5-0948-4941-B303-53EF56A2C15B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3481A5C5-0948-4941-B303-53EF56A2C15B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3481A5C5-0948-4941-B303-53EF56A2C15B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3481A5C5-0948-4941-B303-53EF56A2C15B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

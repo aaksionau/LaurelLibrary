@@ -71,7 +71,7 @@
 			"type": "func",
 			"dependsOn": "build (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/functions/LaurelLibrary.IsbnChunkProcess.Func/bin/Debug/net9.0"
+				"cwd": "${workspaceFolder}/LaurelLibrary.Functions/bin/Debug/net9.0"
 			},
 			"command": "host start",
 			"isBackground": true,

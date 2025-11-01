@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
@@ -10,11 +11,11 @@ namespace LaurelLibrary.EmailSenderServices.Services;
 
 public class EmailSenderService : IEmailSender
 {
-    private readonly IAzureQueueMailService _queueMailService;
+    private readonly IAzureQueueService _queueMailService;
     private readonly ILogger<EmailSenderService> _logger;
 
     public EmailSenderService(
-        IAzureQueueMailService queueMailService,
+        IAzureQueueService queueMailService,
         ILogger<EmailSenderService> logger
     )
     {
@@ -54,7 +55,7 @@ public class EmailSenderService : IEmailSender
             );
 
             // Send to Azure Queue for asynchronous processing
-            var success = await _queueMailService.SendMessageAsync(messageJson);
+            var success = await _queueMailService.SendMessageAsync(messageJson, "emails");
 
             if (success)
             {

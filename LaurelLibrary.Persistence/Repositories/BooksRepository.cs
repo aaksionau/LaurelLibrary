@@ -228,6 +228,25 @@ public class BooksRepository : IBooksRepository
         return existing;
     }
 
+    public async Task UpdateAppropriateAgeBookAsync(
+        Guid bookId,
+        int minAge,
+        int maxAge,
+        string reasoning
+    )
+    {
+        var book = await _dbContext.Books.FirstOrDefaultAsync(b => b.BookId == bookId);
+
+        if (book != null)
+        {
+            book.MinAge = minAge;
+            book.MaxAge = maxAge;
+            book.ClassificationReasoning = reasoning;
+
+            await _dbContext.SaveChangesAsync();
+        }
+    }
+
     public async Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId)
     {
         // Remove auth check for function app compatibility

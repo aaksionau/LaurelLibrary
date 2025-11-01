@@ -19,7 +19,7 @@ public class BooksService : IBooksService
     private readonly IReadersRepository _readersRepository;
     private readonly IIsbnService _isbnService;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueMailService _mailService;
+    private readonly IAzureQueueService _queueService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -30,7 +30,7 @@ public class BooksService : IBooksService
         IReadersRepository readersRepository,
         IIsbnService isbnService,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueMailService mailService,
+        IAzureQueueService queueService,
         ILogger<BooksService> logger
     )
     {
@@ -41,7 +41,7 @@ public class BooksService : IBooksService
         _readersRepository = readersRepository;
         _isbnService = isbnService;
         _emailTemplateService = emailTemplateService;
-        _mailService = mailService;
+        _queueService = queueService;
         _logger = logger;
     }
 
@@ -183,12 +183,33 @@ public class BooksService : IBooksService
         );
 
         await _booksRepository.AddBookAsync(entity);
+        await DetermineAppropriateAgeAsync(entity);
+
         _logger.LogInformation(
             "Created book {BookId} in library {LibraryId}",
             entity.BookId,
             libraryId
         );
         return true;
+    }
+
+    private async Task DetermineAppropriateAgeAsync(Book entity)
+    {
+        if (string.IsNullOrWhiteSpace(entity.Synopsis))
+        {
+            return;
+        }
+
+        var createdBook = new AgeClassificationBookDto()
+        {
+            BookId = entity.BookId,
+            Title = entity.Title,
+            Description = entity.Synopsis,
+        };
+
+        var message = JsonSerializer.Serialize(createdBook);
+
+        await this._queueService.SendMessageAsync(message, "age-classification-books");
     }
 
     private async Task AddOrAttachAuthorsAsync(Book entity, string authorNames, Guid libraryId)
@@ -382,7 +403,7 @@ public class BooksService : IBooksService
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
 
-                await _mailService.SendMessageAsync(messageJson);
+                await _queueService.SendMessageAsync(messageJson, "emails");
 
                 _logger.LogInformation(
                     "Checkout confirmation email sent to reader {ReaderId} at {Email}",

@@ -25,4 +25,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Views/**/*.cshtml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

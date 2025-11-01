@@ -50,4 +50,9 @@ public class Book : Audit
     public Collection<Category> Categories { get; set; } = new Collection<Category>();
 
     public Collection<Author> Authors { get; set; } = new Collection<Author>();
+    public int MinAge { get; set; }
+    public int MaxAge { get; set; }
+
+    [StringLength(1024)]
+    public string ClassificationReasoning { get; set; } = string.Empty;
 }

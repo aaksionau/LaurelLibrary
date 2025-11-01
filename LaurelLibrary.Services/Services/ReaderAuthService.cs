@@ -20,16 +20,16 @@ public class ReaderVerificationData
 public class ReaderAuthService : IReaderAuthService
 {
     private readonly IReadersRepository _readersRepository;
-    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService _emailTemplateService;
-    private readonly LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService _mailService;
+    private readonly IEmailTemplateService _emailTemplateService;
+    private readonly IAzureQueueService _mailService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<ReaderAuthService> _logger;
     private const int VerificationCodeExpiryMinutes = 10;
 
     public ReaderAuthService(
         IReadersRepository readersRepository,
-        LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService emailTemplateService,
-        LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService mailService,
+        IEmailTemplateService emailTemplateService,
+        IAzureQueueService mailService,
         IMemoryCache cache,
         ILogger<ReaderAuthService> logger
     )
@@ -118,7 +118,7 @@ public class ReaderAuthService : IReaderAuthService
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );
 
-            await _mailService.SendMessageAsync(messageJson);
+            await _mailService.SendMessageAsync(messageJson, "emails");
 
             _logger.LogInformation("Verification code sent to reader {ReaderId}", reader.ReaderId);
 
