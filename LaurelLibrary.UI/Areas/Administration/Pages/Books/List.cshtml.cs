@@ -56,6 +56,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         [TempData]
         public string? StatusMessage { get; set; }
 
+        [BindProperty]
+        public List<Guid> SelectedBookIds { get; set; } = new List<Guid>();
+
         public async Task OnGetAsync(int? pageNumber, int? pageSize)
         {
             var user = await this.userService.GetAppUserAsync();
@@ -103,6 +106,24 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
 
             var deleted = await this.booksRepository.DeleteBookAsync(bookId);
             StatusMessage = deleted ? "Book deleted." : "Book not found or could not be deleted.";
+
+            // Preserve paging when redirecting
+            return RedirectToPage(new { pageNumber = pageNumber ?? 1, pageSize = pageSize ?? 10 });
+        }
+
+        public async Task<IActionResult> OnPostDeleteMultipleAsync(int? pageNumber, int? pageSize)
+        {
+            if (SelectedBookIds == null || !SelectedBookIds.Any())
+            {
+                StatusMessage = "No books selected for deletion.";
+                return RedirectToPage();
+            }
+
+            var deletedCount = await this.booksRepository.DeleteMultipleBooksAsync(SelectedBookIds);
+            StatusMessage =
+                deletedCount > 0
+                    ? $"{deletedCount} book(s) deleted successfully."
+                    : "No books were deleted.";
 
             // Preserve paging when redirecting
             return RedirectToPage(new { pageNumber = pageNumber ?? 1, pageSize = pageSize ?? 10 });

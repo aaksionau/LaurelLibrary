@@ -91,4 +91,27 @@ public class DetailsModel : PageModel
 
         return RedirectToPage("Details", new { id });
     }
+
+    public async Task<IActionResult> OnPostDeleteAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            StatusMessage = "Invalid book identifier.";
+            return RedirectToPage("List");
+        }
+
+        var user = await authenticationService.GetAppUserAsync();
+        if (!user.CurrentLibraryId.HasValue)
+        {
+            StatusMessage = "No library selected.";
+            return RedirectToPage("List");
+        }
+
+        var deleted = await booksRepository.DeleteBookAsync(id);
+        StatusMessage = deleted
+            ? "Book deleted successfully."
+            : "Book not found or could not be deleted.";
+
+        return RedirectToPage("List");
+    }
 }

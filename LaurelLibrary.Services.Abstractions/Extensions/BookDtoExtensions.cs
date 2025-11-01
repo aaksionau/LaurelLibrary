@@ -20,6 +20,7 @@ public static class BookDtoExtensions
                     : string.Empty,
             Image = book.Image,
             Synopsis = book.Synopsis,
+            NumberOfCopies = book.BookInstances.Count,
         };
     }
 

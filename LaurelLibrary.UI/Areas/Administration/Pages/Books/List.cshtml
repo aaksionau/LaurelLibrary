@@ -9,6 +9,7 @@
     <div class="card-header">
         <h3 class="d-inline">Books</h3>
         <div class="float-end">
+            <button type="submit" form="booksForm" id="deleteSelectedBtn" class="btn btn-danger" disabled onclick="return confirm('Are you sure you want to delete the selected books?');">Delete Selected</button>
             <a class="btn btn-info me-2" asp-area="Administration" asp-page="/Books/Wizard">Add Books</a>
         </div>
     </div>
@@ -56,21 +57,37 @@
         </div>
         @if (Model.Books.Any())
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width: 80px;">Image</th>
-                        <th style="max-width: 60%;">Title</th>
-                        <th class="text-start">Age Range</th>
-                        <th class="text-start">Authors</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <form method="post" asp-page-handler="DeleteMultiple" id="booksForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+                
+                <div class="d-flex align-items-center">
+                    <span id="selectedCount" class="text-muted small" style="display: none;"></span>
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="selectAllCheckbox" class="form-check-input" />
+                            </th>
+                            <th style="width: 80px;">Image</th>
+                            <th style="max-width: 60%;">Title</th>
+                            <th class="text-start">Age Range</th>
+                            <th class="text-center">Copies</th>
+                            <th class="text-start">Authors</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     @foreach (var book in Model.Books)
                 {
-                    <tr class="book-row" style="cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">
-                        <td style="width: 80px;">
+                    <tr class="book-row">
+                        <td onclick="event.stopPropagation();">
+                            <input type="checkbox" name="SelectedBookIds" value="@book.BookId" class="form-check-input book-checkbox" />
+                        </td>
+                        <td style="width: 80px; cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">
                             @if (!string.IsNullOrWhiteSpace(book.Image))
                             {
                                 <img src="@book.Image" alt="@book.Title" class="img-thumbnail" style="max-width: 60px; max-height: 80px; object-fit: cover;" />
@@ -82,7 +99,7 @@
                                 </div>
                             }
                         </td>
-                        <td style="max-width: 60%; word-wrap: break-word;">
+                        <td style="max-width: 60%; word-wrap: break-word; cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">
                             <div class="fw-semibold">@book.Title</div>
                             @if (!string.IsNullOrWhiteSpace(book.Synopsis))
                             {
@@ -91,8 +108,9 @@
                                 </div>
                             }
                         </td>
-                        <td>@book.AgeRange</td>
-                        <td class="text-start">@book.Authors</td>
+                        <td style="cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">@book.AgeRange</td>
+                        <td class="text-center" style="cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">@book.NumberOfCopies</td>
+                        <td class="text-start" style="cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">@book.Authors</td>
                                 <td class="text-end" onclick="event.stopPropagation();">
                                     <a class="btn btn-link text-primary p-0 me-2" asp-page="/Books/Update" asp-route-bookId="@book.BookId" title="Edit"><i class="bi bi-pencil"></i></a>
 
@@ -106,6 +124,7 @@
                 }
             </tbody>
         </table>
+        </form>
         }
         else
         {
@@ -151,6 +170,46 @@
                 allowClear: true,
                 width: '100%'
             });
+
+            // Multiple selection functionality
+            function updateSelectedCount() {
+                var selectedCount = $('.book-checkbox:checked').length;
+                
+                if (selectedCount > 0) {
+                    $('#selectedCount').text(selectedCount + ' selected').show();
+                } else {
+                    $('#selectedCount').hide();
+                }
+                
+                $('#deleteSelectedBtn').prop('disabled', selectedCount === 0);
+            }
+
+            // Handle individual checkbox changes
+            $('.book-checkbox').change(function() {
+                updateSelectedCount();
+                
+                // Update the "select all" checkbox state
+                var totalCheckboxes = $('.book-checkbox').length;
+                var checkedCheckboxes = $('.book-checkbox:checked').length;
+                
+                if (checkedCheckboxes === 0) {
+                    $('#selectAllCheckbox').prop('indeterminate', false).prop('checked', false);
+                } else if (checkedCheckboxes === totalCheckboxes) {
+                    $('#selectAllCheckbox').prop('indeterminate', false).prop('checked', true);
+                } else {
+                    $('#selectAllCheckbox').prop('indeterminate', true);
+                }
+            });
+
+            // Handle "select all" checkbox
+            $('#selectAllCheckbox').change(function() {
+                var isChecked = $(this).prop('checked');
+                $('.book-checkbox').prop('checked', isChecked);
+                updateSelectedCount();
+            });
+
+            // Initialize count
+            updateSelectedCount();
         });
     </script>
 }

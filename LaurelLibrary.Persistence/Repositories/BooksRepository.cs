@@ -93,6 +93,7 @@ public class BooksRepository : IBooksRepository
         var query = _dbContext
             .Books.Include(b => b.Authors)
             .Include(b => b.Categories)
+            .Include(b => b.BookInstances)
             .Where(b => b.LibraryId == libraryId);
 
         if (authorId.HasValue)
@@ -303,5 +304,38 @@ public class BooksRepository : IBooksRepository
         await _dbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<int> DeleteMultipleBooksAsync(IEnumerable<Guid> bookIds)
+    {
+        // Remove auth check for function app compatibility
+
+        var booksToDelete = await _dbContext
+            .Books.Include(b => b.BookInstances)
+            .Include(b => b.Authors)
+            .Include(b => b.Categories)
+            .Where(b => bookIds.Contains(b.BookId))
+            .ToListAsync();
+
+        if (!booksToDelete.Any())
+            return 0;
+
+        foreach (var book in booksToDelete)
+        {
+            // Remove related book instances first (if any)
+            if (book.BookInstances != null && book.BookInstances.Count > 0)
+            {
+                _dbContext.BookInstances.RemoveRange(book.BookInstances);
+            }
+
+            // Detach authors/categories relationships
+            book.Authors.Clear();
+            book.Categories.Clear();
+        }
+
+        _dbContext.Books.RemoveRange(booksToDelete);
+        await _dbContext.SaveChangesAsync();
+
+        return booksToDelete.Count;
     }
 }
