@@ -456,6 +456,58 @@ public class BooksService : IBooksService
         return true;
     }
 
+    public async Task<bool> ChangeBookInstanceStatusAsync(
+        int bookInstanceId,
+        Domain.Enums.BookInstanceStatus newStatus,
+        Guid libraryId
+    )
+    {
+        var bookInstance = await _booksRepository.GetBookInstanceByIdAsync(bookInstanceId);
+        if (bookInstance == null || bookInstance.Book.LibraryId != libraryId)
+        {
+            _logger.LogWarning(
+                "Book instance {BookInstanceId} not found in library {LibraryId}",
+                bookInstanceId,
+                libraryId
+            );
+            return false;
+        }
+
+        var oldStatus = bookInstance.Status;
+        bookInstance.Status = newStatus;
+
+        // Clear checkout details if changing from Borrowed to any other status
+        if (
+            oldStatus == Domain.Enums.BookInstanceStatus.Borrowed
+            && newStatus != Domain.Enums.BookInstanceStatus.Borrowed
+        )
+        {
+            bookInstance.ReaderId = null;
+            bookInstance.CheckedOutDate = null;
+            bookInstance.DueDate = null;
+        }
+
+        var updated = await _booksRepository.UpdateBookInstanceAsync(bookInstance);
+        if (updated == null)
+        {
+            _logger.LogError(
+                "Failed to update book instance {BookInstanceId} status",
+                bookInstanceId
+            );
+            return false;
+        }
+
+        _logger.LogInformation(
+            "Changed book instance {BookInstanceId} status from {OldStatus} to {NewStatus} in library {LibraryId}",
+            bookInstanceId,
+            oldStatus,
+            newStatus,
+            libraryId
+        );
+
+        return true;
+    }
+
     public async Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId)
     {
         return await _booksRepository.GetBorrowedBooksByLibraryAsync(libraryId);

@@ -1,4 +1,5 @@
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -11,16 +12,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books;
 public class DetailsModel : PageModel
 {
     private readonly IBooksRepository booksRepository;
+    private readonly IBooksService booksService;
     private readonly IUserService userService;
     private readonly IAuthenticationService authenticationService;
 
     public DetailsModel(
         IBooksRepository booksRepository,
+        IBooksService booksService,
         IUserService userService,
         IAuthenticationService authenticationService
     )
     {
         this.booksRepository = booksRepository;
+        this.booksService = booksService;
         this.userService = userService;
         this.authenticationService = authenticationService;
     }
@@ -55,5 +59,36 @@ public class DetailsModel : PageModel
 
         Book = book;
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostChangeStatusAsync(
+        Guid id,
+        int bookInstanceId,
+        BookInstanceStatus newStatus
+    )
+    {
+        var user = await authenticationService.GetAppUserAsync();
+        if (!user.CurrentLibraryId.HasValue)
+        {
+            StatusMessage = "No library selected.";
+            return RedirectToPage("Details", new { id });
+        }
+
+        var success = await booksService.ChangeBookInstanceStatusAsync(
+            bookInstanceId,
+            newStatus,
+            user.CurrentLibraryId.Value
+        );
+
+        if (success)
+        {
+            StatusMessage = $"Book instance status changed to {newStatus} successfully.";
+        }
+        else
+        {
+            StatusMessage = "Failed to change book instance status.";
+        }
+
+        return RedirectToPage("Details", new { id });
     }
 }

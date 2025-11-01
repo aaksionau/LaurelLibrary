@@ -4,6 +4,29 @@
 @using System.Net
 @using Microsoft.CodeAnalysis.CSharp.Syntax
 
+<style>
+    /* Fix dropdown visibility in table containers */
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    /* Ensure dropdowns have proper z-index and positioning */
+    .dropdown-menu {
+        z-index: 1050;
+        position: absolute;
+    }
+
+    /* Handle table cell positioning for dropdowns */
+    .table td {
+        position: relative;
+    }
+
+    /* Prevent dropdown from being cut off by table boundaries */
+    .card-body {
+        overflow: visible;
+    }
+</style>
+
 <!-- Page Header -->
 <div class="d-flex align-items-center justify-content-between mt-3 mb-4">
     <div class="d-flex align-items-center gap-3">
@@ -13,6 +36,14 @@
         <h1 class="mb-0">Book Details</h1>
     </div>
 </div>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @Model.StatusMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 @if (Model.Book == null)
 {
@@ -269,7 +300,56 @@ else
                                                 }
                                             </td>
                                             <td>
-                                                <!-- Placeholder for per-instance actions -->
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                                        id="statusDropdown@(inst.BookInstanceId)" data-bs-toggle="dropdown"
+                                                        aria-expanded="false">
+                                                        Change Status
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end"
+                                                        aria-labelledby="statusDropdown@(inst.BookInstanceId)">
+                                                        @foreach (var status in
+                                                                                                    Enum.GetValues<LaurelLibrary.Domain.Enums.BookInstanceStatus>())
+                                                        {
+                                                            @if (status != inst.Status)
+                                                            {
+                                                                <li>
+                                                                    <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                                                                        <input type="hidden" name="id" value="@Model.Book.BookId" />
+                                                                        <input type="hidden" name="bookInstanceId"
+                                                                            value="@inst.BookInstanceId" />
+                                                                        <input type="hidden" name="newStatus" value="@status" />
+                                                                        <button type="submit" class="dropdown-item">
+                                                                            @switch (status)
+                                                                            {
+                                                                                case LaurelLibrary.Domain.Enums.BookInstanceStatus.Available:
+                                                                                    <i class="bi bi-check-circle me-2 text-success"></i>
+                                                                                    <span>Available</span>
+                                                                                    break;
+                                                                                case LaurelLibrary.Domain.Enums.BookInstanceStatus.Borrowed:
+                                                                                    <i class="bi bi-arrow-right-circle me-2 text-warning"></i>
+                                                                                    <span>Borrowed</span>
+                                                                                    break;
+                                                                                case LaurelLibrary.Domain.Enums.BookInstanceStatus.Reserved:
+                                                                                    <i class="bi bi-bookmark me-2 text-info"></i>
+                                                                                    <span>Reserved</span>
+                                                                                    break;
+                                                                                case LaurelLibrary.Domain.Enums.BookInstanceStatus.Lost:
+                                                                                    <i class="bi bi-exclamation-triangle me-2 text-danger"></i>
+                                                                                    <span>Lost</span>
+                                                                                    break;
+                                                                                case LaurelLibrary.Domain.Enums.BookInstanceStatus.Damaged:
+                                                                                    <i class="bi bi-wrench me-2 text-secondary"></i>
+                                                                                    <span>Damaged</span>
+                                                                                    break;
+                                                                            }
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            }
+                                                        }
+                                                    </ul>
+                                                </div>
                                             </td>
                                         </tr>
                                     }
@@ -317,4 +397,27 @@ else
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        // Ensure Bootstrap dropdowns are properly initialized
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize all dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+
+            // Add confirmation for status changes
+            document.querySelectorAll('form[asp-page-handler="ChangeStatus"] button').forEach(function (button) {
+                button.addEventListener('click', function (e) {
+                    var status = this.querySelector('span').textContent;
+                    if (!confirm('Are you sure you want to change the status to ' + status + '?')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
 }

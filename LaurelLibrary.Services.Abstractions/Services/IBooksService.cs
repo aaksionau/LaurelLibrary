@@ -1,4 +1,5 @@
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Dtos;
 
 namespace LaurelLibrary.Services.Abstractions.Services;
@@ -20,4 +21,13 @@ public interface IBooksService
     Task<bool> CheckoutBooksAsync(int readerId, List<int> bookInstanceIds, Guid libraryId);
     Task<bool> ReturnBooksAsync(List<int> bookInstanceIds, Guid libraryId);
     Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId);
+
+    /// <summary>
+    /// Changes the status of a book instance. Returns true if successful, false otherwise.
+    /// </summary>
+    Task<bool> ChangeBookInstanceStatusAsync(
+        int bookInstanceId,
+        BookInstanceStatus newStatus,
+        Guid libraryId
+    );
 }
