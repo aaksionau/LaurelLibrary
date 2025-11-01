@@ -31,7 +31,8 @@ public class ClassifyBookByAge
 
     [Function(nameof(ClassifyBookByAge))]
     public async Task Run(
-        [QueueTrigger("age-classification-books")] QueueMessage message,
+        [QueueTrigger("age-classification-books", Connection = "AzureStorage")]
+            QueueMessage message,
         CancellationToken cancellationToken
     )
     {
@@ -65,7 +66,7 @@ public class ClassifyBookByAge
         history.AddUserMessage(userPrompt.ToString());
         var settings = new AzureOpenAIPromptExecutionSettings
         {
-            MaxTokens = 150,
+            MaxTokens = 80,
             Temperature = 0.1,
             ResponseFormat = typeof(AgeClassificationResult),
             FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),

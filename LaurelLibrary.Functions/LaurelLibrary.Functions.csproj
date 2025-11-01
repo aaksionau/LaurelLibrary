@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
@@ -7,7 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Azure.Identity" Version="1.17.0" />
@@ -19,10 +17,10 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.5" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.66.0" />
   </ItemGroup>
-
   <ItemGroup>
+    <ProjectReference Include="../LaurelLibrary.EmailSenderServices/LaurelLibrary.EmailSenderServices.csproj" />
     <ProjectReference Include="../LaurelLibrary.Persistence/LaurelLibrary.Persistence.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
+    <ProjectReference Include="../LaurelLibrary.Services/LaurelLibrary.Services.csproj" />
   </ItemGroup>
-
 </Project>

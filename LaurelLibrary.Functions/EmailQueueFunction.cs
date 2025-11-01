@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
-using LaurelLibrary.Models;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -19,14 +20,14 @@ public class EmailQueueFunction
     }
 
     [Function(nameof(EmailQueueFunction))]
-    public async Task Run([QueueTrigger("emails")] string messageText)
+    public async Task Run([QueueTrigger("emails", Connection = "AzureStorage")] string messageText)
     {
         _logger.LogInformation("Processing email queue message: {messageText}", messageText);
 
         try
         {
             // Deserialize the queue message to EmailMessage object
-            var emailMessage = JsonSerializer.Deserialize<EmailMessage>(
+            var emailMessage = JsonSerializer.Deserialize<EmailMessageDto>(
                 messageText,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
             );

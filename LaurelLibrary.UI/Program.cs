@@ -54,32 +54,27 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
-builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
-builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
 builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IReadersRepository, ReadersRepository>();
+builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
+builder.Services.AddScoped<IKiosksService, KiosksService>();
+builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
+
+// register services
 builder.Services.AddScoped<IBarcodeService, BarcodeService>();
 builder.Services.AddScoped<IReadersService, ReadersService>();
 builder.Services.AddScoped<IReaderAuthService, ReaderAuthService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
-builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
-builder.Services.AddScoped<IKiosksService, KiosksService>();
-builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ILibrariesService, LibrariesService>();
+builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IBookImportService, BookImportService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
-builder.Services.AddScoped<
-    LaurelLibrary.EmailSenderServices.Interfaces.IAzureQueueMailService,
-    AzureQueueMailService
->();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
-builder.Services.AddScoped<
-    LaurelLibrary.EmailSenderServices.Interfaces.IEmailTemplateService,
-    EmailTemplateService
->();
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 builder.Services.AddHttpContextAccessor();
 

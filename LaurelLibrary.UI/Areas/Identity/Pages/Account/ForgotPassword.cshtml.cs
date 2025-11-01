@@ -23,16 +23,19 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
         private readonly UserManager<AppUser> _userManager;
         private readonly IEmailSender _emailSender;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly ILogger<ForgotPasswordModel> _logger;
 
         public ForgotPasswordModel(
             UserManager<AppUser> userManager,
             IEmailSender emailSender,
-            IEmailTemplateService emailTemplateService
+            IEmailTemplateService emailTemplateService,
+            ILogger<ForgotPasswordModel> logger
         )
         {
             _userManager = userManager;
             _emailSender = emailSender;
             _emailTemplateService = emailTemplateService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -47,6 +50,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync()
         {
+            _logger.LogInformation("Password reset requested for email: {Email}", Input.Email);
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(Input.Email);

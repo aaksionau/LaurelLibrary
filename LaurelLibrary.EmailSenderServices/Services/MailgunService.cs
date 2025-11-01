@@ -1,15 +1,11 @@
-using LaurelLibrary.Models;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using RestSharp.Authenticators;
 
 namespace LaurelLibrary.Services;
-
-public interface IMailgunService
-{
-    Task<bool> SendEmailAsync(EmailMessage emailMessage);
-}
 
 public class MailgunService : IMailgunService
 {
@@ -40,7 +36,7 @@ public class MailgunService : IMailgunService
         _client = new RestClient(options);
     }
 
-    public async Task<bool> SendEmailAsync(EmailMessage emailMessage)
+    public async Task<bool> SendEmailAsync(EmailMessageDto emailMessage)
     {
         try
         {
