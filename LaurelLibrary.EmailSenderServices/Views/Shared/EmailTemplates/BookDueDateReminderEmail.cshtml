@@ -1,0 +1,409 @@
+@model LaurelLibrary.EmailSenderServices.Dtos.BookDueDateReminderEmailDto
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+        {
+            <text>Book Return Reminder - Laurel Library</text>
+        }
+        else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+        {
+            <text>Books Due Today - Laurel Library</text>
+        }
+        else
+        {
+            <text>Overdue Books Notice - Laurel Library</text>
+        }
+    </title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .header {
+            @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+            {
+                <text>background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);</text>
+            }
+            else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+            {
+                <text>background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);</text>
+            }
+            else
+            {
+                <text>background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);</text>
+            }
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .alert-message {
+            @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+            {
+                <text>background-color: #fdf2f2; color: #c53030; border-left: 4px solid #e53e3e;</text>
+            }
+            else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+            {
+                <text>background-color: #fffbf0; color: #c05621; border-left: 4px solid #ed8936;</text>
+            }
+            else
+            {
+                <text>background-color: #ebf8ff; color: #2b6cb0; border-left: 4px solid #4299e1;</text>
+            }
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .books-section {
+            margin: 30px 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .book-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+            {
+                <text>border-left-color: #e53e3e;</text>
+            }
+            else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+            {
+                <text>border-left-color: #ed8936;</text>
+            }
+            else
+            {
+                <text>border-left-color: #4299e1;</text>
+            }
+        }
+
+        .book-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .book-authors {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .book-due-date {
+            font-size: 14px;
+            font-weight: 500;
+            @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+            {
+                <text>color: #c53030;</text>
+            }
+            else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+            {
+                <text>color: #c05621;</text>
+            }
+            else
+            {
+                <text>color: #2b6cb0;</text>
+            }
+        }
+
+        .book-isbn {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .library-info {
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+
+        .library-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .library-details {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .action-section {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .action-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .action-text {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background-color: #34495e;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+
+        .footer-text {
+            margin: 5px 0;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #ecf0f1;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+                {
+                    <text>⚠️</text>
+                }
+                else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                {
+                    <text>⏰</text>
+                }
+                else
+                {
+                    <text>📚</text>
+                }
+            </div>
+            <h1>
+                @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                {
+                    <text>Book Return Reminder</text>
+                }
+                else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                {
+                    <text>Books Due Today</text>
+                }
+                else
+                {
+                    <text>Overdue Books Notice</text>
+                }
+            </h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Hello @Model.ReaderName,
+            </div>
+
+            <div class="alert-message">
+                @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                {
+                    <text>📅 <strong>Friendly Reminder:</strong> You have @Model.Books.Count book(s) that will be due in 3 days. Please plan to return them on time to avoid late fees.</text>
+                }
+                else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                {
+                    <text>⏰ <strong>Due Today:</strong> You have @Model.Books.Count book(s) that are due for return today. Please return them as soon as possible.</text>
+                }
+                else
+                {
+                    <text>⚠️ <strong>Overdue Notice:</strong> You have @Model.Books.Count book(s) that are overdue. Please return them immediately to avoid additional late fees.</text>
+                }
+            </div>
+
+            <div class="message">
+                @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                {
+                    <text>This is a friendly reminder that you have books checked out from our library that will be due soon. We wanted to give you advance notice so you can plan your return accordingly.</text>
+                }
+                else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                {
+                    <text>Your borrowed books are due for return today. Please bring them to the library during our operating hours to avoid any late fees.</text>
+                }
+                else
+                {
+                    <text>Our records show that you have overdue books. Please return them as soon as possible. Late fees may apply for overdue items.</text>
+                }
+            </div>
+
+            <div class="books-section">
+                <div class="section-title">
+                    @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                    {
+                        <text>📚 Books Due Soon</text>
+                    }
+                    else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                    {
+                        <text>📚 Books Due Today</text>
+                    }
+                    else
+                    {
+                        <text>📚 Overdue Books</text>
+                    }
+                </div>
+
+                @foreach (var book in Model.Books)
+                {
+                    <div class="book-item">
+                        <div class="book-title">@book.Title</div>
+                        @if (!string.IsNullOrEmpty(book.Authors))
+                        {
+                            <div class="book-authors">by @book.Authors</div>
+                        }
+                        <div class="book-due-date">
+                            @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                            {
+                                <text>Due: @book.DueDate.ToString("MMMM dd, yyyy") (in @Math.Abs(book.DaysOverdue) days)</text>
+                            }
+                            else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                            {
+                                <text>Due: @book.DueDate.ToString("MMMM dd, yyyy") (TODAY)</text>
+                            }
+                            else
+                            {
+                                <text>Was due: @book.DueDate.ToString("MMMM dd, yyyy") (@book.DaysOverdue days overdue)</text>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(book.Isbn))
+                        {
+                            <div class="book-isbn">ISBN: @book.Isbn</div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="action-section">
+                <div class="action-title">
+                    @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.Overdue)
+                    {
+                        <text>🚨 Immediate Action Required</text>
+                    }
+                    else
+                    {
+                        <text>📍 What You Need to Do</text>
+                    }
+                </div>
+                <div class="action-text">
+                    @if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.UpcomingDueDate)
+                    {
+                        <text>Please plan to return your books by the due date. You can renew books online or by visiting the library if you need more time.</text>
+                    }
+                    else if (Model.ReminderType == LaurelLibrary.EmailSenderServices.Dtos.ReminderType.DueToday)
+                    {
+                        <text>Please return your books today during library hours. If you can't make it today, please contact us to discuss renewal options.</text>
+                    }
+                    else
+                    {
+                        <text>Please return your overdue books immediately. Contact the library if you have any questions about your account or need assistance with returns.</text>
+                    }
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="library-info">
+                <div class="library-name">📚 @Model.LibraryName</div>
+                <div class="library-details">
+                    @if (!string.IsNullOrEmpty(Model.LibraryDescription))
+                    {
+                        <div>@Model.LibraryDescription</div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.LibraryAddress))
+                    {
+                        <div>📍 <strong>Address:</strong> @Model.LibraryAddress</div>
+                    }
+                </div>
+            </div>
+
+            <div class="message">
+                Thank you for being a valued member of our library community. If you have any questions or need assistance, please don't hesitate to contact us.
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-text">
+                This is an automated message from @Model.LibraryName
+            </div>
+            <div class="footer-text">
+                Please do not reply to this email
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

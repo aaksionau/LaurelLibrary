@@ -338,4 +338,33 @@ public class BooksRepository : IBooksRepository
 
         return booksToDelete.Count;
     }
+
+    public async Task<List<BookInstance>> GetBooksForDueDateRemindersAsync()
+    {
+        var today = DateTimeOffset.UtcNow.Date;
+        var threeDaysFromNow = today.AddDays(3);
+        var fiveDaysAgo = today.AddDays(-5);
+
+        return await _dbContext
+            .BookInstances.Include(bi => bi.Book)
+            .ThenInclude(b => b.Authors)
+            .Include(bi => bi.Reader)
+            .Include(bi => bi.Book.Library)
+            .Where(bi =>
+                bi.Status == Domain.Enums.BookInstanceStatus.Borrowed
+                && bi.DueDate.HasValue
+                && bi.ReaderId.HasValue
+                && bi.Reader != null
+                && !string.IsNullOrEmpty(bi.Reader.Email)
+                && (
+                    // Books due in 3 days (reminder)
+                    bi.DueDate.Value.Date == threeDaysFromNow
+                    // Books due today
+                    || bi.DueDate.Value.Date == today
+                    // Books overdue by 5+ days
+                    || bi.DueDate.Value.Date <= fiveDaysAgo
+                )
+            )
+            .ToListAsync();
+    }
 }

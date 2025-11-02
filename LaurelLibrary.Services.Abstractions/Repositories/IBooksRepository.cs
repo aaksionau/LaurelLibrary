@@ -29,4 +29,5 @@ public interface IBooksRepository
     Task<bool> DeleteBookAsync(Guid bookId);
     Task<int> DeleteMultipleBooksAsync(IEnumerable<Guid> bookIds);
     Task UpdateAppropriateAgeBookAsync(Guid bookId, int minAge, int maxAge, string reasoning);
+    Task<List<BookInstance>> GetBooksForDueDateRemindersAsync();
 }
