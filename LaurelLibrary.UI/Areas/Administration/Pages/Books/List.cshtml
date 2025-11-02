@@ -18,40 +18,89 @@
         {
             <div class="alert alert-info">@Model.StatusMessage</div>
         }
+        @if (!string.IsNullOrWhiteSpace(Model.SemanticSearchStatus))
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-robot me-2"></i>@Model.SemanticSearchStatus
+            </div>
+        }
         <div class="mb-4 p-3 border rounded bg-light">
             <form method="get" class="mb-0">
                 <div class="row g-2 align-items-end">
-                <div class="col">
-                    <input class="form-control" type="text" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search by title" />
+                
+                <!-- Traditional Search Section -->
+                <div class="col-12">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" id="semanticSearchToggle" name="UseSemanticSearch" value="true" @(Model.UseSemanticSearch ? "checked" : "") onchange="toggleSearchMode()">
+                        <label class="form-check-label" for="semanticSearchToggle">
+                            <strong>🤖 AI Semantic Search</strong> - Ask questions in natural language
+                        </label>
+                    </div>
                 </div>
 
-                <div class="col-2">
-                    <select class="form-select" name="SelectedAuthorId" id="authorSelect" style="min-width: 200px;">
-                        <option value="">All Authors</option>
-                        @foreach (var a in Model.Authors)
-                        {
-                            <option value="@a.AuthorId" selected="@(Model.SelectedAuthorId == a.AuthorId ? "selected" : null)">@a.FullName</option>
-                        }
-                    </select>
+                <!-- Semantic Search Input -->
+                <div id="semanticSearchSection" style="display: @(Model.UseSemanticSearch ? "block" : "none");">
+                    <div class="row g-2 align-items-end">
+                        <div class="col">
+                            <input class="form-control" type="text" id="semanticSearchInput" name="SemanticSearchQuery" value="@Model.SemanticSearchQuery" placeholder="e.g., 'Find science fiction books for teenagers', 'Books by Stephen King'" />
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary" id="searchButton">
+                                <i class="fas fa-search" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" id="searchSpinner" style="display: none;"></span>
+                                <span id="searchButtonText">Search</span>
+                            </button>
+                            <a class="btn btn-secondary ms-2" href="@Url.Page("/Books/List", new { area = "Administration" })">Clear</a>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col">
+                            <small class="text-muted">
+                                Examples: "Children's books about animals", "Recent fantasy novels", "Books for young adults"
+                            </small>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-2">
-                    <select class="form-select" name="SelectedCategoryId" id="categorySelect" style="min-width: 200px;">
-                        <option value="">All Categories</option>
-                        @foreach (var c in Model.Categories)
-                        {
-                            <option value="@c.CategoryId" selected="@(Model.SelectedCategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
-                        }
-                    </select>
+                <!-- Traditional Search Section -->
+                <div id="traditionalSearchSection" style="display: @(Model.UseSemanticSearch ? "none" : "block");">
+                    <div class="row g-2 align-items-end">
+                        <div class="col">
+                            <input class="form-control" type="text" id="titleSearch" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search by title" />
+                        </div>
+
+                        <div class="col-2">
+                            <select class="form-select" name="SelectedAuthorId" id="authorSelect" style="min-width: 200px;">
+                                <option value="">All Authors</option>
+                                @foreach (var a in Model.Authors)
+                                {
+                                    <option value="@a.AuthorId" selected="@(Model.SelectedAuthorId == a.AuthorId ? "selected" : null)">@a.FullName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-2">
+                            <select class="form-select" name="SelectedCategoryId" id="categorySelect" style="min-width: 200px;">
+                                <option value="">All Categories</option>
+                                @foreach (var c in Model.Categories)
+                                {
+                                    <option value="@c.CategoryId" selected="@(Model.SelectedCategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a class="btn btn-secondary ms-2" href="@Url.Page("/Books/List", new { area = "Administration" })">Clear</a>
+                        </div>
+                    </div>
                 </div>
 
                 <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
                 <input type="hidden" name="pageSize" value="@Model.PageSize" />
 
-                <div class="col-auto ms-auto">
-                    <button type="submit" class="btn btn-primary me-2">Filter</button>
-                    <a class="btn btn-secondary" href="@Url.Page("/Books/List", new { area = "Administration" })">Clear</a>
-                </div>
             </div>
             </form>
         </div>
@@ -210,6 +259,46 @@
 
             // Initialize count
             updateSelectedCount();
+        });
+
+        // Toggle between traditional and semantic search
+        function toggleSearchMode() {
+            var useSemanticSearch = document.getElementById('semanticSearchToggle').checked;
+            var semanticSection = document.getElementById('semanticSearchSection');
+            var traditionalSection = document.getElementById('traditionalSearchSection');
+            
+            if (useSemanticSearch) {
+                semanticSection.style.display = 'block';
+                traditionalSection.style.display = 'none';
+                // Clear traditional search fields when switching to semantic
+                document.getElementById('titleSearch').value = '';
+                document.getElementById('authorSelect').value = '';
+                document.getElementById('categorySelect').value = '';
+            } else {
+                semanticSection.style.display = 'none';
+                traditionalSection.style.display = 'block';
+                // Clear semantic search field when switching to traditional
+                document.getElementById('semanticSearchInput').value = '';
+            }
+        }
+
+        // Handle form submission for semantic search loading indicator
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var useSemanticSearch = document.getElementById('semanticSearchToggle').checked;
+            var semanticQuery = document.getElementById('semanticSearchInput').value.trim();
+            
+            if (useSemanticSearch && semanticQuery) {
+                // Show loading state for semantic search
+                var searchButton = document.getElementById('searchButton');
+                var searchIcon = document.getElementById('searchIcon');
+                var searchSpinner = document.getElementById('searchSpinner');
+                var searchButtonText = document.getElementById('searchButtonText');
+                
+                searchButton.disabled = true;
+                searchIcon.style.display = 'none';
+                searchSpinner.style.display = 'inline-block';
+                searchButtonText.textContent = 'AI Processing...';
+            }
         });
     </script>
 }

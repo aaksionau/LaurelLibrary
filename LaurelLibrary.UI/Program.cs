@@ -75,6 +75,7 @@ builder.Services.AddScoped<IBookImportService, BookImportService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<ISemanticSearchService, SemanticSearchService>();
 
 builder.Services.AddHttpContextAccessor();
 

@@ -15,18 +15,21 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         private readonly IAuthenticationService userService;
         private readonly IAuthorsRepository authorsRepository;
         private readonly ICategoriesRepository categoriesRepository;
+        private readonly ISemanticSearchService semanticSearchService;
 
         public ListModel(
             IBooksRepository booksRepository,
             IAuthenticationService userService,
             IAuthorsRepository authorsRepository,
-            ICategoriesRepository categoriesRepository
+            ICategoriesRepository categoriesRepository,
+            ISemanticSearchService semanticSearchService
         )
         {
             this.booksRepository = booksRepository;
             this.userService = userService;
             this.authorsRepository = authorsRepository;
             this.categoriesRepository = categoriesRepository;
+            this.semanticSearchService = semanticSearchService;
         }
 
         [BindProperty]
@@ -48,6 +51,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
 
+        [BindProperty(SupportsGet = true)]
+        public string? SemanticSearchQuery { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public bool UseSemanticSearch { get; set; }
+
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
         public int TotalPages { get; set; }
@@ -55,6 +64,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
 
         [TempData]
         public string? StatusMessage { get; set; }
+
+        [TempData]
+        public string? SemanticSearchStatus { get; set; }
 
         [BindProperty]
         public List<Guid> SelectedBookIds { get; set; } = new List<Guid>();
@@ -76,14 +88,57 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 500
             );
 
-            var paged = await this.booksRepository.GetAllBooksAsync(
-                user.CurrentLibraryId.Value,
-                pageNumber ?? 1,
-                pageSize ?? 10,
-                SelectedAuthorId,
-                SelectedCategoryId,
-                SearchTerm
-            );
+            PagedResult<LaurelBookSummaryDto> paged;
+
+            // Use semantic search if enabled and query is provided
+            if (UseSemanticSearch && !string.IsNullOrWhiteSpace(SemanticSearchQuery))
+            {
+                try
+                {
+                    paged = await this.semanticSearchService.SearchBooksSemanticAsync(
+                        SemanticSearchQuery,
+                        user.CurrentLibraryId.Value,
+                        pageNumber ?? 1,
+                        pageSize ?? 10
+                    );
+
+                    if (paged.TotalCount == 0)
+                    {
+                        SemanticSearchStatus =
+                            $"AI Search: No books found for '{SemanticSearchQuery}'. Try rephrasing your query or use traditional search.";
+                    }
+                    else
+                    {
+                        SemanticSearchStatus =
+                            $"AI Search: Found {paged.TotalCount} books matching '{SemanticSearchQuery}'";
+                    }
+                }
+                catch (Exception)
+                {
+                    // Log the error and fall back to empty results
+                    SemanticSearchStatus =
+                        "AI Search temporarily unavailable. Please try traditional search.";
+                    paged = new PagedResult<LaurelBookSummaryDto>
+                    {
+                        Items = new List<LaurelBookSummaryDto>(),
+                        Page = pageNumber ?? 1,
+                        PageSize = pageSize ?? 10,
+                        TotalCount = 0,
+                    };
+                }
+            }
+            else
+            {
+                // Use traditional search
+                paged = await this.booksRepository.GetAllBooksAsync(
+                    user.CurrentLibraryId.Value,
+                    pageNumber ?? 1,
+                    pageSize ?? 10,
+                    SelectedAuthorId,
+                    SelectedCategoryId,
+                    SearchTerm
+                );
+            }
 
             Books = paged.Items;
             PageNumber = paged.Page;
