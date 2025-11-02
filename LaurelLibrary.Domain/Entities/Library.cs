@@ -22,9 +22,6 @@ public class Library : Audit
     [StringLength(64)]
     public required string Alias { get; set; }
 
-    [StringLength(17)]
-    public string? MacAddress { get; set; }
-
     [StringLength(1024)]
     public string? Logo { get; set; }
 

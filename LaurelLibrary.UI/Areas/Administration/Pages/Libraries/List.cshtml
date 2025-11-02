@@ -6,13 +6,40 @@
 }
 
 <style>
-    .clickable-row {
-        position: relative;
+    .library-card {
+        transition: all 0.3s ease;
         cursor: pointer;
+        border: 1px solid #dee2e6;
+        position: relative;
     }
 
-    .clickable-row:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+    .library-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        border-color: #6c9bd1;
+    }
+
+    .library-stats {
+        background-color: #f8f9fb;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #6c9bd1;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
     }
 </style>
 
@@ -23,49 +50,83 @@
             Library</a>
     </div>
     <div class="card-body">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Address</th>
-                    <th>Alias</th>
-                    <th>Mac Address</th>
-                    <th>Books</th>
-                    <th>Students</th>
-                    <th>Administrators</th>
-                    <th>Created At</th>
-                    <th>Updated At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+        @if (Model.Libraries.Any())
+        {
+            <div class="row">
                 @foreach (var library in Model.Libraries)
                 {
-                    <tr class="clickable-row">
-                        <td>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card library-card h-100">
                             <a asp-area="Administration" asp-page="/Libraries/Details" asp-route-id="@library.LibraryId"
-                                class="stretched-link text-decoration-none text-body"></a>
-                            @library.Name
-                        </td>
-                        <td>@(string.IsNullOrWhiteSpace(library.Description) ? "-" : (library.Description.Length > 50 ?
-                                                    library.Description.Substring(0, 50) + "..." : library.Description))</td>
-                        <td>@library.Address</td>
-                        <td>@library.Alias</td>
-                        <td>@library.MacAddress</td>
-                        <td>@library.BooksCount</td>
-                        <td>@library.StudentsCount</td>
-                        <td>@library.AdministratorsCount</td>
-                        <td>@library.CreatedAt.ToString("g")</td>
-                        <td>@library.UpdatedAt?.ToString("g")</td>
-                        <td>
-                            <a class="btn btn-link text-primary p-0" asp-area="Administration" asp-page="/Libraries/Update"
-                                asp-route-libraryId="@library.LibraryId" title="Edit"
-                                style="position: relative; z-index: 10;"><i class="bi bi-pencil"></i></a>
-                        </td>
-                    </tr>
+                                class="stretched-link text-decoration-none"></a>
+                            <div class="card-header" style="background-color: #e8f2f7; border-bottom: 1px solid #d1e7f0; color: #495057;">
+                                <h5 class="card-title mb-0">@library.Name</h5>
+                                @if (!string.IsNullOrWhiteSpace(library.Alias))
+                                {
+                                    <small style="color: #6c757d;">@library.Alias</small>
+                                }
+                            </div>
+                            <div class="card-body">
+                                @if (!string.IsNullOrWhiteSpace(library.Description))
+                                {
+                                    <p class="card-text">
+                                        @(library.Description.Length > 100 ? library.Description.Substring(0, 100) + "..." : library.Description)
+                                    </p>
+                                }
+                                
+                                @if (!string.IsNullOrWhiteSpace(library.Address))
+                                {
+                                    <p class="card-text">
+                                        <i class="bi bi-geo-alt text-muted"></i>
+                                        <small class="text-muted">@library.Address</small>
+                                    </p>
+                                }
+
+                                <div class="library-stats">
+                                    <div class="row text-center">
+                                        <div class="col-4 stat-item">
+                                            <div class="stat-number">@library.BooksCount</div>
+                                            <div class="stat-label">Books</div>
+                                        </div>
+                                        <div class="col-4 stat-item">
+                                            <div class="stat-number">@library.StudentsCount</div>
+                                            <div class="stat-label">Students</div>
+                                        </div>
+                                        <div class="col-4 stat-item">
+                                            <div class="stat-number">@library.AdministratorsCount</div>
+                                            <div class="stat-label">Admins</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center text-muted">
+                                    <small>
+                                        <i class="bi bi-calendar3"></i>
+                                        Created: @library.CreatedAt.ToString("MMM dd, yyyy")
+                                    </small>
+                                    <a class="btn btn-outline-secondary btn-sm" asp-area="Administration" asp-page="/Libraries/Update"
+                                        asp-route-libraryId="@library.LibraryId" title="Edit Library"
+                                        style="position: relative; z-index: 10; border-color: #6c9bd1; color: #6c9bd1;">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-building display-1 text-muted"></i>
+                <h4 class="mt-3 text-muted">No libraries found</h4>
+                <p class="text-muted">Get started by adding your first library.</p>
+                <a class="btn" asp-area="Administration" asp-page="/Libraries/Update"
+                   style="background-color: #6c9bd1; border-color: #6c9bd1; color: white;">
+                    <i class="bi bi-plus-circle"></i> Add Library
+                </a>
+            </div>
+        }
     </div>
 </div>

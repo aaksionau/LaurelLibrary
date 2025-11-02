@@ -227,7 +227,6 @@ public class LibrariesService : ILibrariesService
                     LibraryId = l.LibraryId.ToString(),
                     Name = l.Name,
                     Address = l.Address ?? string.Empty,
-                    MacAddress = l.MacAddress,
                     Logo = l.Logo,
                     Description = l.Description,
                     CheckoutDurationDays = l.CheckoutDurationDays,
@@ -246,6 +245,17 @@ public class LibrariesService : ILibrariesService
     {
         try
         {
+            // Check if alias already exists
+            var existingLibraryWithAlias = await _librariesRepository.GetByAliasAsync(
+                libraryDto.Alias
+            );
+            if (existingLibraryWithAlias != null)
+            {
+                throw new InvalidOperationException(
+                    $"A library with alias '{libraryDto.Alias}' already exists. Please choose a different alias."
+                );
+            }
+
             // Check subscription limits before creating new library
             var canAddLibrary = await _subscriptionService.CanAddLibraryAsync(userId);
             if (!canAddLibrary)

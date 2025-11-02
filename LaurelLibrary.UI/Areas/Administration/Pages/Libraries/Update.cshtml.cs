@@ -100,16 +100,35 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
                     // Redirect to subscription page for upgrade
                     return Redirect($"{ex.RedirectUrl}?message={Uri.EscapeDataString(ex.Message)}");
                 }
-                catch (InvalidOperationException ex) when (ex.Message.Contains("subscription"))
+                catch (InvalidOperationException ex)
+                    when (ex.Message.Contains("subscription") || ex.Message.Contains("alias"))
                 {
-                    // Handle subscription limit exceeded (fallback for legacy exceptions)
+                    // Handle subscription limit exceeded or alias uniqueness (fallback for legacy exceptions)
                     ModelState.AddModelError(string.Empty, ex.Message);
                     return Page();
                 }
             }
             else
             {
+                // Check if alias is being changed and if the new alias already exists
                 var entity = this.Library.ToEntity(Guid.Parse(this.Library.LibraryId));
+                var existingLibrary = await this.librariesRepository.GetByIdAsync(entity.LibraryId);
+
+                if (existingLibrary != null && existingLibrary.Alias != this.Library.Alias)
+                {
+                    var existingLibraryWithAlias = await this.librariesRepository.GetByAliasAsync(
+                        this.Library.Alias
+                    );
+                    if (existingLibraryWithAlias != null)
+                    {
+                        ModelState.AddModelError(
+                            nameof(Library.Alias),
+                            $"A library with alias '{this.Library.Alias}' already exists. Please choose a different alias."
+                        );
+                        return Page();
+                    }
+                }
+
                 var currentUser = await this.userService.GetAppUserAsync();
                 entity.UpdatedBy = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
                 await this.librariesRepository.UpdateAsync(entity);

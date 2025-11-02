@@ -14,7 +14,6 @@ public static class LibraryDtoExtensions
             Name = libraryDto.Name,
             Address = libraryDto.Address,
             Alias = libraryDto.Alias,
-            MacAddress = libraryDto.MacAddress,
             Logo = libraryDto.Logo,
             Description = libraryDto.Description,
             CheckoutDurationDays = libraryDto.CheckoutDurationDays,
@@ -28,9 +27,8 @@ public static class LibraryDtoExtensions
         {
             LibraryId = library.LibraryId.ToString(),
             Name = library.Name,
-            Address = library.Address,
+            Address = library.Address ?? string.Empty,
             Alias = library.Alias,
-            MacAddress = library.MacAddress,
             Logo = library.Logo,
             Description = library.Description,
             CheckoutDurationDays = library.CheckoutDurationDays,

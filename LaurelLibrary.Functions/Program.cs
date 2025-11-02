@@ -37,7 +37,7 @@ builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
 
 // Register services
-builder.Services.AddScoped<IBooksService, BooksService>();
+// BooksService is registered with HttpClient below
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
@@ -55,6 +55,12 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
             ?? throw new InvalidOperationException("ISBNdb:BaseUrl not configured")
     );
     client.DefaultRequestHeaders.Add("Authorization", configuration["ISBNdb:ApiKey"]);
+});
+
+// Add HttpClient for BooksService to download images
+builder.Services.AddHttpClient<IBooksService, BooksService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 builder.Services.AddScoped<IMailgunService, MailgunService>();
 

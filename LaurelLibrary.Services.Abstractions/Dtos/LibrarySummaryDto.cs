@@ -8,7 +8,6 @@ public class LibrarySummaryDto
     public required string Name { get; set; }
     public string? Address { get; set; }
     public required string Alias { get; set; }
-    public string? MacAddress { get; set; }
     public string? Description { get; set; }
     public int BooksCount { get; set; }
     public int StudentsCount { get; set; }

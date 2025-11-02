@@ -31,7 +31,6 @@ public class LibrariesRepository : ILibrariesRepository
                 Name = l.Name,
                 Address = l.Address,
                 Alias = l.Alias,
-                MacAddress = l.MacAddress,
                 Description = l.Description,
                 BooksCount = l.Books.Count,
                 StudentsCount = l.Students.Count,
@@ -72,16 +71,25 @@ public class LibrariesRepository : ILibrariesRepository
             .FirstOrDefaultAsync(l => l.LibraryId == id);
     }
 
+    public async Task<Library?> GetByAliasAsync(string alias)
+    {
+        if (string.IsNullOrWhiteSpace(alias))
+            return null;
+
+        var normalizedAlias = alias.Trim();
+        return await _dbContext.Libraries.FirstOrDefaultAsync(l => l.Alias == normalizedAlias);
+    }
+
     // Update an existing library
     public async Task<Library?> UpdateAsync(Library library)
     {
         var existingLibrary = await GetByIdAsync(library.LibraryId);
         existingLibrary.Name = library.Name;
         existingLibrary.Address = library.Address;
-        existingLibrary.MacAddress = library.MacAddress;
         existingLibrary.Alias = library.Alias;
         existingLibrary.Logo = library.Logo;
         existingLibrary.Description = library.Description;
+        existingLibrary.CheckoutDurationDays = library.CheckoutDurationDays;
         existingLibrary.UpdatedAt = DateTime.UtcNow;
         existingLibrary.UpdatedBy = library.UpdatedBy;
         await _dbContext.SaveChangesAsync();

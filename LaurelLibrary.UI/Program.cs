@@ -75,7 +75,8 @@ builder.Services.AddScoped<IReaderAuthService, ReaderAuthService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
-builder.Services.AddScoped<IBooksService, BooksService>();
+
+// BooksService is registered with HttpClient below
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
@@ -98,6 +99,12 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
             ?? throw new InvalidOperationException("Base URL not configured")
     );
     client.DefaultRequestHeaders.Add("Authorization", builder.Configuration["ISBNdb:ApiKey"]);
+});
+
+// Add HttpClient for BooksService to download images
+builder.Services.AddHttpClient<IBooksService, BooksService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 
 var app = builder.Build();

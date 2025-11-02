@@ -9,6 +9,7 @@ public interface ILibrariesRepository
     Task<Library> CreateAsync(Library library);
     Task<Library?> GetByIdAsync(Guid id);
     Task<Library?> GetByIdWithDetailsAsync(Guid id);
+    Task<Library?> GetByAliasAsync(string alias);
     Task<Library?> UpdateAsync(Library library);
     Task RemoveAsync(Guid libraryId);
     Task AddAdministratorAsync(Guid libraryId, string userId);
