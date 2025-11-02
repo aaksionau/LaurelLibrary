@@ -34,6 +34,7 @@ builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
 
 // Register services
 builder.Services.AddScoped<IBooksService, BooksService>();
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>

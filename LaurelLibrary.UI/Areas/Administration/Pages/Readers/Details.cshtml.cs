@@ -21,6 +21,7 @@ public class DetailsModel : PageModel
     public ReaderDto? Reader { get; set; }
     public List<BorrowingHistoryDto> BorrowingHistory { get; set; } =
         new List<BorrowingHistoryDto>();
+    public List<ReaderActionDto> ReaderActions { get; set; } = new List<ReaderActionDto>();
 
     [TempData]
     public string? StatusMessage { get; set; }
@@ -59,6 +60,9 @@ public class DetailsModel : PageModel
 
         // Load borrowing history
         BorrowingHistory = await readersService.GetBorrowingHistoryAsync(id);
+
+        // Load reader actions
+        ReaderActions = await readersService.GetReaderActionsAsync(id, 1, 100); // Load up to 100 actions
 
         return Page();
     }

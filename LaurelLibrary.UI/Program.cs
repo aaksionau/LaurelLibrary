@@ -66,6 +66,7 @@ builder.Services.AddScoped<IKiosksService, KiosksService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
 
 // register services
 builder.Services.AddScoped<IBarcodeService, BarcodeService>();
@@ -86,6 +87,7 @@ builder.Services.AddScoped<ISemanticSearchService, SemanticSearchService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 
 builder.Services.AddHttpContextAccessor();
 

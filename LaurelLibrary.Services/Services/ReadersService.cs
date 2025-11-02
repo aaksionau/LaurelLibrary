@@ -18,6 +18,7 @@ public class ReadersService : IReadersService
     private readonly IBarcodeService _barcodeService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IReaderActionService _readerActionService;
     private readonly ILogger<ReadersService> _logger;
     private readonly string? _wwwrootPath;
 
@@ -30,6 +31,7 @@ public class ReadersService : IReadersService
         IBarcodeService barcodeService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
+        IReaderActionService readerActionService,
         ILogger<ReadersService> logger
     )
     {
@@ -41,6 +43,7 @@ public class ReadersService : IReadersService
         _barcodeService = barcodeService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
+        _readerActionService = readerActionService;
         _logger = logger;
         _wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "reader-eans");
     }
@@ -508,5 +511,19 @@ public class ReadersService : IReadersService
         await _readersRepository.UpdateBarcodeImageUrlAsync(readerId, barcodeUrl);
 
         return true;
+    }
+
+    public async Task<List<ReaderActionDto>> GetReaderActionsAsync(
+        int readerId,
+        int page = 1,
+        int pageSize = 50
+    )
+    {
+        return await _readerActionService.GetReaderActionsAsync(readerId, page, pageSize);
+    }
+
+    public async Task<int> GetReaderActionsCountAsync(int readerId)
+    {
+        return await _readerActionService.GetReaderActionsCountAsync(readerId);
     }
 }

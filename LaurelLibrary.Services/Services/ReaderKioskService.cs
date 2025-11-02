@@ -15,6 +15,7 @@ public class ReaderKioskService : IReaderKioskService
     private readonly IReadersRepository _readersRepository;
     private readonly IEmailTemplateService _emailTemplateService;
     private readonly IAzureQueueService _queueService;
+    private readonly IReaderActionService _readerActionService;
     private readonly ILogger<ReaderKioskService> _logger;
 
     public ReaderKioskService(
@@ -23,6 +24,7 @@ public class ReaderKioskService : IReaderKioskService
         IReadersRepository readersRepository,
         IEmailTemplateService emailTemplateService,
         IAzureQueueService queueService,
+        IReaderActionService readerActionService,
         ILogger<ReaderKioskService> logger
     )
     {
@@ -31,6 +33,7 @@ public class ReaderKioskService : IReaderKioskService
         _readersRepository = readersRepository;
         _emailTemplateService = emailTemplateService;
         _queueService = queueService;
+        _readerActionService = readerActionService;
         _logger = logger;
     }
 
@@ -78,6 +81,17 @@ public class ReaderKioskService : IReaderKioskService
             bookInstance.Status = Domain.Enums.BookInstanceStatus.Borrowed;
 
             await _booksRepository.UpdateBookInstanceAsync(bookInstance);
+
+            // Log the checkout action
+            await _readerActionService.LogCheckoutActionAsync(
+                readerId,
+                bookInstance.BookInstanceId,
+                bookInstance.Book.Title,
+                bookInstance.Book.Isbn ?? string.Empty,
+                string.Join(", ", bookInstance.Book.Authors.Select(a => a.FullName)),
+                dueDate,
+                libraryId
+            );
 
             // Collect book information for the email
             checkedOutBooks.Add(
@@ -170,6 +184,19 @@ public class ReaderKioskService : IReaderKioskService
                 || bookInstance.Status != Domain.Enums.BookInstanceStatus.Borrowed
             )
                 continue;
+
+            // Store reader information before clearing it for the action log
+            var readerIdBeforeReturn = bookInstance.ReaderId!.Value;
+
+            // Log the return action before updating the book instance
+            await _readerActionService.LogReturnActionAsync(
+                readerIdBeforeReturn,
+                bookInstance.BookInstanceId,
+                bookInstance.Book.Title,
+                bookInstance.Book.Isbn ?? string.Empty,
+                string.Join(", ", bookInstance.Book.Authors.Select(a => a.FullName)),
+                libraryId
+            );
 
             bookInstance.ReaderId = null;
             bookInstance.CheckedOutDate = null;
