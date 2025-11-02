@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Persistence.Data;
+using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -49,6 +50,30 @@ public class ImportHistoryRepository : IImportHistoryRepository
             .Where(i => i.LibraryId == libraryId)
             .OrderByDescending(i => i.ImportedAt)
             .ToListAsync();
+    }
+
+    public async Task<PagedResult<ImportHistory>> GetByLibraryIdPagedAsync(
+        Guid libraryId,
+        int pageNumber,
+        int pageSize
+    )
+    {
+        var query = _dbContext
+            .Set<ImportHistory>()
+            .Where(i => i.LibraryId == libraryId)
+            .OrderByDescending(i => i.ImportedAt);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        return new PagedResult<ImportHistory>
+        {
+            Items = items,
+            Page = pageNumber,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+        };
     }
 
     public async Task UpdateChunkProgressAsync(

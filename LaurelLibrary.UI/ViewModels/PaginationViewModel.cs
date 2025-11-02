@@ -8,5 +8,6 @@ namespace LaurelLibrary.UI.ViewModels
         public int TotalCount { get; set; }
         public string Area { get; set; } = "Administration";
         public string Page { get; set; } = "/Books/List";
+        public string? Tab { get; set; }
     }
 }

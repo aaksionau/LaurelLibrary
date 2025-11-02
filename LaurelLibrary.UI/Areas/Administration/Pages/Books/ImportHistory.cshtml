@@ -5,192 +5,322 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5 class="card-title mb-0">
-                        <i class="fas fa-history"></i> Book Import History
+                        <i class="fas fa-file-upload"></i> Book Import Management
                     </h5>
-                    <a asp-page="Import" class="btn btn-primary">
-                        <i class="fas fa-file-upload"></i> New Import
-                    </a>
                 </div>
                 <div class="card-body">
-                    @if (Model.ImportHistories.Count == 0)
-                    {
-                        <div class="alert alert-info" role="alert">
-                            <i class="fas fa-info-circle"></i> No import history found. Start by importing books from CSV.
-                        </div>
-                        <a asp-page="Import" class="btn btn-primary">
-                            <i class="fas fa-file-upload"></i> Import Books
-                        </a>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>File Name</th>
-                                        <th>Status</th>
-                                        <th>Total ISBNs</th>
-                                        <th>Success</th>
-                                        <th>Failed</th>
-                                        <th>Success Rate</th>
-                                        <th>Imported By</th>
-                                        <th>Failed ISBNs</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var history in Model.ImportHistories)
-                                    {
-                                        var successRate = history.TotalIsbns > 0
-                                        ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1")
-                                        : "0";
-                                        var progressBarClass = history.SuccessCount == history.TotalIsbns
-                                        ? "bg-success"
-                                        : history.SuccessCount > history.FailedCount
-                                        ? "bg-warning"
-                                        : "bg-danger";
+                    <!-- Tab Navigation -->
+                    <ul class="nav nav-tabs" id="importTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link @(Model.CurrentTab != "history" ? "active" : "")" 
+                               href="?pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" 
+                               role="tab">
+                                <i class="fas fa-file-upload"></i> Import Functionality
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link @(Model.CurrentTab == "history" ? "active" : "")" 
+                               href="?tab=history&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" 
+                               role="tab">
+                                <i class="fas fa-history"></i> History
+                            </a>
+                        </li>
+                    </ul>                    <!-- Tab Content -->
+                    <div class="tab-content mt-3" id="importTabContent">
+                        <!-- Import Functionality Tab -->
+                        <div class="tab-pane fade @(Model.CurrentTab != "history" ? "show active" : "")" id="import-pane" role="tabpanel" aria-labelledby="import-tab">
+                            <div class="alert alert-info" role="alert">
+                                <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Instructions</h6>
+                                <p class="mb-0">
+                                    Upload a CSV file containing ISBN numbers (up to 1000). The file can contain:
+                                </p>
+                                <ul class="mb-0">
+                                    <li>One ISBN per line</li>
+                                    <li>Multiple ISBNs per line separated by commas</li>
+                                    <li>ISBN-10 or ISBN-13 format (with or without hyphens)</li>
+                                    <li>Optional header row (will be automatically detected and skipped)</li>
+                                </ul>
+                                <p class="mt-2 mb-0">
+                                    <strong>Example CSV format:</strong><br/>
+                                    <code>
+                                        9781492666868<br/>
+                                        9781616555719<br/>
+                                        978-0-123456-78-9
+                                    </code>
+                                </p>
+                            </div>
 
-                                        <tr>
-                                            <td>
-                                                <span data-bs-toggle="tooltip" title="@history.ImportedAt.ToString("F")">
-                                                    @history.ImportedAt.ToString("g")
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-file-csv text-success"></i>
-                                                @history.FileName
-                                            </td>
-                                            <td>
-                                                @switch (history.Status)
-                                                {
-                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Pending:
-                                                        <span class="badge bg-secondary">
-                                                            <i class="fas fa-clock"></i> Pending
-                                                        </span>
-                                                        break;
-                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Processing:
-                                                        <span class="badge bg-info">
-                                                            <i class="fas fa-spinner fa-spin"></i> Processing
-                                                            (@history.ProcessedChunks/@history.TotalChunks chunks)
-                                                        </span>
-                                                        @if (history.TotalChunks > 0)
-                                                        {
-                                                            var chunkProgress = (history.ProcessedChunks * 100.0 /
-                                                            history.TotalChunks).ToString("F0");
-                                                            <div class="progress mt-1" style="height: 5px; min-width: 100px;">
-                                                                <div class="progress-bar bg-info" role="progressbar"
-                                                                    style="width: @chunkProgress%" aria-valuenow="@chunkProgress"
-                                                                    aria-valuemin="0" aria-valuemax="100">
-                                                                </div>
-                                                            </div>
-                                                        }
-                                                        break;
-                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Completed:
-                                                        <span class="badge bg-success">
-                                                            <i class="fas fa-check-circle"></i> Completed
-                                                        </span>
-                                                        @if (history.CompletedAt.HasValue)
-                                                        {
-                                                            <small class="text-muted d-block" data-bs-toggle="tooltip"
-                                                                title="@history.CompletedAt.Value.ToString("F")">
-                                                                @history.CompletedAt.Value.ToString("g")
-                                                            </small>
-                                                        }
-                                                        break;
-                                                    case LaurelLibrary.Domain.Enums.ImportStatus.Failed:
-                                                        <span class="badge bg-danger">
-                                                            <i class="fas fa-exclamation-circle"></i> Failed
-                                                        </span>
-                                                        break;
-                                                }
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-primary">@history.TotalIsbns</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-check"></i> @history.SuccessCount
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-danger">
-                                                    <i class="fas fa-times"></i> @history.FailedCount
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="progress" style="min-width: 100px;">
-                                                    <div class="progress-bar @progressBarClass" role="progressbar"
-                                                        style="width: @successRate%" aria-valuenow="@successRate"
-                                                        aria-valuemin="0" aria-valuemax="100">
-                                                        @successRate%
-                                                    </div>
+                            @if (!string.IsNullOrEmpty(Model.Message))
+                            {
+                                <div class="alert @(Model.IsSuccess ? "alert-success" : "alert-danger")" role="alert">
+                                    <i class="fas @(Model.IsSuccess ? "fa-check-circle" : "fa-exclamation-triangle")"></i>
+                                    @Model.Message
+                                </div>
+
+                                @if (Model.IsSuccess && Model.ImportHistoryId.HasValue)
+                                {
+                                    <div class="card mb-3" id="progressCard">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <span id="statusTitle">Import Progress</span>
+                                                <span id="statusBadge" class="badge bg-info ms-2">Processing</span>
+                                            </h6>
+                                            
+                                            <div class="progress mb-3" style="height: 25px;">
+                                                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                     role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                                    <span id="progressText">0%</span>
                                                 </div>
-                                            </td>
-                                            <td>
-                                                <i class="fas fa-user"></i> @history.CreatedBy
-                                            </td>
-                                            <td>
-                                                @if (!string.IsNullOrWhiteSpace(history.FailedIsbns))
-                                                {
-                                                    <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#failedModal_@history.ImportHistoryId">
-                                                        <i class="fas fa-list"></i> View
-                                                    </button>
+                                            </div>
 
-                                                    <!-- Modal for Failed ISBNs -->
-                                                    <div class="modal fade" id="failedModal_@history.ImportHistoryId" tabindex="-1"
-                                                        aria-labelledby="failedModalLabel_@history.ImportHistoryId"
-                                                        aria-hidden="true">
-                                                        <div class="modal-dialog modal-lg">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title"
-                                                                        id="failedModalLabel_@history.ImportHistoryId">
-                                                                        Failed ISBNs - @history.FileName
-                                                                    </h5>
-                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                        aria-label="Close"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p class="text-muted">
-                                                                        The following ISBNs were not found or failed to import:
-                                                                    </p>
-                                                                    <div class="alert alert-warning">
-                                                                        @foreach (var isbn in
-                                                                                                                                    history.FailedIsbns.Split(',').Select(s => s.Trim()))
-                                                                        {
-                                                                            <span class="badge bg-warning text-dark me-1">@isbn</span>
-                                                                        }
+                                            <div class="row text-center mb-3">
+                                                <div class="col-md-3">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-tasks fa-2x text-info"></i>
+                                                    </div>
+                                                    <h4 class="mb-0">
+                                                        <span id="processedChunks">0</span> / <span id="totalChunks">0</span>
+                                                    </h4>
+                                                    <small class="text-muted">Chunks Processed</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-list-ol fa-2x text-primary"></i>
+                                                    </div>
+                                                    <h4 class="mb-0" id="totalIsbns">@Model.TotalIsbns</h4>
+                                                    <small class="text-muted">Total ISBNs</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                                                    </div>
+                                                    <h4 class="mb-0" id="successCount">0</h4>
+                                                    <small class="text-muted">Successfully Imported</small>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="mb-2">
+                                                        <i class="fas fa-times-circle fa-2x text-danger"></i>
+                                                    </div>
+                                                    <h4 class="mb-0" id="failedCount">0</h4>
+                                                    <small class="text-muted">Failed</small>
+                                                </div>
+                                            </div>
+
+                                            <div id="completedActions" class="mt-3" style="display: none;">
+                                                <button type="button" class="btn btn-primary" onclick="switchToHistoryTab()">
+                                                    <i class="fas fa-history"></i> View Import History
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <input type="hidden" id="importHistoryId" value="@Model.ImportHistoryId" />
+                                }
+                            }
+
+                            <form method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label for="csvFile" class="form-label">
+                                        <i class="fas fa-file-csv"></i> Select CSV File
+                                    </label>
+                                    <input class="form-control" type="file" id="csvFile" asp-for="CsvFile" accept=".csv" required />
+                                    <div class="form-text">Maximum file size: 5MB. Supported format: CSV only.</div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload"></i> Upload and Import
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- History Tab -->
+                        <div class="tab-pane fade @(Model.CurrentTab == "history" ? "show active" : "")" id="history-pane" role="tabpanel" aria-labelledby="history-tab">
+                            @if (Model.TotalCount == 0)
+                            {
+                                <div class="alert alert-info" role="alert">
+                                    <i class="fas fa-info-circle"></i> No import history found. Start by importing books from CSV using the Import Functionality tab.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>File Name</th>
+                                                <th>Status</th>
+                                                <th>Total ISBNs</th>
+                                                <th>Success</th>
+                                                <th>Failed</th>
+                                                <th>Success Rate</th>
+                                                <th>Imported By</th>
+                                                <th>Failed ISBNs</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var history in Model.ImportHistories)
+                                            {
+                                                var successRate = history.TotalIsbns > 0
+                                                ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1")
+                                                : "0";
+                                                var progressBarClass = history.SuccessCount == history.TotalIsbns
+                                                ? "bg-success"
+                                                : history.SuccessCount > history.FailedCount
+                                                ? "bg-warning"
+                                                : "bg-danger";
+
+                                                <tr>
+                                                    <td>
+                                                        <span data-bs-toggle="tooltip" title="@history.ImportedAt.ToString("F")">
+                                                            @history.ImportedAt.ToString("g")
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <i class="fas fa-file-csv text-success"></i>
+                                                        @history.FileName
+                                                    </td>
+                                                    <td>
+                                                        @switch (history.Status)
+                                                        {
+                                                            case LaurelLibrary.Domain.Enums.ImportStatus.Pending:
+                                                                <span class="badge bg-secondary">
+                                                                    <i class="fas fa-clock"></i> Pending
+                                                                </span>
+                                                                break;
+                                                            case LaurelLibrary.Domain.Enums.ImportStatus.Processing:
+                                                                <span class="badge bg-info">
+                                                                    <i class="fas fa-spinner fa-spin"></i> Processing
+                                                                    (@history.ProcessedChunks/@history.TotalChunks chunks)
+                                                                </span>
+                                                                @if (history.TotalChunks > 0)
+                                                                {
+                                                                    var chunkProgress = (history.ProcessedChunks * 100.0 /
+                                                                    history.TotalChunks).ToString("F0");
+                                                                    <div class="progress mt-1" style="height: 5px; min-width: 100px;">
+                                                                        <div class="progress-bar bg-info" role="progressbar"
+                                                                            style="width: @chunkProgress%" aria-valuenow="@chunkProgress"
+                                                                            aria-valuemin="0" aria-valuemax="100">
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
-                                                                </div>
+                                                                }
+                                                                break;
+                                                            case LaurelLibrary.Domain.Enums.ImportStatus.Completed:
+                                                                <span class="badge bg-success">
+                                                                    <i class="fas fa-check-circle"></i> Completed
+                                                                </span>
+                                                                @if (history.CompletedAt.HasValue)
+                                                                {
+                                                                    <small class="text-muted d-block" data-bs-toggle="tooltip"
+                                                                        title="@history.CompletedAt.Value.ToString("F")">
+                                                                        @history.CompletedAt.Value.ToString("g")
+                                                                    </small>
+                                                                }
+                                                                break;
+                                                            case LaurelLibrary.Domain.Enums.ImportStatus.Failed:
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fas fa-exclamation-circle"></i> Failed
+                                                                </span>
+                                                                break;
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-primary">@history.TotalIsbns</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check"></i> @history.SuccessCount
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-danger">
+                                                            <i class="fas fa-times"></i> @history.FailedCount
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="progress" style="min-width: 100px;">
+                                                            <div class="progress-bar @progressBarClass" role="progressbar"
+                                                                style="width: @successRate%" aria-valuenow="@successRate"
+                                                                aria-valuemin="0" aria-valuemax="100">
+                                                                @successRate%
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">-</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <i class="fas fa-user"></i> @history.CreatedBy
+                                                    </td>
+                                                    <td>
+                                                        @if (!string.IsNullOrWhiteSpace(history.FailedIsbns))
+                                                        {
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#failedModal_@history.ImportHistoryId">
+                                                                <i class="fas fa-list"></i> View
+                                                            </button>
 
-                        <div class="mt-3">
-                            <a asp-page="List" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to Books
-                            </a>
+                                                            <!-- Modal for Failed ISBNs -->
+                                                            <div class="modal fade" id="failedModal_@history.ImportHistoryId" tabindex="-1"
+                                                                aria-labelledby="failedModalLabel_@history.ImportHistoryId"
+                                                                aria-hidden="true">
+                                                                <div class="modal-dialog modal-lg">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title"
+                                                                                id="failedModalLabel_@history.ImportHistoryId">
+                                                                                Failed ISBNs - @history.FileName
+                                                                            </h5>
+                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                                aria-label="Close"></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <p class="text-muted">
+                                                                                The following ISBNs were not found or failed to import:
+                                                                            </p>
+                                                                            <div class="alert alert-warning">
+                                                                                @foreach (var isbn in
+                                                                                                                                            history.FailedIsbns.Split(',').Select(s => s.Trim()))
+                                                                                {
+                                                                                    <span class="badge bg-warning text-dark me-1">@isbn</span>
+                                                                                }
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Close</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination Controls at the bottom -->
+                                @await Component.InvokeAsync("PaginationControls", new LaurelLibrary.UI.ViewModels.PaginationViewModel
+                                {
+                                    PageNumber = Model.PageNumber,
+                                    PageSize = Model.PageSize,
+                                    TotalPages = Model.TotalPages,
+                                    TotalCount = Model.TotalCount,
+                                    Area = "Administration",
+                                    Page = "/Books/ImportHistory",
+                                    Tab = Model.CurrentTab
+                                })
+                            }
                         </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
@@ -198,11 +328,113 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         // Initialize Bootstrap tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
+
+        // Function to switch to history tab
+        function switchToHistoryTab() {
+            window.location.href = '?tab=history&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize';
+        }
+
+        // Function to switch to import tab
+        function switchToImportTab() {
+            window.location.href = '?pageNumber=@Model.PageNumber&pageSize=@Model.PageSize';
+        }
+
+        // Show file name when selected
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                var fileName = e.target.files[0].name;
+                var fileSize = (e.target.files[0].size / 1024).toFixed(2);
+                console.log('Selected file: ' + fileName + ' (' + fileSize + ' KB)');
+            }
+        });
+
+        // SignalR connection for real-time import progress
+        const importHistoryIdElement = document.getElementById('importHistoryId');
+        if (importHistoryIdElement) {
+            const importHistoryId = importHistoryIdElement.value;
+            
+            // Build SignalR connection
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/importProgress")
+                .withAutomaticReconnect()
+                .build();
+
+            // Start the connection
+            connection.start().then(function () {
+                console.log('SignalR Connected.');
+                
+                // Join the import group
+                connection.invoke("JoinImportGroup", importHistoryId).catch(function (err) {
+                    console.error("Error joining import group: " + err.toString());
+                });
+                
+            }).catch(function (err) {
+                console.error("SignalR connection error: " + err.toString());
+            });
+
+            // Listen for progress updates
+            connection.on("ImportProgress", function (importId, data) {
+                if (importId === importHistoryId) {
+                    updateProgress(data);
+                }
+            });
+
+            // Listen for completion
+            connection.on("ImportCompleted", function (importId, data) {
+                if (importId === importHistoryId) {
+                    updateProgress(data);
+                    showCompletedState();
+                }
+            });
+
+            function updateProgress(data) {
+                // Update progress bar
+                const progressPercentage = data.totalChunks > 0 
+                    ? Math.round((data.processedChunks / data.totalChunks) * 100) 
+                    : 0;
+                
+                document.getElementById('progressBar').style.width = progressPercentage + '%';
+                document.getElementById('progressBar').setAttribute('aria-valuenow', progressPercentage);
+                document.getElementById('progressText').textContent = progressPercentage + '%';
+                
+                // Update counters
+                document.getElementById('processedChunks').textContent = data.processedChunks;
+                document.getElementById('totalChunks').textContent = data.totalChunks;
+                document.getElementById('successCount').textContent = data.successCount;
+                document.getElementById('failedCount').textContent = data.failedCount;
+                
+                // Update status badge
+                const statusBadge = document.getElementById('statusBadge');
+                if (data.status === 'Completed') {
+                    statusBadge.className = 'badge bg-success ms-2';
+                    statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Completed';
+                } else if (data.status === 'Failed') {
+                    statusBadge.className = 'badge bg-danger ms-2';
+                    statusBadge.innerHTML = '<i class="fas fa-exclamation-circle"></i> Failed';
+                } else {
+                    statusBadge.className = 'badge bg-info ms-2';
+                    statusBadge.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing';
+                }
+            }
+
+            function showCompletedState() {
+                // Remove animation from progress bar
+                const progressBar = document.getElementById('progressBar');
+                progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                
+                // Show completed actions
+                document.getElementById('completedActions').style.display = 'block';
+                
+                // Update title
+                document.getElementById('statusTitle').textContent = 'Import Completed';
+            }
+        }
     </script>
 }

@@ -206,6 +206,24 @@ public class BookImportService : IBookImportService
         );
     }
 
+    public async Task<PagedResult<ImportHistory>> GetImportHistoryPagedAsync(
+        int pageNumber,
+        int pageSize
+    )
+    {
+        var currentUser = await _authenticationService.GetAppUserAsync();
+        if (currentUser?.CurrentLibraryId == null)
+        {
+            throw new InvalidOperationException("Current user or library not found.");
+        }
+
+        return await _importHistoryRepository.GetByLibraryIdPagedAsync(
+            currentUser.CurrentLibraryId.Value,
+            pageNumber,
+            pageSize
+        );
+    }
+
     public async Task<ImportHistory?> GetImportHistoryByIdAsync(Guid importHistoryId)
     {
         return await _importHistoryRepository.GetByIdAsync(importHistoryId);

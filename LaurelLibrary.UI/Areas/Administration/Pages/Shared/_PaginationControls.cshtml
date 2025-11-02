@@ -8,7 +8,11 @@
     {
         if (kv.Key == null) continue;
         // For simplicity, take the first value when multiple present
-        query[kv.Key] = kv.Value.FirstOrDefault();
+        var value = kv.Value.FirstOrDefault();
+        if (value != null)
+        {
+            query[kv.Key] = value;
+        }
     }
 
     // Helper to build a link for a given page number and page size
@@ -17,6 +21,13 @@
         var q = new Dictionary<string, string>(query, StringComparer.OrdinalIgnoreCase);
         q["pageNumber"] = pageNumber.ToString();
         q["pageSize"] = pageSize.ToString();
+        
+        // Add tab parameter if specified
+        if (!string.IsNullOrEmpty(Model.Tab))
+        {
+            q["tab"] = Model.Tab;
+        }
+        
         // Preserve selected author/category filters if present in the current request
         var selAuthor = Context.Request.Query["SelectedAuthorId"].FirstOrDefault();
         if (!string.IsNullOrEmpty(selAuthor)) q["SelectedAuthorId"] = selAuthor;
@@ -32,6 +43,10 @@
         <form method="get" asp-area="@Model.Area" asp-page="@Model.Page" class="d-inline-block me-3"
             aria-label="Page size selector">
             <input type="hidden" name="pageNumber" value="@Model.PageNumber" />
+            @if (!string.IsNullOrEmpty(Model.Tab))
+            {
+                <input type="hidden" name="tab" value="@Model.Tab" />
+            }
             @* Preserve other query string parameters *@
             @{
                 foreach (var kv in Context.Request.Query)
