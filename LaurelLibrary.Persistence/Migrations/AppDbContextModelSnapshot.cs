@@ -530,6 +530,80 @@ namespace LaurelLibrary.Persistence.Migrations
                     b.ToTable("Readers");
                 });
 
+            modelBuilder.Entity("LaurelLibrary.Domain.Entities.Subscription", b =>
+                {
+                    b.Property<Guid>("SubscriptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BillingInterval")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LibraryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("NextBillingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StripeCustomerId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripePriceId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("StripeSubscriptionId")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("TrialEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.HasKey("SubscriptionId");
+
+                    b.HasIndex("LibraryId")
+                        .IsUnique();
+
+                    b.ToTable("Subscriptions");
+                });
+
             modelBuilder.Entity("LibraryReader", b =>
                 {
                     b.Property<Guid>("LibrariesLibraryId")
@@ -799,6 +873,17 @@ namespace LaurelLibrary.Persistence.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("LaurelLibrary.Domain.Entities.Subscription", b =>
+                {
+                    b.HasOne("LaurelLibrary.Domain.Entities.Library", "Library")
+                        .WithOne("Subscription")
+                        .HasForeignKey("LaurelLibrary.Domain.Entities.Subscription", "LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Library");
+                });
+
             modelBuilder.Entity("LibraryReader", b =>
                 {
                     b.HasOne("LaurelLibrary.Domain.Entities.Library", null)
@@ -875,6 +960,8 @@ namespace LaurelLibrary.Persistence.Migrations
                     b.Navigation("Books");
 
                     b.Navigation("Kiosks");
+
+                    b.Navigation("Subscription");
                 });
 #pragma warning restore 612, 618
         }

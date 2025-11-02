@@ -9,17 +9,17 @@ namespace LaurelLibrary.UI.Pages
     public class ReturnModel : PageModel
     {
         private readonly IReadersService _readersService;
-        private readonly IBooksService _booksService;
+        private readonly IReaderKioskService _readerKioskService;
         private readonly IBooksRepository _booksRepository;
 
         public ReturnModel(
             IReadersService readersService,
-            IBooksService booksService,
+            IReaderKioskService readerKioskService,
             IBooksRepository booksRepository
         )
         {
             _readersService = readersService;
-            _booksService = booksService;
+            _readerKioskService = readerKioskService;
             _booksRepository = booksRepository;
         }
 
@@ -47,9 +47,6 @@ namespace LaurelLibrary.UI.Pages
 
         [TempData]
         public string? ErrorMessage { get; set; }
-
-        [TempData]
-        public bool ShowReturnSuccess { get; set; }
 
         public void OnGet()
         {
@@ -343,17 +340,30 @@ namespace LaurelLibrary.UI.Pages
             }
 
             var bookInstanceIds = ScannedBooks.Select(b => b.BookInstanceId).ToList();
-            var success = await _booksService.ReturnBooksAsync(bookInstanceIds, LibraryId.Value);
+            var success = await _readerKioskService.ReturnBooksAsync(
+                bookInstanceIds,
+                LibraryId.Value
+            );
 
             if (success)
             {
                 Message = $"Successfully returned {ScannedBooks.Count} book(s).";
-                ShowReturnSuccess = true;
                 // Clear the return session
                 TempData.Remove("CurrentReader");
                 TempData.Remove("ScannedBooks");
                 ScannedBooks.Clear();
                 CurrentReader = null;
+
+                // Redirect to Index page after successful return
+                return RedirectToPage(
+                    "/Index",
+                    new
+                    {
+                        libraryId = LibraryId,
+                        kioskId = KioskId,
+                        browserFingerprint = BrowserFingerprint,
+                    }
+                );
             }
             else
             {

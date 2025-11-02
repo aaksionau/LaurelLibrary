@@ -22,42 +22,45 @@ public class ImportStatusController : ControllerBase
     [HttpGet("{importHistoryId}")]
     public async Task<IActionResult> GetStatus(Guid importHistoryId)
     {
-        try
+        // Validate the input parameter
+        if (importHistoryId == Guid.Empty)
         {
-            var importHistory = await _importHistoryRepository.GetByIdAsync(importHistoryId);
+            throw new ArgumentException(
+                "Import history ID cannot be empty",
+                nameof(importHistoryId)
+            );
+        }
 
-            if (importHistory == null)
+        var importHistory = await _importHistoryRepository.GetByIdAsync(importHistoryId);
+
+        if (importHistory == null)
+        {
+            return NotFound(new { message = "Import history not found" });
+        }
+
+        // Validate business logic - example of InvalidOperationException
+        if (importHistory.TotalChunks < 0 || importHistory.ProcessedChunks < 0)
+        {
+            throw new InvalidOperationException(
+                "Import history data is in an invalid state with negative chunk counts"
+            );
+        }
+
+        return Ok(
+            new
             {
-                return NotFound(new { message = "Import history not found" });
+                importHistoryId = importHistory.ImportHistoryId,
+                status = importHistory.Status.ToString(),
+                processedChunks = importHistory.ProcessedChunks,
+                totalChunks = importHistory.TotalChunks,
+                successCount = importHistory.SuccessCount,
+                failedCount = importHistory.FailedCount,
+                totalIsbns = importHistory.TotalIsbns,
+                progress = importHistory.TotalChunks > 0
+                    ? (int)((double)importHistory.ProcessedChunks / importHistory.TotalChunks * 100)
+                    : 0,
+                completedAt = importHistory.CompletedAt,
             }
-
-            return Ok(
-                new
-                {
-                    importHistoryId = importHistory.ImportHistoryId,
-                    status = importHistory.Status.ToString(),
-                    processedChunks = importHistory.ProcessedChunks,
-                    totalChunks = importHistory.TotalChunks,
-                    successCount = importHistory.SuccessCount,
-                    failedCount = importHistory.FailedCount,
-                    totalIsbns = importHistory.TotalIsbns,
-                    progress = importHistory.TotalChunks > 0
-                        ? (int)(
-                            (double)importHistory.ProcessedChunks / importHistory.TotalChunks * 100
-                        )
-                        : 0,
-                    completedAt = importHistory.CompletedAt,
-                }
-            );
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error fetching import status for {ImportHistoryId}",
-                importHistoryId
-            );
-            return StatusCode(500, new { message = "Error fetching import status" });
-        }
+        );
     }
 }

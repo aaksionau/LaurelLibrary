@@ -13,4 +13,6 @@ public interface ILibrariesRepository
     Task RemoveAsync(Guid libraryId);
     Task AddAdministratorAsync(Guid libraryId, string userId);
     Task RemoveAdministratorAsync(Guid libraryId, string userId);
+    Task<List<Library>> GetLibrariesForUserAsync(string userId);
+    Task<int> GetLibraryCountByUserIdAsync(string userId);
 }

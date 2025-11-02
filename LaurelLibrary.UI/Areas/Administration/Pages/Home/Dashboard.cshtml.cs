@@ -9,17 +9,17 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Home
     [Authorize]
     public class DashboardModel : PageModel
     {
-        private readonly IBooksService booksService;
+        private readonly IReaderKioskService readerKioskService;
         private readonly IUserService userService;
         private readonly IAuthenticationService authenticationService;
 
         public DashboardModel(
-            IBooksService booksService,
+            IReaderKioskService readerKioskService,
             IUserService userService,
             IAuthenticationService authenticationService
         )
         {
-            this.booksService = booksService;
+            this.readerKioskService = readerKioskService;
             this.userService = userService;
             this.authenticationService = authenticationService;
         }
@@ -35,7 +35,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Home
                 return;
             }
 
-            BorrowedBooks = await booksService.GetBorrowedBooksByLibraryAsync(
+            BorrowedBooks = await readerKioskService.GetBorrowedBooksByLibraryAsync(
                 user.CurrentLibraryId.Value
             );
         }

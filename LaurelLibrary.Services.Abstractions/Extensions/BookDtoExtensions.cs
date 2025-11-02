@@ -48,4 +48,52 @@ public static class BookDtoExtensions
                 isbnBook.Subjects != null ? string.Join(", ", isbnBook.Subjects) : string.Empty,
         };
     }
+
+    /// <summary>
+    /// Converts a Book entity to a LaurelBookDto.
+    /// </summary>
+    public static LaurelBookDto ToLaurelBookDto(this Book entity)
+    {
+        return new LaurelBookDto
+        {
+            BookId = entity.BookId,
+            Title = entity.Title,
+            Publisher = entity.Publisher,
+            Synopsis = entity.Synopsis,
+            Language = entity.Language,
+            Image = entity.Image,
+            ImageOriginal = entity.ImageOriginal,
+            Edition = entity.Edition,
+            Pages = entity.Pages,
+            DatePublished = entity.DatePublished,
+            Isbn = entity.Isbn,
+            Binding = entity.Binding,
+            Authors = string.Join(", ", entity.Authors.Select(a => a.FullName)),
+            Categories = string.Join(", ", entity.Categories.Select(c => c.Name)),
+        };
+    }
+
+    /// <summary>
+    /// Converts a LaurelBookDto to a Book entity.
+    /// </summary>
+    public static Book ToBookEntity(this LaurelBookDto bookDto, Guid libraryId)
+    {
+        return new Book
+        {
+            BookId = bookDto.BookId == Guid.Empty ? Guid.NewGuid() : bookDto.BookId,
+            LibraryId = libraryId,
+            Library = null!,
+            Title = bookDto.Title ?? string.Empty,
+            Publisher = bookDto.Publisher,
+            Synopsis = bookDto.Synopsis,
+            Language = bookDto.Language,
+            Image = bookDto.Image,
+            ImageOriginal = bookDto.ImageOriginal,
+            Edition = bookDto.Edition,
+            Pages = bookDto.Pages,
+            DatePublished = bookDto.DatePublished,
+            Isbn = bookDto.Isbn,
+            Binding = bookDto.Binding,
+        };
+    }
 }

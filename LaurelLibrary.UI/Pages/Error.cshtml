@@ -4,23 +4,113 @@
     ViewData["Title"] = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        @(Model.StatusCode == 400 ? "Bad Request" : 
+                          Model.StatusCode == 401 ? "Unauthorized" : 
+                          Model.StatusCode == 404 ? "Not Found" : "Error")
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-danger mb-3">@Model.ErrorMessage</h4>
+                    
+                    @if (Model.ShowErrorDetails && !string.IsNullOrEmpty(Model.ErrorDetails))
+                    {
+                        <div class="alert alert-warning">
+                            <h5><i class="fas fa-info-circle me-2"></i>Error Details:</h5>
+                            <p class="mb-0">@Model.ErrorDetails</p>
+                        </div>
+                    }
+                    else if (Model.StatusCode >= 400 && Model.StatusCode < 500)
+                    {
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-lightbulb me-2"></i>What can you do?</h5>
+                            <ul class="mb-0">
+                                @if (Model.StatusCode == 400)
+                                {
+                                    <li>Check that all required fields are filled correctly</li>
+                                    <li>Verify that the data you entered is valid</li>
+                                    <li>Try refreshing the page and submitting again</li>
+                                }
+                                else if (Model.StatusCode == 401)
+                                {
+                                    <li>Please log in to access this resource</li>
+                                    <li>Check that you have the necessary permissions</li>
+                                }
+                                else if (Model.StatusCode == 404)
+                                {
+                                    <li>Check the URL for any typos</li>
+                                    <li>Use the navigation menu to find what you're looking for</li>
+                                    <li>The resource you're looking for might have been moved or deleted</li>
+                                }
+                                else
+                                {
+                                    <li>Go back to the previous page</li>
+                                    <li>Try again in a few minutes</li>
+                                    <li>Contact support if the problem persists</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-secondary">
+                            <h5><i class="fas fa-tools me-2"></i>What happened?</h5>
+                            <p class="mb-2">An unexpected error occurred while processing your request. Our team has been notified and is working to resolve the issue.</p>
+                            <h6>You can try:</h6>
+                            <ul class="mb-0">
+                                <li>Going back to the previous page</li>
+                                <li>Refreshing this page</li>
+                                <li>Trying again in a few minutes</li>
+                                <li>Contacting support if the problem persists</li>
+                            </ul>
+                        </div>
+                    }
 
-@if (Model.ShowRequestId)
+                    @if (Model.ShowRequestId)
+                    {
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                            </small>
+                        </div>
+                    }
+
+                    <div class="mt-4">
+                        <a href="javascript:history.back()" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left me-1"></i> Go Back
+                        </a>
+                        <a href="~/" class="btn btn-primary">
+                            <i class="fas fa-home me-1"></i> Home Page
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.ShowErrorDetails)
 {
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-code me-2"></i>Development Mode</h5>
+                    <p class="mb-2">
+                        You're seeing detailed error information because the application is running in <strong>Development</strong> mode.
+                    </p>
+                    <p class="mb-0">
+                        <strong>Note:</strong> Detailed error information should not be enabled in production environments
+                        as it can reveal sensitive information to end users.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 }
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to the <strong>Development</strong> environment displays detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>

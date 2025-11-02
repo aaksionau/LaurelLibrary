@@ -40,4 +40,6 @@ public class Library : Audit
     public virtual Collection<AppUser> Administrators { get; set; } = new Collection<AppUser>();
 
     public virtual Collection<Kiosk> Kiosks { get; set; } = new Collection<Kiosk>();
+
+    public virtual Subscription? Subscription { get; set; }
 }

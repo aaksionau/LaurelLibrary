@@ -1,5 +1,6 @@
 using System;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Domain.Exceptions;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
@@ -15,6 +16,7 @@ public class ReadersService : IReadersService
     private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IBarcodeService _barcodeService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ILogger<ReadersService> _logger;
     private readonly string? _wwwrootPath;
 
@@ -25,6 +27,7 @@ public class ReadersService : IReadersService
         IUserService userService,
         IAuthenticationService authenticationService,
         IBarcodeService barcodeService,
+        ISubscriptionService subscriptionService,
         ILogger<ReadersService> logger
     )
     {
@@ -34,6 +37,7 @@ public class ReadersService : IReadersService
         _userService = userService;
         _authenticationService = authenticationService;
         _barcodeService = barcodeService;
+        _subscriptionService = subscriptionService;
         _logger = logger;
         _wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "reader-eans");
     }
@@ -132,14 +136,51 @@ public class ReadersService : IReadersService
         }
 
         var displayName = await GetUserFullNameAsync();
+        var currentLibrary = await _librariesRepository.GetByIdAsync(
+            currentUser.CurrentLibraryId.Value
+        );
+
+        // Determine operation type early
+        bool isCreateOperation = readerDto.ReaderId == 0;
+
+        if (isCreateOperation)
+        {
+            return await CreateReaderAsync(readerDto, currentUser, currentLibrary, displayName);
+        }
+        else
+        {
+            return await UpdateReaderAsync(readerDto, currentUser, currentLibrary, displayName);
+        }
+    }
+
+    private async Task<bool> CreateReaderAsync(
+        ReaderDto readerDto,
+        AppUser currentUser,
+        Library? currentLibrary,
+        string displayName
+    )
+    {
+        // Check subscription limits before creating new reader
+        var canAddReader = await _subscriptionService.CanAddReaderAsync(
+            currentUser.CurrentLibraryId!.Value
+        );
+        if (!canAddReader)
+        {
+            var usage = await _subscriptionService.GetSubscriptionUsageAsync(
+                currentUser.CurrentLibraryId.Value
+            );
+            throw new SubscriptionUpgradeRequiredException(
+                $"Cannot add reader. Your current subscription plan allows a maximum of {usage.MaxReaders} readers, and you currently have {usage.CurrentReaders} readers.",
+                "Additional Readers",
+                "current",
+                "higher tier"
+            );
+        }
 
         // Map DTO to entity
         var entity = await MapDtoToEntityAsync(readerDto);
 
         // Add current user's library to the reader's libraries
-        var currentLibrary = await _librariesRepository.GetByIdAsync(
-            currentUser.CurrentLibraryId.Value
-        );
         if (
             currentLibrary != null
             && !entity.Libraries.Any(l => l.LibraryId == currentLibrary.LibraryId)
@@ -148,69 +189,84 @@ public class ReadersService : IReadersService
             entity.Libraries.Add(currentLibrary);
         }
 
-        // Set audit fields
+        // Set audit fields for creation
+        entity.CreatedBy = displayName;
+        entity.CreatedAt = DateTimeOffset.UtcNow;
         entity.UpdatedBy = displayName;
         entity.UpdatedAt = DateTimeOffset.UtcNow;
 
-        // Check if this is a create or update operation
-        if (readerDto.ReaderId == 0)
+        // First add the reader to get the ReaderId
+        await _readersRepository.AddReaderAsync(entity);
+        _logger.LogInformation(
+            "Added reader {ReaderId} ({FirstName} {LastName}) with {LibraryCount} libraries",
+            entity.ReaderId,
+            entity.FirstName,
+            entity.LastName,
+            entity.Libraries.Count
+        );
+
+        // Generate EAN after adding (so we have ReaderId)
+        entity.Ean = _barcodeService.GenerateEan13(entity.ReaderId);
+        _logger.LogInformation(
+            "Generated EAN {Ean} for reader {ReaderId}",
+            entity.Ean,
+            entity.ReaderId
+        );
+
+        // Generate and save barcode image to Azure Blob Storage
+        if (!string.IsNullOrEmpty(entity.Ean) && currentLibrary != null)
         {
-            // Create new reader
-            entity.CreatedBy = displayName;
-            entity.CreatedAt = DateTimeOffset.UtcNow;
-
-            // First add the reader to get the ReaderId
-            await _readersRepository.AddReaderAsync(entity);
-            _logger.LogInformation(
-                "Added reader {ReaderId} ({FirstName} {LastName}) with {LibraryCount} libraries",
-                entity.ReaderId,
-                entity.FirstName,
-                entity.LastName,
-                entity.Libraries.Count
-            );
-
-            // Generate EAN after adding (so we have ReaderId)
-            entity.Ean = _barcodeService.GenerateEan13(entity.ReaderId);
-            _logger.LogInformation(
-                "Generated EAN {Ean} for reader {ReaderId}",
+            var barcodeUrl = await GenerateAndUploadBarcodeAsync(
                 entity.Ean,
+                currentLibrary.LibraryId,
                 entity.ReaderId
             );
 
-            // Generate and save barcode image to Azure Blob Storage
-            if (!string.IsNullOrEmpty(entity.Ean) && currentLibrary != null)
+            if (barcodeUrl != null)
             {
-                var barcodeUrl = await GenerateAndUploadBarcodeAsync(
-                    entity.Ean,
-                    currentLibrary.LibraryId,
-                    entity.ReaderId
-                );
-
-                if (barcodeUrl != null)
-                {
-                    // Update reader with barcode URL
-                    await _readersRepository.UpdateBarcodeImageUrlAsync(
-                        entity.ReaderId,
-                        barcodeUrl
-                    );
-                }
-
-                // Update reader with EAN using UpdateEanAsync
-                await _readersRepository.UpdateEanAsync(entity.ReaderId, entity.Ean);
+                // Update reader with barcode URL
+                await _readersRepository.UpdateBarcodeImageUrlAsync(entity.ReaderId, barcodeUrl);
             }
 
-            _logger.LogInformation(
-                "Created reader {ReaderId} with EAN {Ean}",
-                entity.ReaderId,
-                entity.Ean
-            );
-            return false; // Created
+            // Update reader with EAN using UpdateEanAsync
+            await _readersRepository.UpdateEanAsync(entity.ReaderId, entity.Ean);
         }
+
+        _logger.LogInformation(
+            "Created reader {ReaderId} with EAN {Ean}",
+            entity.ReaderId,
+            entity.Ean
+        );
+        return false; // Created
+    }
+
+    private async Task<bool> UpdateReaderAsync(
+        ReaderDto readerDto,
+        AppUser currentUser,
+        Library? currentLibrary,
+        string displayName
+    )
+    {
+        // Map DTO to entity
+        var entity = await MapDtoToEntityAsync(readerDto);
+
+        // Add current user's library to the reader's libraries
+        if (
+            currentLibrary != null
+            && !entity.Libraries.Any(l => l.LibraryId == currentLibrary.LibraryId)
+        )
+        {
+            entity.Libraries.Add(currentLibrary);
+        }
+
+        // Set audit fields for update
+        entity.UpdatedBy = displayName;
+        entity.UpdatedAt = DateTimeOffset.UtcNow;
 
         // Update existing reader
         var updated = await _readersRepository.UpdateReaderAsync(
             entity,
-            currentUser.CurrentLibraryId.Value
+            currentUser.CurrentLibraryId!.Value
         );
         if (updated == null)
         {

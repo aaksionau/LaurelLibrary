@@ -32,10 +32,16 @@ builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 
 // Register services
 builder.Services.AddScoped<IBooksService, BooksService>();
+builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {
     client.BaseAddress = new Uri(

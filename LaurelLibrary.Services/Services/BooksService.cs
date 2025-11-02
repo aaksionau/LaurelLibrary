@@ -1,7 +1,6 @@
 using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
-using LaurelLibrary.EmailSenderServices.Dtos;
-using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Domain.Exceptions;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
@@ -15,33 +14,27 @@ public class BooksService : IBooksService
     private readonly IBooksRepository _booksRepository;
     private readonly IAuthorsRepository _authorsRepository;
     private readonly ICategoriesRepository _categoriesRepository;
-    private readonly ILibrariesRepository _librariesRepository;
-    private readonly IReadersRepository _readersRepository;
     private readonly IIsbnService _isbnService;
-    private readonly IEmailTemplateService _emailTemplateService;
     private readonly IAzureQueueService _queueService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
         IBooksRepository booksRepository,
         IAuthorsRepository authorsRepository,
         ICategoriesRepository categoriesRepository,
-        ILibrariesRepository librariesRepository,
-        IReadersRepository readersRepository,
         IIsbnService isbnService,
-        IEmailTemplateService emailTemplateService,
         IAzureQueueService queueService,
+        ISubscriptionService subscriptionService,
         ILogger<BooksService> logger
     )
     {
         _booksRepository = booksRepository;
         _authorsRepository = authorsRepository;
         _categoriesRepository = categoriesRepository;
-        _librariesRepository = librariesRepository;
-        _readersRepository = readersRepository;
         _isbnService = isbnService;
-        _emailTemplateService = emailTemplateService;
         _queueService = queueService;
+        _subscriptionService = subscriptionService;
         _logger = logger;
     }
 
@@ -53,31 +46,10 @@ public class BooksService : IBooksService
             return null;
         }
 
-        // Map entity to DTO
-        LaurelBookDto dto = MapBookToDto(entity);
+        // Map entity to DTO using extension method
+        LaurelBookDto dto = entity.ToLaurelBookDto();
 
         return dto;
-    }
-
-    private static LaurelBookDto MapBookToDto(Book entity)
-    {
-        return new LaurelBookDto
-        {
-            BookId = entity.BookId,
-            Title = entity.Title,
-            Publisher = entity.Publisher,
-            Synopsis = entity.Synopsis,
-            Language = entity.Language,
-            Image = entity.Image,
-            ImageOriginal = entity.ImageOriginal,
-            Edition = entity.Edition,
-            Pages = entity.Pages,
-            DatePublished = entity.DatePublished,
-            Isbn = entity.Isbn,
-            Binding = entity.Binding,
-            Authors = string.Join(", ", entity.Authors.Select(a => a.FullName)),
-            Categories = string.Join(", ", entity.Categories.Select(c => c.Name)),
-        };
     }
 
     public async Task<bool> CreateOrUpdateBookAsync(
@@ -102,8 +74,11 @@ public class BooksService : IBooksService
                 nameof(currentUserFullName)
             );
 
+        // Determine operation type early
+        bool isCreateOperation = bookDto.BookId == Guid.Empty || bookDto.BookId == default;
+
         // Map DTO to entity
-        var entity = MapDtoToEntity(bookDto, libraryId);
+        var entity = bookDto.ToBookEntity(libraryId);
 
         // Set creator/updater from current user
         entity.CreatedBy = currentUserFullName;
@@ -116,36 +91,22 @@ public class BooksService : IBooksService
         // Map categories (create or attach existing)
         await AddOrAttachCategoriesAsync(entity, bookDto.Categories, libraryId);
 
-        // Check if this is a create or update operation
-        if (await CreateNewBookAsync(bookDto, libraryId, entity))
+        if (isCreateOperation)
         {
-            return true; // Book was created or instance was added
+            return await HandleBookCreationAsync(bookDto, libraryId, entity);
         }
-
-        var updated = await _booksRepository.UpdateBookAsync(entity);
-        if (updated == null)
+        else
         {
-            // If update failed because not found, create instead
-            await _booksRepository.AddBookAsync(entity);
-            _logger.LogWarning("Book {BookId} not found for update; created new.", entity.BookId);
-            return false;
+            return await HandleBookUpdateAsync(entity, libraryId);
         }
-
-        _logger.LogInformation(
-            "Updated book {BookId} in library {LibraryId}",
-            updated.BookId,
-            libraryId
-        );
-        return true;
     }
 
-    private async Task<bool> CreateNewBookAsync(LaurelBookDto bookDto, Guid libraryId, Book entity)
+    private async Task<bool> HandleBookCreationAsync(
+        LaurelBookDto bookDto,
+        Guid libraryId,
+        Book entity
+    )
     {
-        if (bookDto.BookId != Guid.Empty && bookDto.BookId != default)
-        {
-            return false; // Continue with update logic
-        }
-
         // If ISBN provided and a book with same ISBN exists in this library, add a new BookInstance
         if (!string.IsNullOrWhiteSpace(bookDto.Isbn))
         {
@@ -172,6 +133,22 @@ public class BooksService : IBooksService
             }
         }
 
+        // Check subscription limits before creating a new book
+        var canAddBook = await _subscriptionService.CanAddBookAsync(libraryId);
+        if (!canAddBook)
+        {
+            _logger.LogWarning(
+                "Cannot create new book - subscription limit reached for library {LibraryId}",
+                libraryId
+            );
+            throw new SubscriptionUpgradeRequiredException(
+                "Book creation limit reached for your subscription plan.",
+                "Additional Books",
+                "current",
+                "higher tier"
+            );
+        }
+
         // Create a default BookInstance for newly created books
         entity.BookInstances.Add(
             new BookInstance
@@ -193,10 +170,43 @@ public class BooksService : IBooksService
         return true;
     }
 
+    private async Task<bool> HandleBookUpdateAsync(Book entity, Guid libraryId)
+    {
+        var updated = await _booksRepository.UpdateBookAsync(entity);
+        if (updated == null)
+        {
+            // If update failed because not found, create instead
+            await _booksRepository.AddBookAsync(entity);
+            _logger.LogWarning("Book {BookId} not found for update; created new.", entity.BookId);
+            return false;
+        }
+
+        _logger.LogInformation(
+            "Updated book {BookId} in library {LibraryId}",
+            updated.BookId,
+            libraryId
+        );
+        return true;
+    }
+
     private async Task DetermineAppropriateAgeAsync(Book entity)
     {
         if (string.IsNullOrWhiteSpace(entity.Synopsis))
         {
+            return;
+        }
+
+        // Check if age classification is enabled for this library
+        var isAgeClassificationEnabled = await _subscriptionService.IsAgeClassificationEnabledAsync(
+            entity.LibraryId
+        );
+        if (!isAgeClassificationEnabled)
+        {
+            _logger.LogInformation(
+                "Age classification skipped for book {BookId} - feature not enabled for library {LibraryId}",
+                entity.BookId,
+                entity.LibraryId
+            );
             return;
         }
 
@@ -281,181 +291,6 @@ public class BooksService : IBooksService
         return book;
     }
 
-    private Book MapDtoToEntity(LaurelBookDto bookDto, Guid libraryId)
-    {
-        return new Book
-        {
-            BookId = bookDto.BookId == Guid.Empty ? Guid.NewGuid() : bookDto.BookId,
-            LibraryId = libraryId,
-            Library = null!,
-            Title = bookDto.Title ?? string.Empty,
-            Publisher = bookDto.Publisher,
-            Synopsis = bookDto.Synopsis,
-            Language = bookDto.Language,
-            Image = bookDto.Image,
-            ImageOriginal = bookDto.ImageOriginal,
-            Edition = bookDto.Edition,
-            Pages = bookDto.Pages,
-            DatePublished = bookDto.DatePublished,
-            Isbn = bookDto.Isbn,
-            Binding = bookDto.Binding,
-        };
-    }
-
-    public async Task<bool> CheckoutBooksAsync(
-        int readerId,
-        List<int> bookInstanceIds,
-        Guid libraryId
-    )
-    {
-        if (bookInstanceIds == null || bookInstanceIds.Count == 0)
-            return false;
-
-        // Get the library to determine checkout duration
-        var library = await _librariesRepository.GetByIdAsync(libraryId);
-        if (library == null)
-        {
-            _logger.LogWarning("Cannot checkout books: library {LibraryId} not found", libraryId);
-            return false;
-        }
-
-        // Get the reader information
-        var reader = await _readersRepository.GetByIdAsync(readerId, libraryId);
-        if (reader == null)
-        {
-            _logger.LogWarning("Cannot checkout books: reader {ReaderId} not found", readerId);
-            return false;
-        }
-
-        var checkoutDate = DateTimeOffset.UtcNow;
-        var dueDate = checkoutDate.AddDays(library.CheckoutDurationDays);
-        var checkedOutBooks = new List<CheckedOutBookDto>();
-
-        foreach (var instanceId in bookInstanceIds)
-        {
-            var bookInstance = await _booksRepository.GetBookInstanceByIdAsync(instanceId);
-            if (
-                bookInstance == null
-                || bookInstance.Status != Domain.Enums.BookInstanceStatus.Available
-            )
-                continue;
-
-            bookInstance.ReaderId = readerId;
-            bookInstance.CheckedOutDate = checkoutDate;
-            bookInstance.DueDate = dueDate;
-            bookInstance.Status = Domain.Enums.BookInstanceStatus.Borrowed;
-
-            await _booksRepository.UpdateBookInstanceAsync(bookInstance);
-
-            // Collect book information for the email
-            checkedOutBooks.Add(
-                new CheckedOutBookDto
-                {
-                    Title = bookInstance.Book.Title,
-                    Authors = string.Join(", ", bookInstance.Book.Authors.Select(a => a.FullName)),
-                    Isbn = bookInstance.Book.Isbn,
-                    Publisher = bookInstance.Book.Publisher,
-                }
-            );
-        }
-
-        _logger.LogInformation(
-            "Checked out {Count} book instances to reader {ReaderId} with due date {DueDate} ({Days} days)",
-            bookInstanceIds.Count,
-            readerId,
-            dueDate,
-            library.CheckoutDurationDays
-        );
-
-        // Send checkout confirmation email to the reader
-        if (!string.IsNullOrEmpty(reader.Email) && checkedOutBooks.Any())
-        {
-            try
-            {
-                var emailModel = new BookCheckoutEmailDto
-                {
-                    ReaderName = $"{reader.FirstName} {reader.LastName}",
-                    LibraryName = library.Name,
-                    LibraryAddress = library.Address,
-                    LibraryDescription = library.Description,
-                    CheckedOutDate = checkoutDate.DateTime,
-                    DueDate = dueDate.DateTime,
-                    Books = checkedOutBooks,
-                };
-
-                // Render the email template
-                var emailBody = await _emailTemplateService.RenderTemplateAsync(
-                    "BookCheckoutEmail",
-                    emailModel
-                );
-
-                var emailMessage = new LaurelLibrary.EmailSenderServices.Dtos.EmailMessageDto
-                {
-                    To = reader.Email,
-                    Subject = $"Books Checked Out from {library.Name}",
-                    Body = emailBody,
-                    Timestamp = DateTime.UtcNow,
-                };
-
-                // Serialize to JSON for queue message
-                var messageJson = JsonSerializer.Serialize(
-                    emailMessage,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
-
-                await _queueService.SendMessageAsync(messageJson, "emails");
-
-                _logger.LogInformation(
-                    "Checkout confirmation email sent to reader {ReaderId} at {Email}",
-                    readerId,
-                    reader.Email
-                );
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(
-                    ex,
-                    "Failed to send checkout confirmation email to reader {ReaderId}",
-                    readerId
-                );
-                // Don't fail the checkout if email fails
-            }
-        }
-
-        return true;
-    }
-
-    public async Task<bool> ReturnBooksAsync(List<int> bookInstanceIds, Guid libraryId)
-    {
-        if (bookInstanceIds == null || bookInstanceIds.Count == 0)
-            return false;
-
-        foreach (var instanceId in bookInstanceIds)
-        {
-            var bookInstance = await _booksRepository.GetBookInstanceByIdAsync(instanceId);
-            if (
-                bookInstance == null
-                || bookInstance.Status != Domain.Enums.BookInstanceStatus.Borrowed
-            )
-                continue;
-
-            bookInstance.ReaderId = null;
-            bookInstance.CheckedOutDate = null;
-            bookInstance.DueDate = null;
-            bookInstance.Status = Domain.Enums.BookInstanceStatus.Available;
-
-            await _booksRepository.UpdateBookInstanceAsync(bookInstance);
-        }
-
-        _logger.LogInformation(
-            "Returned {Count} book instances in library {LibraryId}",
-            bookInstanceIds.Count,
-            libraryId
-        );
-
-        return true;
-    }
-
     public async Task<bool> ChangeBookInstanceStatusAsync(
         int bookInstanceId,
         Domain.Enums.BookInstanceStatus newStatus,
@@ -506,10 +341,5 @@ public class BooksService : IBooksService
         );
 
         return true;
-    }
-
-    public async Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId)
-    {
-        return await _booksRepository.GetBorrowedBooksByLibraryAsync(libraryId);
     }
 }

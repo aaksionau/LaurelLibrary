@@ -148,4 +148,18 @@ public class LibrariesRepository : ILibrariesRepository
             );
         }
     }
+
+    public async Task<List<Library>> GetLibrariesForUserAsync(string userId)
+    {
+        return await _dbContext
+            .Libraries.Where(l => l.Administrators.Any(a => a.Id == userId))
+            .ToListAsync();
+    }
+
+    public async Task<int> GetLibraryCountByUserIdAsync(string userId)
+    {
+        return await _dbContext
+            .Libraries.Where(l => l.Administrators.Any(a => a.Id == userId))
+            .CountAsync();
+    }
 }

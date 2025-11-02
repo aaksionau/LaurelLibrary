@@ -210,4 +210,11 @@ public class ReadersRepository : IReadersRepository
 
         return true;
     }
+
+    public async Task<int> GetReaderCountByLibraryIdAsync(Guid libraryId)
+    {
+        return await _dbContext
+            .Readers.Where(r => r.Libraries.Any(l => l.LibraryId == libraryId))
+            .CountAsync();
+    }
 }

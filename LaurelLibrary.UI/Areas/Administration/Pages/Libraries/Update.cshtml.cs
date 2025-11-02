@@ -1,3 +1,4 @@
+using LaurelLibrary.Domain.Exceptions;
 using LaurelLibrary.Persistence.Repositories;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
@@ -12,18 +13,21 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
     public class UpdateModel : PageModel
     {
         private readonly ILibrariesRepository librariesRepository;
+        private readonly ILibrariesService librariesService;
         private readonly IAuthenticationService userService;
         private readonly IBlobStorageService blobStorageService;
         private readonly IConfiguration configuration;
 
         public UpdateModel(
             ILibrariesRepository librariesRepository,
+            ILibrariesService librariesService,
             IAuthenticationService userService,
             IBlobStorageService blobStorageService,
             IConfiguration configuration
         )
         {
             this.librariesRepository = librariesRepository;
+            this.librariesService = librariesService;
             this.userService = userService;
             this.blobStorageService = blobStorageService;
             this.configuration = configuration;
@@ -86,12 +90,22 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
 
             if (string.IsNullOrEmpty(this.Library.LibraryId))
             {
-                var entity = this.Library.ToEntity(Guid.NewGuid());
-                var currentUser = await this.userService.GetAppUserAsync();
-                entity.Administrators.Add(currentUser);
-                entity.CreatedBy = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
-                entity.UpdatedBy = entity.CreatedBy;
-                await this.librariesRepository.CreateAsync(entity);
+                try
+                {
+                    var currentUser = await this.userService.GetAppUserAsync();
+                    await this.librariesService.CreateLibraryAsync(this.Library, currentUser.Id);
+                }
+                catch (SubscriptionUpgradeRequiredException ex)
+                {
+                    // Redirect to subscription page for upgrade
+                    return Redirect($"{ex.RedirectUrl}?message={Uri.EscapeDataString(ex.Message)}");
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("subscription"))
+                {
+                    // Handle subscription limit exceeded (fallback for legacy exceptions)
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                    return Page();
+                }
             }
             else
             {

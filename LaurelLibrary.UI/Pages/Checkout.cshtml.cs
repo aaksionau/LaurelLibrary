@@ -9,17 +9,17 @@ namespace LaurelLibrary.UI.Pages
     public class CheckoutModel : PageModel
     {
         private readonly IReadersService _readersService;
-        private readonly IBooksService _booksService;
+        private readonly IReaderKioskService _readerKioskService;
         private readonly IBooksRepository _booksRepository;
 
         public CheckoutModel(
             IReadersService readersService,
-            IBooksService booksService,
+            IReaderKioskService readerKioskService,
             IBooksRepository booksRepository
         )
         {
             _readersService = readersService;
-            _booksService = booksService;
+            _readerKioskService = readerKioskService;
             _booksRepository = booksRepository;
         }
 
@@ -336,7 +336,7 @@ namespace LaurelLibrary.UI.Pages
             }
 
             var bookInstanceIds = ScannedBooks.Select(b => b.BookInstanceId).ToList();
-            var success = await _booksService.CheckoutBooksAsync(
+            var success = await _readerKioskService.CheckoutBooksAsync(
                 CurrentReader.ReaderId,
                 bookInstanceIds,
                 LibraryId.Value
@@ -352,6 +352,9 @@ namespace LaurelLibrary.UI.Pages
                 TempData.Remove("ScannedBooks");
                 ScannedBooks.Clear();
                 CurrentReader = null;
+
+                // Redirect to index page so someone else can start from the beginning
+                return RedirectToPage("/Index", new { libraryId = LibraryId });
             }
             else
             {
@@ -360,16 +363,16 @@ namespace LaurelLibrary.UI.Pages
                     CurrentReader
                 );
                 TempData["ScannedBooks"] = System.Text.Json.JsonSerializer.Serialize(ScannedBooks);
-            }
 
-            return RedirectToPage(
-                new
-                {
-                    libraryId = LibraryId,
-                    kioskId = KioskId,
-                    browserFingerprint = BrowserFingerprint,
-                }
-            );
+                return RedirectToPage(
+                    new
+                    {
+                        libraryId = LibraryId,
+                        kioskId = KioskId,
+                        browserFingerprint = BrowserFingerprint,
+                    }
+                );
+            }
         }
 
         public IActionResult OnPostRemoveBook(int bookInstanceId)

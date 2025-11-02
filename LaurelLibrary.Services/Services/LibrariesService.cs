@@ -1,4 +1,7 @@
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Domain.Exceptions;
+using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -10,18 +13,21 @@ public class LibrariesService : ILibrariesService
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly ILogger<LibrariesService> _logger;
 
     public LibrariesService(
         ILibrariesRepository librariesRepository,
         IUserService userService,
         IAuthenticationService authenticationService,
+        ISubscriptionService subscriptionService,
         ILogger<LibrariesService> logger
     )
     {
         _librariesRepository = librariesRepository;
         _userService = userService;
         _authenticationService = authenticationService;
+        _subscriptionService = subscriptionService;
         _logger = logger;
     }
 
@@ -168,6 +174,99 @@ public class LibrariesService : ILibrariesService
                 userId,
                 libraryId
             );
+            throw;
+        }
+    }
+
+    public async Task<List<LibraryDto>> GetLibrariesForUserAsync(string userId)
+    {
+        try
+        {
+            var libraries = await _librariesRepository.GetLibrariesForUserAsync(userId);
+            return libraries
+                .Select(l => new LibraryDto
+                {
+                    LibraryId = l.LibraryId.ToString(),
+                    Name = l.Name,
+                    Address = l.Address ?? string.Empty,
+                    MacAddress = l.MacAddress,
+                    Logo = l.Logo,
+                    Description = l.Description,
+                    CheckoutDurationDays = l.CheckoutDurationDays,
+                    Alias = l.Alias,
+                })
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting libraries for user {UserId}", userId);
+            throw;
+        }
+    }
+
+    public async Task<Library> CreateLibraryAsync(LibraryDto libraryDto, string userId)
+    {
+        try
+        {
+            // Check subscription limits before creating new library
+            var canAddLibrary = await _subscriptionService.CanAddLibraryAsync(userId);
+            if (!canAddLibrary)
+            {
+                var userLibraries = await _librariesRepository.GetLibrariesForUserAsync(userId);
+                if (userLibraries.Count > 0)
+                {
+                    var firstLibraryId = userLibraries.First().LibraryId;
+                    var subscription = await _subscriptionService.GetLibrarySubscriptionAsync(
+                        firstLibraryId
+                    );
+                    var tierName = subscription?.Tier switch
+                    {
+                        Domain.Enums.SubscriptionTier.BookwormBasic => "Free",
+                        Domain.Enums.SubscriptionTier.LibraryLover => "Library Lover",
+                        Domain.Enums.SubscriptionTier.BibliothecaPro => "Bibliotheca Pro",
+                        _ => "current",
+                    };
+
+                    throw new SubscriptionUpgradeRequiredException(
+                        $"Cannot create library. Your {tierName} subscription allows only one library.",
+                        "Multiple Libraries",
+                        tierName,
+                        "Bibliotheca Pro"
+                    );
+                }
+            }
+
+            // Create the library entity
+            var entity = libraryDto.ToEntity(Guid.NewGuid());
+
+            // Get the current user and add them as administrator
+            var currentUser = await _authenticationService.GetAppUserAsync();
+            entity.Administrators.Add(currentUser);
+            entity.CreatedBy = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+            entity.UpdatedBy = entity.CreatedBy;
+
+            // Create the library
+            var createdLibrary = await _librariesRepository.CreateAsync(entity);
+
+            // Create a free subscription for the new library if the user doesn't have one
+            await _subscriptionService.CreateFreeSubscriptionAsync(createdLibrary.LibraryId);
+
+            _logger.LogInformation(
+                "Created library {LibraryId} ({LibraryName}) for user {UserId}",
+                createdLibrary.LibraryId,
+                createdLibrary.Name,
+                userId
+            );
+
+            return createdLibrary;
+        }
+        catch (Exception ex)
+            when (ex is not KeyNotFoundException
+                && ex is not InvalidOperationException
+                && ex is not SubscriptionUpgradeRequiredException
+            )
+        {
+            _logger.LogError(ex, "Error creating library for user {UserId}", userId);
             throw;
         }
     }

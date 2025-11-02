@@ -367,4 +367,9 @@ public class BooksRepository : IBooksRepository
             )
             .ToListAsync();
     }
+
+    public async Task<int> GetBookCountByLibraryIdAsync(Guid libraryId)
+    {
+        return await _dbContext.Books.Where(b => b.LibraryId == libraryId).CountAsync();
+    }
 }

@@ -16,13 +16,15 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         private readonly IAuthorsRepository authorsRepository;
         private readonly ICategoriesRepository categoriesRepository;
         private readonly ISemanticSearchService semanticSearchService;
+        private readonly ISubscriptionService subscriptionService;
 
         public ListModel(
             IBooksRepository booksRepository,
             IAuthenticationService userService,
             IAuthorsRepository authorsRepository,
             ICategoriesRepository categoriesRepository,
-            ISemanticSearchService semanticSearchService
+            ISemanticSearchService semanticSearchService,
+            ISubscriptionService subscriptionService
         )
         {
             this.booksRepository = booksRepository;
@@ -30,6 +32,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             this.authorsRepository = authorsRepository;
             this.categoriesRepository = categoriesRepository;
             this.semanticSearchService = semanticSearchService;
+            this.subscriptionService = subscriptionService;
         }
 
         [BindProperty]
@@ -68,6 +71,8 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         [TempData]
         public string? SemanticSearchStatus { get; set; }
 
+        public bool CanUseSemanticSearch { get; set; }
+
         [BindProperty]
         public List<Guid> SelectedBookIds { get; set; } = new List<Guid>();
 
@@ -88,10 +93,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 500
             );
 
+            // Check if semantic search is available for this library
+            CanUseSemanticSearch = await subscriptionService.IsSemanticSearchEnabledAsync(
+                user.CurrentLibraryId.Value
+            );
+
             PagedResult<LaurelBookSummaryDto> paged;
 
             // Use semantic search if enabled and query is provided
-            if (UseSemanticSearch && !string.IsNullOrWhiteSpace(SemanticSearchQuery))
+            if (
+                UseSemanticSearch
+                && !string.IsNullOrWhiteSpace(SemanticSearchQuery)
+                && CanUseSemanticSearch
+            )
             {
                 try
                 {
@@ -126,6 +140,22 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                         TotalCount = 0,
                     };
                 }
+            }
+            else if (UseSemanticSearch && !CanUseSemanticSearch)
+            {
+                // User tried to use semantic search but doesn't have access
+                SemanticSearchStatus =
+                    "AI Search requires an upgraded subscription plan. Please upgrade to use this feature.";
+
+                // Fall back to traditional search
+                paged = await this.booksRepository.GetAllBooksAsync(
+                    user.CurrentLibraryId.Value,
+                    pageNumber ?? 1,
+                    pageSize ?? 10,
+                    SelectedAuthorId,
+                    SelectedCategoryId,
+                    SearchTerm
+                );
             }
             else
             {

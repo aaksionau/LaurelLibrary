@@ -18,9 +18,6 @@ public interface IBooksService
     );
     Task<LaurelBookDto?> GetBookByIdAsync(Guid bookId);
     Task<LaurelBookDto?> SearchBookByIsbnAsync(string isbn);
-    Task<bool> CheckoutBooksAsync(int readerId, List<int> bookInstanceIds, Guid libraryId);
-    Task<bool> ReturnBooksAsync(List<int> bookInstanceIds, Guid libraryId);
-    Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId);
 
     /// <summary>
     /// Changes the status of a book instance. Returns true if successful, false otherwise.

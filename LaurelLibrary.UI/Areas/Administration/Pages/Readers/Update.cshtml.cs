@@ -1,3 +1,4 @@
+using LaurelLibrary.Domain.Exceptions;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -78,9 +79,22 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Readers
                 }
             }
 
-            await this.readersService.CreateOrUpdateReaderAsync(Reader);
-
-            return RedirectToPage("./List");
+            try
+            {
+                await this.readersService.CreateOrUpdateReaderAsync(Reader);
+                return RedirectToPage("./List");
+            }
+            catch (SubscriptionUpgradeRequiredException ex)
+            {
+                // Redirect to subscription page for upgrade
+                return Redirect($"{ex.RedirectUrl}?message={Uri.EscapeDataString(ex.Message)}");
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("subscription"))
+            {
+                // Handle subscription limit exceeded (fallback for legacy exceptions)
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return Page();
+            }
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)

@@ -17,6 +17,18 @@ public class AppDbContext : IdentityDbContext<AppUser>
             .HasOne(b => b.Library)
             .WithMany(l => l.Books)
             .OnDelete(DeleteBehavior.NoAction);
+
+        // Subscription relationships
+        builder
+            .Entity<Subscription>()
+            .HasOne(s => s.Library)
+            .WithOne(l => l.Subscription)
+            .HasForeignKey<Subscription>(s => s.LibraryId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Configure decimal precision for subscription amount
+        builder.Entity<Subscription>().Property(s => s.Amount).HasPrecision(18, 2);
+
         base.OnModelCreating(builder);
     }
 
@@ -28,4 +40,5 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Reader> Readers { get; set; }
     public DbSet<Kiosk> Kiosks { get; set; }
     public DbSet<ImportHistory> ImportHistories { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
 }

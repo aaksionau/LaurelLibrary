@@ -24,6 +24,7 @@ public class BookImportService : IBookImportService
     private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IAzureQueueService _queueService;
+    private readonly ISubscriptionService _subscriptionService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BookImportService> _logger;
 
@@ -38,6 +39,7 @@ public class BookImportService : IBookImportService
         IUserService userService,
         IAuthenticationService authenticationService,
         IAzureQueueService queueService,
+        ISubscriptionService subscriptionService,
         IConfiguration configuration,
         ILogger<BookImportService> logger
     )
@@ -48,6 +50,7 @@ public class BookImportService : IBookImportService
         _userService = userService;
         _authenticationService = authenticationService;
         _queueService = queueService;
+        _subscriptionService = subscriptionService;
         _configuration = configuration;
         _logger = logger;
 
@@ -78,6 +81,9 @@ public class BookImportService : IBookImportService
         // Parse ISBNs from CSV
         var isbns = await ParseIsbnsFromCsvAsync(csvStream);
         var totalIsbns = isbns.Count;
+
+        // Check subscription limits before processing
+        await _subscriptionService.ValidateBookImportLimitsAsync(libraryId, totalIsbns);
 
         _logger.LogInformation(
             "Starting chunked import of {Count} ISBNs for library {LibraryId}",

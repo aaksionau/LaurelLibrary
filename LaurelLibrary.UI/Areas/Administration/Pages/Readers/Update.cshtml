@@ -12,6 +12,7 @@
         </div>
 
         <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <input asp-for="Reader.ReaderId" hidden />
             <div class="mb-3">
                 <label class="form-label" asp-for="Reader.FirstName"></label>
