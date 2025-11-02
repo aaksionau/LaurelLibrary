@@ -65,6 +65,7 @@ builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();
 builder.Services.AddScoped<IKiosksService, KiosksService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 
 // register services
 builder.Services.AddScoped<IBarcodeService, BarcodeService>();
@@ -74,6 +75,8 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 builder.Services.AddScoped<IBooksService, BooksService>();
+builder.Services.AddScoped<IAuthorsService, AuthorsService>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
 builder.Services.AddScoped<IBookImportService, BookImportService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
@@ -82,6 +85,7 @@ builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<ISemanticSearchService, SemanticSearchService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 builder.Services.AddHttpContextAccessor();
 

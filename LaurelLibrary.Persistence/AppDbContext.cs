@@ -41,4 +41,5 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Kiosk> Kiosks { get; set; }
     public DbSet<ImportHistory> ImportHistories { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 }

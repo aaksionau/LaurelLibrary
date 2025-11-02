@@ -25,6 +25,7 @@ public class BookImportService : IBookImportService
     private readonly IAuthenticationService _authenticationService;
     private readonly IAzureQueueService _queueService;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAuditLogService _auditLogService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BookImportService> _logger;
 
@@ -40,6 +41,7 @@ public class BookImportService : IBookImportService
         IAuthenticationService authenticationService,
         IAzureQueueService queueService,
         ISubscriptionService subscriptionService,
+        IAuditLogService auditLogService,
         IConfiguration configuration,
         ILogger<BookImportService> logger
     )
@@ -51,6 +53,7 @@ public class BookImportService : IBookImportService
         _authenticationService = authenticationService;
         _queueService = queueService;
         _subscriptionService = subscriptionService;
+        _auditLogService = auditLogService;
         _configuration = configuration;
         _logger = logger;
 
@@ -119,6 +122,18 @@ public class BookImportService : IBookImportService
         };
 
         await _importHistoryRepository.AddAsync(importHistory);
+
+        // Log audit action for bulk import
+        await _auditLogService.LogActionAsync(
+            "Bulk Add",
+            "Book",
+            currentUser.CurrentLibraryId.Value,
+            currentUser.Id,
+            userName,
+            importHistory.ImportHistoryId.ToString(),
+            fileName,
+            $"Started bulk import of {totalIsbns} ISBNs from CSV file"
+        );
 
         _logger.LogInformation(
             "Created ImportHistory {ImportHistoryId} with {TotalChunks} chunks",

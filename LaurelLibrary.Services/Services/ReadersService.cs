@@ -17,6 +17,7 @@ public class ReadersService : IReadersService
     private readonly IAuthenticationService _authenticationService;
     private readonly IBarcodeService _barcodeService;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAuditLogService _auditLogService;
     private readonly ILogger<ReadersService> _logger;
     private readonly string? _wwwrootPath;
 
@@ -28,6 +29,7 @@ public class ReadersService : IReadersService
         IAuthenticationService authenticationService,
         IBarcodeService barcodeService,
         ISubscriptionService subscriptionService,
+        IAuditLogService auditLogService,
         ILogger<ReadersService> logger
     )
     {
@@ -38,6 +40,7 @@ public class ReadersService : IReadersService
         _authenticationService = authenticationService;
         _barcodeService = barcodeService;
         _subscriptionService = subscriptionService;
+        _auditLogService = auditLogService;
         _logger = logger;
         _wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "reader-eans");
     }
@@ -232,6 +235,18 @@ public class ReadersService : IReadersService
             await _readersRepository.UpdateEanAsync(entity.ReaderId, entity.Ean);
         }
 
+        // Log audit action for reader creation
+        await _auditLogService.LogActionAsync(
+            "Add",
+            "Reader",
+            currentUser.CurrentLibraryId!.Value,
+            currentUser.Id,
+            displayName,
+            entity.ReaderId.ToString(),
+            $"{entity.FirstName} {entity.LastName}",
+            $"Added new reader with EAN: {entity.Ean}"
+        );
+
         _logger.LogInformation(
             "Created reader {ReaderId} with EAN {Ean}",
             entity.ReaderId,
@@ -274,6 +289,18 @@ public class ReadersService : IReadersService
             return false;
         }
 
+        // Log audit action for reader update
+        await _auditLogService.LogActionAsync(
+            "Edit",
+            "Reader",
+            currentUser.CurrentLibraryId!.Value,
+            currentUser.Id,
+            displayName,
+            updated.ReaderId.ToString(),
+            $"{updated.FirstName} {updated.LastName}",
+            "Updated reader details"
+        );
+
         _logger.LogInformation("Updated reader {ReaderId}", updated.ReaderId);
         return true; // Updated
     }
@@ -286,12 +313,31 @@ public class ReadersService : IReadersService
             throw new InvalidOperationException("Current user library not found.");
         }
 
+        // Get reader details before deletion for audit log
+        var reader = await _readersRepository.GetByIdAsync(
+            readerId,
+            currentUser.CurrentLibraryId.Value
+        );
+
         var result = await _readersRepository.DeleteReaderAsync(
             readerId,
             currentUser.CurrentLibraryId.Value
         );
-        if (result)
+        if (result && reader != null)
         {
+            // Log audit action for reader deletion
+            var currentUserName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+            await _auditLogService.LogActionAsync(
+                "Remove",
+                "Reader",
+                currentUser.CurrentLibraryId.Value,
+                currentUser.Id,
+                currentUserName,
+                readerId.ToString(),
+                $"{reader.FirstName} {reader.LastName}",
+                "Deleted reader and associated data"
+            );
+
             _logger.LogInformation("Deleted reader {ReaderId}", readerId);
         }
         else

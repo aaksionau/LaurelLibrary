@@ -17,6 +17,7 @@ public class BooksService : IBooksService
     private readonly IIsbnService _isbnService;
     private readonly IAzureQueueService _queueService;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAuditLogService _auditLogService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -26,6 +27,7 @@ public class BooksService : IBooksService
         IIsbnService isbnService,
         IAzureQueueService queueService,
         ISubscriptionService subscriptionService,
+        IAuditLogService auditLogService,
         ILogger<BooksService> logger
     )
     {
@@ -35,6 +37,7 @@ public class BooksService : IBooksService
         _isbnService = isbnService;
         _queueService = queueService;
         _subscriptionService = subscriptionService;
+        _auditLogService = auditLogService;
         _logger = logger;
     }
 
@@ -48,6 +51,20 @@ public class BooksService : IBooksService
 
         // Map entity to DTO using extension method
         LaurelBookDto dto = entity.ToLaurelBookDto();
+
+        return dto;
+    }
+
+    public async Task<LaurelBookWithInstancesDto?> GetWithInstancesByIdAsync(Guid bookId)
+    {
+        var entity = await _booksRepository.GetWithInstancesByIdAsync(bookId);
+        if (entity == null)
+        {
+            return null;
+        }
+
+        // Map entity to DTO using extension method
+        LaurelBookWithInstancesDto dto = entity.ToLaurelBookWithInstancesDto();
 
         return dto;
     }
@@ -93,18 +110,31 @@ public class BooksService : IBooksService
 
         if (isCreateOperation)
         {
-            return await HandleBookCreationAsync(bookDto, libraryId, entity);
+            return await HandleBookCreationAsync(
+                bookDto,
+                libraryId,
+                entity,
+                currentUserId,
+                currentUserFullName
+            );
         }
         else
         {
-            return await HandleBookUpdateAsync(entity, libraryId);
+            return await HandleBookUpdateAsync(
+                entity,
+                libraryId,
+                currentUserId,
+                currentUserFullName
+            );
         }
     }
 
     private async Task<bool> HandleBookCreationAsync(
         LaurelBookDto bookDto,
         Guid libraryId,
-        Book entity
+        Book entity,
+        string currentUserId,
+        string currentUserFullName
     )
     {
         // If ISBN provided and a book with same ISBN exists in this library, add a new BookInstance
@@ -162,6 +192,18 @@ public class BooksService : IBooksService
         await _booksRepository.AddBookAsync(entity);
         await DetermineAppropriateAgeAsync(entity);
 
+        // Log audit action
+        await _auditLogService.LogActionAsync(
+            "Add",
+            "Book",
+            libraryId,
+            currentUserId,
+            currentUserFullName,
+            entity.BookId.ToString(),
+            entity.Title,
+            $"Created new book with ISBN: {entity.Isbn}"
+        );
+
         _logger.LogInformation(
             "Created book {BookId} in library {LibraryId}",
             entity.BookId,
@@ -170,7 +212,12 @@ public class BooksService : IBooksService
         return true;
     }
 
-    private async Task<bool> HandleBookUpdateAsync(Book entity, Guid libraryId)
+    private async Task<bool> HandleBookUpdateAsync(
+        Book entity,
+        Guid libraryId,
+        string currentUserId,
+        string currentUserFullName
+    )
     {
         var updated = await _booksRepository.UpdateBookAsync(entity);
         if (updated == null)
@@ -180,6 +227,18 @@ public class BooksService : IBooksService
             _logger.LogWarning("Book {BookId} not found for update; created new.", entity.BookId);
             return false;
         }
+
+        // Log audit action for update
+        await _auditLogService.LogActionAsync(
+            "Edit",
+            "Book",
+            libraryId,
+            currentUserId,
+            currentUserFullName,
+            entity.BookId.ToString(),
+            entity.Title,
+            "Updated book details"
+        );
 
         _logger.LogInformation(
             "Updated book {BookId} in library {LibraryId}",
@@ -341,5 +400,134 @@ public class BooksService : IBooksService
         );
 
         return true;
+    }
+
+    public async Task<bool> DeleteBookAsync(
+        Guid bookId,
+        Guid libraryId,
+        string currentUserId,
+        string currentUserFullName
+    )
+    {
+        // Get book details before deletion for audit log
+        var book = await _booksRepository.GetByIdAsync(bookId);
+
+        if (book == null || book.LibraryId != libraryId)
+        {
+            _logger.LogWarning("Book {BookId} not found in library {LibraryId}", bookId, libraryId);
+            return false;
+        }
+
+        var deleted = await _booksRepository.DeleteBookAsync(bookId);
+        if (deleted)
+        {
+            // Log audit action
+            await _auditLogService.LogActionAsync(
+                "Remove",
+                "Book",
+                libraryId,
+                currentUserId,
+                currentUserFullName,
+                bookId.ToString(),
+                book.Title,
+                "Deleted book and all instances"
+            );
+
+            _logger.LogInformation(
+                "Deleted book {BookId} '{Title}' from library {LibraryId}",
+                bookId,
+                book.Title,
+                libraryId
+            );
+
+            return true;
+        }
+        else
+        {
+            _logger.LogError(
+                "Failed to delete book {BookId} from library {LibraryId}",
+                bookId,
+                libraryId
+            );
+            return false;
+        }
+    }
+
+    public async Task<PagedResult<LaurelBookSummaryDto>> GetAllBooksAsync(
+        Guid libraryId,
+        int page = 1,
+        int pageSize = 10,
+        int? authorId = null,
+        int? categoryId = null,
+        string? searchTitle = null
+    )
+    {
+        return await _booksRepository.GetAllBooksAsync(
+            libraryId,
+            page,
+            pageSize,
+            authorId,
+            categoryId,
+            searchTitle
+        );
+    }
+
+    public async Task<int> DeleteMultipleBooksAsync(
+        IEnumerable<Guid> bookIds,
+        Guid libraryId,
+        string currentUserId,
+        string currentUserFullName
+    )
+    {
+        // Validate that all books belong to the specified library before deletion
+        var validBookIds = new List<Guid>();
+
+        foreach (var bookId in bookIds)
+        {
+            var book = await _booksRepository.GetByIdAsync(bookId);
+            if (book != null && book.LibraryId == libraryId)
+            {
+                validBookIds.Add(bookId);
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Book {BookId} not found in library {LibraryId}, skipping deletion",
+                    bookId,
+                    libraryId
+                );
+            }
+        }
+
+        if (!validBookIds.Any())
+        {
+            _logger.LogWarning(
+                "No valid books found for deletion in library {LibraryId}",
+                libraryId
+            );
+            return 0;
+        }
+
+        var deletedCount = await _booksRepository.DeleteMultipleBooksAsync(validBookIds);
+
+        // Log audit action for bulk deletion
+        await _auditLogService.LogActionAsync(
+            "Remove",
+            "Book",
+            libraryId,
+            currentUserId,
+            currentUserFullName,
+            string.Join(",", validBookIds),
+            "Multiple books",
+            $"Bulk deleted {deletedCount} books and all their instances"
+        );
+
+        _logger.LogInformation(
+            "Bulk deleted {DeletedCount} books from library {LibraryId}",
+            deletedCount,
+            libraryId
+        );
+
+        return deletedCount;
     }
 }

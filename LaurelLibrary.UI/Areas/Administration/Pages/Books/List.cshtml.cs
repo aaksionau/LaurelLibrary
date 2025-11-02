@@ -1,6 +1,5 @@
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,26 +10,26 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     [Authorize]
     public class ListModel : PageModel
     {
-        private readonly IBooksRepository booksRepository;
+        private readonly IBooksService booksService;
         private readonly IAuthenticationService userService;
-        private readonly IAuthorsRepository authorsRepository;
-        private readonly ICategoriesRepository categoriesRepository;
+        private readonly IAuthorsService authorsService;
+        private readonly ICategoriesService categoriesService;
         private readonly ISemanticSearchService semanticSearchService;
         private readonly ISubscriptionService subscriptionService;
 
         public ListModel(
-            IBooksRepository booksRepository,
+            IBooksService booksService,
             IAuthenticationService userService,
-            IAuthorsRepository authorsRepository,
-            ICategoriesRepository categoriesRepository,
+            IAuthorsService authorsService,
+            ICategoriesService categoriesService,
             ISemanticSearchService semanticSearchService,
             ISubscriptionService subscriptionService
         )
         {
-            this.booksRepository = booksRepository;
+            this.booksService = booksService;
             this.userService = userService;
-            this.authorsRepository = authorsRepository;
-            this.categoriesRepository = categoriesRepository;
+            this.authorsService = authorsService;
+            this.categoriesService = categoriesService;
             this.semanticSearchService = semanticSearchService;
             this.subscriptionService = subscriptionService;
         }
@@ -86,8 +85,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             }
 
             // Load filters data
-            Authors = await this.authorsRepository.GetAllAsync(user.CurrentLibraryId.Value, 1, 500);
-            Categories = await this.categoriesRepository.GetAllAsync(
+            Authors = await this.authorsService.GetAllAuthorsAsync(
+                user.CurrentLibraryId.Value,
+                1,
+                500
+            );
+            Categories = await this.categoriesService.GetAllCategoriesAsync(
                 user.CurrentLibraryId.Value,
                 1,
                 500
@@ -148,7 +151,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     "AI Search requires an upgraded subscription plan. Please upgrade to use this feature.";
 
                 // Fall back to traditional search
-                paged = await this.booksRepository.GetAllBooksAsync(
+                paged = await this.booksService.GetAllBooksAsync(
                     user.CurrentLibraryId.Value,
                     pageNumber ?? 1,
                     pageSize ?? 10,
@@ -160,7 +163,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             else
             {
                 // Use traditional search
-                paged = await this.booksRepository.GetAllBooksAsync(
+                paged = await this.booksService.GetAllBooksAsync(
                     user.CurrentLibraryId.Value,
                     pageNumber ?? 1,
                     pageSize ?? 10,
@@ -189,7 +192,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 return RedirectToPage();
             }
 
-            var deleted = await this.booksRepository.DeleteBookAsync(bookId);
+            var user = await this.userService.GetAppUserAsync();
+            if (!user.CurrentLibraryId.HasValue)
+            {
+                StatusMessage = "No library selected.";
+                return RedirectToPage();
+            }
+
+            var deleted = await this.booksService.DeleteBookAsync(
+                bookId,
+                user.CurrentLibraryId.Value,
+                user.Id,
+                $"{user.FirstName} {user.LastName}".Trim()
+            );
             StatusMessage = deleted ? "Book deleted." : "Book not found or could not be deleted.";
 
             // Preserve paging when redirecting
@@ -204,7 +219,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 return RedirectToPage();
             }
 
-            var deletedCount = await this.booksRepository.DeleteMultipleBooksAsync(SelectedBookIds);
+            var user = await this.userService.GetAppUserAsync();
+            if (!user.CurrentLibraryId.HasValue)
+            {
+                StatusMessage = "No library selected.";
+                return RedirectToPage();
+            }
+
+            var deletedCount = await this.booksService.DeleteMultipleBooksAsync(
+                SelectedBookIds,
+                user.CurrentLibraryId.Value,
+                user.Id,
+                $"{user.FirstName} {user.LastName}".Trim()
+            );
             StatusMessage =
                 deletedCount > 0
                     ? $"{deletedCount} book(s) deleted successfully."

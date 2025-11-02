@@ -96,4 +96,58 @@ public static class BookDtoExtensions
             Binding = bookDto.Binding,
         };
     }
+
+    /// <summary>
+    /// Converts a BookInstance entity to a BookInstanceDto.
+    /// </summary>
+    public static BookInstanceDto ToBookInstanceDto(this BookInstance entity)
+    {
+        return new BookInstanceDto
+        {
+            BookInstanceId = entity.BookInstanceId,
+            BookId = entity.BookId,
+            Status = entity.Status,
+            ReaderId = entity.ReaderId,
+            ReaderName =
+                entity.Reader != null
+                    ? $"{entity.Reader.FirstName} {entity.Reader.LastName}"
+                    : null,
+            CheckedOutDate = entity.CheckedOutDate,
+            DueDate = entity.DueDate,
+            Reader = entity.Reader?.ToReaderDto(),
+        };
+    }
+
+    /// <summary>
+    /// Converts a Book entity with instances to a LaurelBookWithInstancesDto.
+    /// </summary>
+    public static LaurelBookWithInstancesDto ToLaurelBookWithInstancesDto(this Book entity)
+    {
+        return new LaurelBookWithInstancesDto
+        {
+            BookId = entity.BookId,
+            Title = entity.Title,
+            Publisher = entity.Publisher,
+            Synopsis = entity.Synopsis,
+            Language = entity.Language,
+            Image = entity.Image,
+            ImageOriginal = entity.ImageOriginal,
+            Edition = entity.Edition,
+            Dimensions = entity.Dimensions,
+            Pages = entity.Pages,
+            DatePublished = entity.DatePublished,
+            Isbn = entity.Isbn,
+            Binding = entity.Binding,
+            MinAge = entity.MinAge,
+            MaxAge = entity.MaxAge,
+            ClassificationReasoning = entity.ClassificationReasoning,
+            Authors = entity.Authors.Select(a => a.ToAuthorDto()).ToList(),
+            Categories = entity.Categories.Select(c => c.ToCategoryDto()).ToList(),
+            BookInstances = entity.BookInstances.Select(bi => bi.ToBookInstanceDto()).ToList(),
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+            CreatedBy = entity.CreatedBy,
+            UpdatedBy = entity.UpdatedBy,
+        };
+    }
 }

@@ -1,0 +1,190 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.AuditLogs.ListModel
+@{
+    ViewData["Title"] = "Audit Logs";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-shield-check me-2"></i>Audit Logs
+    </h2>
+</div>
+
+@if (TempData["StatusMessage"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["StatusMessage"]
+    </div>
+}
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-funnel me-2"></i>Filters
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="ActionFilter" class="form-label">Action</label>
+                <select class="form-select" id="ActionFilter" name="ActionFilter" asp-for="ActionFilter">
+                    <option value="">All Actions</option>
+                    <option value="Add">Add</option>
+                    <option value="Edit">Edit</option>
+                    <option value="Remove">Remove</option>
+                    <option value="Bulk Add">Bulk Add</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="EntityTypeFilter" class="form-label">Entity Type</label>
+                <select class="form-select" id="EntityTypeFilter" name="EntityTypeFilter" asp-for="EntityTypeFilter">
+                    <option value="">All Types</option>
+                    <option value="Book">Book</option>
+                    <option value="Reader">Reader</option>
+                    <option value="Library">Library</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="StartDate" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="StartDate" name="StartDate" asp-for="StartDate" />
+            </div>
+            <div class="col-md-2">
+                <label for="EndDate" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="EndDate" name="EndDate" asp-for="EndDate" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search me-1"></i>Filter
+                </button>
+                <a href="@Url.Page("/AuditLogs/List", new { area = "Administration" })"
+                    class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul me-2"></i>Audit Log Entries
+        </h5>
+        <span class="badge bg-secondary">@Model.TotalCount total entries</span>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.AuditLogs.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 140px;">Date & Time</th>
+                            <th style="width: 80px;">Action</th>
+                            <th style="width: 80px;">Entity</th>
+                            <th>Details</th>
+                            <th style="width: 150px;">User</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model.AuditLogs)
+                        {
+                            <tr>
+                                <td class="text-nowrap">
+                                    <small class="text-muted">
+                                        @log.CreatedAt.ToString("yyyy-MM-dd")
+                                    </small><br>
+                                    <small>
+                                        @log.CreatedAt.ToString("HH:mm:ss")
+                                    </small>
+                                </td>
+                                <td>
+                                    @{
+                                        var actionBadgeClass = log.Action switch
+                                        {
+                                            "Add" => "bg-success",
+                                            "Edit" => "bg-warning",
+                                            "Remove" => "bg-danger",
+                                            "Bulk Add" => "bg-info",
+                                            _ => "bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @actionBadgeClass">@log.Action</span>
+                                </td>
+                                <td>
+                                    @{
+                                        var entityIcon = log.EntityType switch
+                                        {
+                                            "Book" => "bi-book",
+                                            "Reader" => "bi-person",
+                                            "Library" => "bi-building",
+                                            _ => "bi-question-circle"
+                                        };
+                                    }
+                                    <i class="@entityIcon me-1"></i>@log.EntityType
+                                </td>
+                                <td>
+                                    <div>
+                                        @if (!string.IsNullOrEmpty(log.EntityName))
+                                        {
+                                            <strong>@log.EntityName</strong>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.Details))
+                                        {
+                                            <br>
+
+                                            <small class="text-muted">@log.Details</small>
+                                        }
+                                        @if (!string.IsNullOrEmpty(log.EntityId))
+                                        {
+                                            <br>
+
+                                            <small class="text-muted">ID: @log.EntityId</small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <strong>@log.UserName</strong>
+                                        @if (log.User != null && !string.IsNullOrEmpty(log.User.Email))
+                                        {
+                                            <br>
+
+                                            <small class="text-muted">@log.User.Email</small>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="card-footer">
+                    @await Component.InvokeAsync("PaginationControls", new LaurelLibrary.UI.ViewModels.PaginationViewModel
+                    {
+                        PageNumber = Model.CurrentPage,
+                        PageSize = Model.PageSize,
+                        TotalPages = Model.TotalPages,
+                        TotalCount = Model.TotalCount,
+                        Area = "Administration",
+                        Page = "/AuditLogs/List"
+                        })
+        </div>
+                }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <h5 class="mt-3 text-muted">No audit log entries found</h5>
+                <p class="text-muted">Try adjusting your filters or check back later.</p>
+            </div>
+        }
+    </div>
+</div>

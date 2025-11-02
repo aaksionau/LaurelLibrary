@@ -14,6 +14,7 @@ public class LibrariesService : ILibrariesService
     private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IAuditLogService _auditLogService;
     private readonly ILogger<LibrariesService> _logger;
 
     public LibrariesService(
@@ -21,6 +22,7 @@ public class LibrariesService : ILibrariesService
         IUserService userService,
         IAuthenticationService authenticationService,
         ISubscriptionService subscriptionService,
+        IAuditLogService auditLogService,
         ILogger<LibrariesService> logger
     )
     {
@@ -28,6 +30,7 @@ public class LibrariesService : ILibrariesService
         _userService = userService;
         _authenticationService = authenticationService;
         _subscriptionService = subscriptionService;
+        _auditLogService = auditLogService;
         _logger = logger;
     }
 
@@ -78,6 +81,25 @@ public class LibrariesService : ILibrariesService
 
             // Set the current library for the new administrator
             await _userService.SetCurrentLibraryAsync(user.Id, libraryId);
+
+            // Get current user for audit logging
+            var currentUser = await _authenticationService.GetAppUserAsync();
+            var currentUserName =
+                currentUser != null
+                    ? $"{currentUser.FirstName} {currentUser.LastName}".Trim()
+                    : "System";
+
+            // Log audit action for adding administrator
+            await _auditLogService.LogActionAsync(
+                "Add",
+                "Library",
+                libraryId,
+                currentUser?.Id ?? "system",
+                currentUserName,
+                libraryId.ToString(),
+                library.Name,
+                $"Added administrator: {user.FirstName} {user.LastName} ({email})"
+            );
 
             _logger.LogInformation(
                 "Successfully added user '{Email}' as administrator to library {LibraryId} and set as current library",
@@ -154,6 +176,22 @@ public class LibrariesService : ILibrariesService
                     "Cleared current library for user {UserId} as they were removed from library {LibraryId}",
                     userId,
                     libraryId
+                );
+            }
+
+            // Log audit action for removing administrator
+            if (userToRemove != null)
+            {
+                var currentUserName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+                await _auditLogService.LogActionAsync(
+                    "Remove",
+                    "Library",
+                    libraryId,
+                    currentUser.Id,
+                    currentUserName,
+                    libraryId.ToString(),
+                    library.Name,
+                    $"Removed administrator: {userToRemove.FirstName} {userToRemove.LastName} ({userToRemove.Email})"
                 );
             }
 
@@ -250,6 +288,19 @@ public class LibrariesService : ILibrariesService
 
             // Create a free subscription for the new library if the user doesn't have one
             await _subscriptionService.CreateFreeSubscriptionAsync(createdLibrary.LibraryId);
+
+            // Log audit action for library creation
+            var currentUserName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+            await _auditLogService.LogActionAsync(
+                "Add",
+                "Library",
+                createdLibrary.LibraryId,
+                currentUser.Id,
+                currentUserName,
+                createdLibrary.LibraryId.ToString(),
+                createdLibrary.Name,
+                "Created new library"
+            );
 
             _logger.LogInformation(
                 "Created library {LibraryId} ({LibraryName}) for user {UserId}",
