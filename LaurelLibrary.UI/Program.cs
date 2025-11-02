@@ -57,6 +57,7 @@ builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
 builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
+builder.Services.AddScoped<ISemanticSearchRepository, SemanticSearchRepository>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IReadersRepository, ReadersRepository>();
 builder.Services.AddScoped<IKiosksRepository, KiosksRepository>();

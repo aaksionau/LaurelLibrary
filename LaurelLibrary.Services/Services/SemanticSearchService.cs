@@ -1,11 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using Azure.Identity;
-using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Extensions;
+using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
@@ -16,18 +14,18 @@ namespace LaurelLibrary.Services.Services;
 
 public class SemanticSearchService : ISemanticSearchService
 {
-    private readonly AppDbContext _dbContext;
+    private readonly ISemanticSearchRepository _searchRepository;
     private readonly IConfiguration _configuration;
     private readonly ILogger<SemanticSearchService> _logger;
     private readonly IChatCompletionService _chatCompletionService;
 
     public SemanticSearchService(
-        AppDbContext dbContext,
+        ISemanticSearchRepository searchRepository,
         IConfiguration configuration,
         ILogger<SemanticSearchService> logger
     )
     {
-        _dbContext = dbContext;
+        _searchRepository = searchRepository;
         _configuration = configuration;
         _logger = logger;
 
@@ -95,23 +93,13 @@ public class SemanticSearchService : ISemanticSearchService
                 searchCriteria
             );
 
-            // Execute the search using Entity Framework
-            var query = BuildEntityQuery(searchCriteria, libraryId);
-            var totalCount = await query.CountAsync();
-
-            var books = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(b => b.ToSummaryBookDto())
-                .ToListAsync();
-
-            return new PagedResult<LaurelBookSummaryDto>
-            {
-                Items = books,
-                Page = page,
-                PageSize = pageSize,
-                TotalCount = totalCount,
-            };
+            // Execute the search using the repository
+            return await _searchRepository.SearchBooksAsync(
+                searchCriteria,
+                libraryId,
+                page,
+                pageSize
+            );
         }
         catch (Exception ex)
         {
@@ -261,105 +249,4 @@ Return ONLY the JSON object, no other text.";
             return null;
         }
     }
-
-    private IQueryable<Domain.Entities.Book> BuildEntityQuery(
-        SearchCriteria criteria,
-        Guid libraryId
-    )
-    {
-        var query = _dbContext
-            .Books.Include(b => b.Authors)
-            .Include(b => b.Categories)
-            .Include(b => b.BookInstances)
-            .Where(b => b.LibraryId == libraryId);
-
-        // Title keywords
-        if (criteria.TitleKeywords?.Any() == true)
-        {
-            foreach (var keyword in criteria.TitleKeywords)
-            {
-                query = query.Where(b => b.Title.Contains(keyword));
-            }
-        }
-
-        // Author keywords
-        if (criteria.AuthorKeywords?.Any() == true)
-        {
-            foreach (var keyword in criteria.AuthorKeywords)
-            {
-                query = query.Where(b => b.Authors.Any(a => a.FullName.Contains(keyword)));
-            }
-        }
-
-        // Category keywords
-        if (criteria.CategoryKeywords?.Any() == true)
-        {
-            foreach (var keyword in criteria.CategoryKeywords)
-            {
-                query = query.Where(b => b.Categories.Any(c => c.Name.Contains(keyword)));
-            }
-        }
-
-        // Synopsis keywords
-        if (criteria.SynopsisKeywords?.Any() == true)
-        {
-            foreach (var keyword in criteria.SynopsisKeywords)
-            {
-                query = query.Where(b => b.Synopsis != null && b.Synopsis.Contains(keyword));
-            }
-        }
-
-        // Age range
-        if (criteria.MinAge.HasValue)
-        {
-            query = query.Where(b => b.MaxAge >= criteria.MinAge.Value);
-        }
-        if (criteria.MaxAge.HasValue)
-        {
-            query = query.Where(b => b.MinAge <= criteria.MaxAge.Value);
-        }
-
-        // Language
-        if (!string.IsNullOrEmpty(criteria.Language))
-        {
-            query = query.Where(b => b.Language != null && b.Language.Contains(criteria.Language));
-        }
-
-        // Page count
-        if (criteria.MinPages.HasValue)
-        {
-            query = query.Where(b => b.Pages >= criteria.MinPages.Value);
-        }
-        if (criteria.MaxPages.HasValue)
-        {
-            query = query.Where(b => b.Pages <= criteria.MaxPages.Value);
-        }
-
-        // Publication date
-        if (criteria.PublishedAfter.HasValue)
-        {
-            query = query.Where(b => b.DatePublished >= criteria.PublishedAfter.Value);
-        }
-        if (criteria.PublishedBefore.HasValue)
-        {
-            query = query.Where(b => b.DatePublished <= criteria.PublishedBefore.Value);
-        }
-
-        return query.OrderBy(b => b.Title);
-    }
-}
-
-public class SearchCriteria
-{
-    public List<string>? TitleKeywords { get; set; }
-    public List<string>? AuthorKeywords { get; set; }
-    public List<string>? CategoryKeywords { get; set; }
-    public List<string>? SynopsisKeywords { get; set; }
-    public int? MinAge { get; set; }
-    public int? MaxAge { get; set; }
-    public string? Language { get; set; }
-    public int? MinPages { get; set; }
-    public int? MaxPages { get; set; }
-    public DateTime? PublishedAfter { get; set; }
-    public DateTime? PublishedBefore { get; set; }
 }
