@@ -4,6 +4,10 @@
     ViewData["Title"] = "Home page";
 }
 
+@section Head {
+    <link rel="stylesheet" href="~/css/checkout.css" />
+}
+
 @if (Model.Library != null)
 {
     <div class="container py-5" style="min-height: 80vh;">
@@ -26,6 +30,16 @@
                 }
                 <hr class="w-50 mx-auto mt-4 mb-5" style="border-top: 3px solid #6c9fa8; opacity: 1;">
             </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="col-12 mb-4">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @Model.ErrorMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            }
 
             <!-- Action Buttons Section -->
             <div class="col-md-10 col-lg-8">
@@ -97,58 +111,45 @@ else
     </div>
 }
 
+<!-- Success Overlay for Checkout Success -->
+<div id="successOverlay" class="success-overlay" style="display: none;">
+    <div class="success-overlay-content">
+        <div class="success-icon">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h2 class="success-title">Checkout Successful!</h2>
+        <p class="success-message" id="overlayMessage">@Model.Message</p>
+        <button class="btn btn-primary btn-lg mt-3" onclick="closeSuccessOverlay()">
+            <i class="bi bi-x-circle"></i> Close
+        </button>
+    </div>
+</div>
+
+<!-- Success Overlay for Return Success -->
+<div id="returnSuccessOverlay" class="success-overlay" style="display: none;">
+    <div class="success-overlay-content">
+        <div class="success-icon">
+            <i class="bi bi-arrow-left-circle-fill"></i>
+        </div>
+        <h2 class="success-title">Return Successful!</h2>
+        <p class="success-message" id="returnOverlayMessage">@Model.Message</p>
+        <button class="btn btn-primary btn-lg mt-3" onclick="closeReturnSuccessOverlay()">
+            <i class="bi bi-x-circle"></i> Close
+        </button>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+    <script src="~/js/index.js"></script>
     <script>
-        // Initialize FingerprintJS and handle redirect with localStorage parameters
-        (async function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hasLibraryId = urlParams.has('libraryId');
-            const hasKioskId = urlParams.has('kioskId');
-            const hasBrowserFingerprint = urlParams.has('browserFingerprint');
+        // Initialize index page functionality
+        initializeIndexPage({
+            showCheckoutSuccess: @Json.Serialize(Model.ShowCheckoutSuccess && !string.IsNullOrEmpty(Model.Message)),
+            showReturnSuccess: @Json.Serialize(Model.ShowReturnSuccess && !string.IsNullOrEmpty(Model.Message))
+                    });
 
-            // If all parameters are already in the URL, do nothing
-            if (hasLibraryId && hasKioskId && hasBrowserFingerprint) {
-                return;
-            }
-
-            // Get or generate browserFingerprint
-            let browserFingerprint = localStorage.getItem('browserFingerprint');
-
-            if (!browserFingerprint) {
-                try {
-                    // Initialize FingerprintJS
-                    const fp = await FingerprintJS.load();
-                    const result = await fp.get();
-                    browserFingerprint = result.visitorId;
-
-                    // Save to localStorage
-                    localStorage.setItem('browserFingerprint', browserFingerprint);
-                } catch (error) {
-                    console.error('Error generating fingerprint:', error);
-                    // Fallback to a random ID if FingerprintJS fails
-                    browserFingerprint = 'fallback-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('browserFingerprint', browserFingerprint);
-                }
-            }
-
-            // Get other parameters from localStorage
-            const libraryId = localStorage.getItem('libraryId');
-            const kioskId = localStorage.getItem('kioskId');
-
-            // If we have all required parameters in localStorage, redirect
-            if (libraryId && kioskId && browserFingerprint) {
-                const params = new URLSearchParams();
-                params.set('libraryId', libraryId);
-                params.set('kioskId', kioskId);
-                params.set('browserFingerprint', browserFingerprint);
-
-                // Redirect to the same page with parameters
-                window.location.href = `${window.location.pathname}?${params.toString()}`;
-            } else {
-                // If no parameters available, show error message
-                console.warn('Missing library/kiosk information in localStorage');
-            }
-        })();
+        // Initialize fingerprint and redirect functionality
+        initializeFingerprintAndRedirect();
     </script>
 }

@@ -4,10 +4,19 @@
     ViewData["Title"] = "Checkout Books";
 }
 
+@section Head {
+    <link rel="stylesheet" href="~/css/checkout.css" />
+}
+
+@section Scripts {
+    <script src="~/js/checkout.js"></script>
+}
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center gap-3">
-            <a asp-page="/Index" asp-route-libraryId="@Model.LibraryId" asp-route-kioskId="@Model.KioskId" asp-route-browserFingerprint="@Model.BrowserFingerprint" class="btn btn-secondary btn-lg">
+            <a asp-page="/Index" asp-route-libraryId="@Model.LibraryId" asp-route-kioskId="@Model.KioskId"
+                asp-route-browserFingerprint="@Model.BrowserFingerprint" class="btn btn-secondary btn-lg">
                 <i class="bi bi-house-door-fill"></i> Home
             </a>
             <h1 class="mb-0">@ViewData["Title"]</h1>
@@ -25,21 +34,13 @@
         }
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.Message))
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successMessage" data-message="@Model.Message">
-            @Model.Message
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-}
-
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             @Model.ErrorMessage
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-}
+    }
 
     <!-- Step 1: Scan Reader -->
     <div class="card mb-4">
@@ -85,23 +86,25 @@
     @if (Model.CurrentReader != null)
     {
         <div class="card mb-4">
-                <div class="card-body p-0">
-                    <div class="d-flex">
-                        <div class="d-flex flex-column align-items-center justify-content-center text-white p-3" style="width: 140px; background-color: #8fc5a2;">
-                            <span class="badge bg-white fs-5 mb-2" style="color: #8fc5a2;">Step 2</span>
-                            <span class="text-white text-center fw-semibold h4">Scan Books to Checkout</span>
-                        </div>
-                        <div class="flex-grow-1 p-3">
-                            <form method="post" asp-page-handler="ScanBook">
-                                <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
-                                <input type="hidden" name="KioskId" value="@Model.KioskId" />
-                                <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
-                                <div class="mb-3">
+            <div class="card-body p-0">
+                <div class="d-flex">
+                    <div class="d-flex flex-column align-items-center justify-content-center text-white p-3"
+                        style="width: 140px; background-color: #8fc5a2;">
+                        <span class="badge bg-white fs-5 mb-2" style="color: #8fc5a2;">Step 2</span>
+                        <span class="text-white text-center fw-semibold h4">Scan Books to Checkout</span>
+                    </div>
+                    <div class="flex-grow-1 p-3">
+                        <form method="post" asp-page-handler="ScanBook">
+                            <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
+                            <input type="hidden" name="KioskId" value="@Model.KioskId" />
+                            <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
+                            <div class="mb-3">
                                 <input type="text" class="form-control" id="BookIsbn" name="BookIsbn"
                                     placeholder="Scan or enter book ISBN" autofocus required />
                                 <div class="form-text">Scan the book barcode or enter the book ISBN</div>
                             </div>
-                            <button type="submit" class="btn btn-success" style="background-color: #8fc5a2; border-color: #7eb591;">
+                            <button type="submit" class="btn btn-success"
+                                style="background-color: #8fc5a2; border-color: #7eb591;">
                                 <i class="bi bi-plus-circle"></i> Add Book
                             </button>
                         </form>
@@ -170,159 +173,14 @@
                 </div>
             </div>
         </div>
-        }
-    </div>
+    }
+</div>
 
-    <!-- Success Overlay -->
-    <div id="successOverlay" class="success-overlay">
-        <div class="success-overlay-content">
-            <div class="success-icon">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            <h2 class="success-title">Success!</h2>
-            <p class="success-message" id="overlayMessage"></p>
-            <button class="btn btn-primary btn-lg mt-3" onclick="closeSuccessOverlay()">
-                <i class="bi bi-x-circle"></i> Close
-            </button>
-        </div>
-    </div>
-
-    <style>
-        .success-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .success-overlay.show {
-            display: flex;
-        }
-
-        .success-overlay-content {
-            background-color: white;
-            padding: 3rem;
-            border-radius: 1rem;
-            text-align: center;
-            max-width: 500px;
-            animation: slideIn 0.4s ease-out;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .success-icon {
-            font-size: 5rem;
-            color: #8fc5a2;
-            margin-bottom: 1rem;
-            animation: scaleIn 0.5s ease-out;
-        }
-
-        .success-title {
-            color: #8fc5a2;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .success-message {
-            font-size: 1.2rem;
-            color: #333;
-            margin-bottom: 0;
-        }
-
-        @@keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @@keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @@keyframes scaleIn {
-            0% {
-                transform: scale(0);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-    </style>
-
-    <script>
-        function closeSuccessOverlay() {
-            const overlay = document.getElementById('successOverlay');
-            overlay.classList.remove('show');
-        }
-
-        // Auto-focus on the appropriate input field
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check if checkout was successful and show overlay
-            @if (Model.ShowCheckoutSuccess)
-            {
-                <text>
-                var successAlert = document.getElementById('successMessage');
-                if (successAlert) {
-                    var message = successAlert.getAttribute('data-message');
-                    if (message) {
-                        document.getElementById('overlayMessage').textContent = message;
-                        document.getElementById('successOverlay').classList.add('show');
-                        
-                        // Auto-close after 5 seconds
-                        window.setTimeout(function() {
-                            closeSuccessOverlay();
-                        }, 5000);
-                    }
-                }
-                </text>
-            }
-
-            @if (Model.CurrentReader != null)
-                {
-                    <text>
-                                                        // Focus on book input if reader is already selected
-                        const bookInput = document.getElementById('BookIsbn');
-                        if (bookInput) {
-                            bookInput.focus();
-                        // Keep focus on book input when it loses focus (for continuous scanning)
-                        bookInput.addEventListener('blur', function() {
-                            setTimeout(() => bookInput.focus(), 100);
-                                                            });
-                                                        }
-                    </text>
-            }
-                else
-                {
-                    <text>
-                                                        // Focus on reader input if no reader selected
-                        const readerInput = document.getElementById('ReaderEan');
-                        if (readerInput) {
-                            readerInput.focus();
-                        // Keep focus on reader input when it loses focus (for continuous scanning)
-                        readerInput.addEventListener('blur', function() {
-                            setTimeout(() => readerInput.focus(), 100);
-                                                            });
-                                                        }
-                    </text>
-            }
+<script>
+    // Initialize checkout page functionality when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeCheckoutPage({
+            hasCurrentReader: @Json.Serialize(Model.CurrentReader != null)
+        });
     });
-    </script>
+</script>

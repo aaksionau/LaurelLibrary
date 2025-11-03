@@ -51,6 +51,18 @@ public class IndexModel : PageModel
     public Library? Library { get; set; }
     public Kiosk? Kiosk { get; set; }
 
+    [TempData]
+    public string? Message { get; set; }
+
+    [TempData]
+    public string? ErrorMessage { get; set; }
+
+    [TempData]
+    public bool ShowCheckoutSuccess { get; set; }
+
+    [TempData]
+    public bool ShowReturnSuccess { get; set; }
+
     public async Task<IActionResult> OnGetAsync()
     {
         // Redirect to dashboard if user is logged in

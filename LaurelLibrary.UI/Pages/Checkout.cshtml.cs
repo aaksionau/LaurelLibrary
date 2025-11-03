@@ -185,7 +185,7 @@ namespace LaurelLibrary.UI.Pages
             }
 
             var bookInstance = await _booksRepository.GetAvailableBookInstanceByIsbnAsync(
-                BookIsbn.Trim(),
+                BookIsbn.Trim().Replace("-", ""),
                 LibraryId.Value
             );
             if (bookInstance == null)

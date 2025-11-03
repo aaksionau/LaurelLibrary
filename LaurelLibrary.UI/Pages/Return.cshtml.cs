@@ -183,7 +183,7 @@ namespace LaurelLibrary.UI.Pages
             }
 
             var bookInstance = await _booksRepository.GetBorrowedBookInstanceByIsbnAsync(
-                BookIsbn.Trim(),
+                BookIsbn.Trim().Replace("-", ""),
                 LibraryId.Value
             );
             if (bookInstance == null)
@@ -348,6 +348,7 @@ namespace LaurelLibrary.UI.Pages
             if (success)
             {
                 Message = $"Successfully returned {ScannedBooks.Count} book(s).";
+                TempData["ShowReturnSuccess"] = true;
                 // Clear the return session
                 TempData.Remove("CurrentReader");
                 TempData.Remove("ScannedBooks");

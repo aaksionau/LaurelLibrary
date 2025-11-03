@@ -88,7 +88,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             if (
                 Book == null
                 || string.IsNullOrWhiteSpace(Book.Title)
-                || !string.IsNullOrWhiteSpace(Book.Isbn)
+                || string.IsNullOrWhiteSpace(Book.Isbn)
             )
             {
                 return;
@@ -110,6 +110,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 userFullName,
                 currentUser.CurrentLibraryId.Value
             );
+
+            Book = new LaurelBookDto(); // Clear the book form
+            SearchMessage = "Book created successfully.";
 
             return;
         }
