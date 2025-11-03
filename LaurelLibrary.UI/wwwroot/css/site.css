@@ -13,7 +13,7 @@ html {
 .btn-link.nav-link:focus,
 .form-control:focus,
 .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #a8c5e0;
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #245C4F;
 }
 
 html {
@@ -61,11 +61,11 @@ body {
   min-width: 250px;
   /* prevent too narrow on small desktop screens */
   padding: 1.25rem 0.75rem;
-  background: #f5f7f9;
-  /* Soft cool gray background */
+  background: #F9F6F1;
+  /* Warm linen background from new palette */
   box-shadow: none;
-  border-right: 1px solid #e8ebed;
-  /* Gentle border */
+  border-right: 1px solid #e8e3db;
+  /* Warm border color */
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -73,7 +73,8 @@ body {
 }
 
 .app-sidebar .nav-link {
-  color: #5a6c7d;
+  color: #7A6F66;
+  /* Warm taupe from new palette */
   padding: 0.5rem 0.75rem;
   margin: 0.125rem 0;
   border-radius: 0;
@@ -84,16 +85,19 @@ body {
 }
 
 .app-sidebar .nav-link:hover {
-  background-color: #e8f0f7;
-  color: #3d5266;
+  background-color: rgba(36, 92, 79, 0.05);
+  /* Light evergreen tint */
+  color: #245C4F;
+  /* Evergreen from new palette */
   border-left-color: transparent;
   transform: none;
   box-shadow: none;
-  border-bottom-color: #d8e2ea;
+  border-bottom-color: #e8e3db;
 }
 
 .app-sidebar .nav-link.active {
-  background-color: #7ba7d1;
+  background-color: #245C4F;
+  /* Evergreen from new palette */
   color: #ffffff;
   border-left-color: transparent;
   font-weight: 500;
@@ -186,15 +190,15 @@ body {
 /* Pulse animation for scan button */
 @keyframes scan-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(123, 167, 209, 0.6);
+    box-shadow: 0 0 0 0 rgba(36, 92, 79, 0.6);
   }
 
   50% {
-    box-shadow: 0 0 0 10px rgba(123, 167, 209, 0);
+    box-shadow: 0 0 0 10px rgba(36, 92, 79, 0);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(123, 167, 209, 0);
+    box-shadow: 0 0 0 0 rgba(36, 92, 79, 0);
   }
 }
 

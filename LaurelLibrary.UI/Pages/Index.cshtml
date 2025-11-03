@@ -21,14 +21,14 @@
                             style="max-height: 250px; object-fit: contain;" />
                     </div>
                 }
-                <h1 class="display-3 mb-3 fw-bold" style="color: #2c3e50;">@Model.Library.Name</h1>
+                <h1 class="display-3 mb-3 fw-bold" style="color: #2E2B28;">@Model.Library.Name</h1>
                 @if (Model.Kiosk != null)
                 {
                     <p class="text-muted fs-5">
                         <i class="bi bi-geo-alt-fill me-2"></i>Kiosk Location: @Model.Kiosk.Location
                     </p>
                 }
-                <hr class="w-50 mx-auto mt-4 mb-5" style="border-top: 3px solid #6c9fa8; opacity: 1;">
+                <hr class="w-50 mx-auto mt-4 mb-5" style="border-top: 3px solid #245C4F; opacity: 1;">
             </div>
 
             @if (!string.IsNullOrEmpty(Model.ErrorMessage))
@@ -52,7 +52,7 @@
                                     asp-route-kioskId="@Model.KioskId"
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
                                     class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
-                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; min-height: 280px;">
+                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #245C4F 0%, #1e4a3f 100%); color: white; border: none; min-height: 280px;">
                                     <i class="bi bi-box-arrow-in-left mb-4" style="font-size: 4rem;"></i>
                                     <span class="fw-bold mb-2">Return Books</span>
                                     <small class="opacity-75" style="font-size: 0.9rem;">Drop off your borrowed
@@ -70,7 +70,7 @@
                                     asp-route-kioskId="@Model.KioskId"
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
                                     class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
-                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #6c9fa8 0%, #4a7c87 100%); color: white; border: none; min-height: 280px;">
+                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #E6B655 0%, #e2b143 100%); color: white; border: none; min-height: 280px;">
                                     <i class="bi bi-box-arrow-right mb-4" style="font-size: 4rem;"></i>
                                     <span class="fw-bold mb-2">Checkout Books</span>
                                     <small class="opacity-75" style="font-size: 0.9rem;">Borrow items from the
@@ -89,9 +89,9 @@ else
     <div class="container d-flex align-items-center justify-content-center py-5" style="min-height: 80vh;">
         <div class="text-center">
             <div class="mb-5">
-                <i class="bi bi-book-fill" style="font-size: 6rem; color: #6c9fa8;"></i>
+                <i class="bi bi-book-fill" style="font-size: 6rem; color: #245C4F;"></i>
             </div>
-            <h1 class="display-3 mb-4 fw-bold" style="color: #2c3e50;">Laurel Library</h1>
+            <h1 class="display-3 mb-4 fw-bold" style="color: #2E2B28;">Laurel Library</h1>
             <p class="lead text-muted mb-5 fs-4">Modern Library Management System</p>
 
             <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px; border-radius: 12px;">
@@ -101,9 +101,9 @@ else
                         book checkouts, returns, and member management.
                     </p>
                     <hr class="my-4">
-                    <div class="alert alert-info border-0" role="alert" style="background-color: #e8f4f5;">
-                        <i class="bi bi-info-circle-fill me-2"></i>
-                        <small>Please configure your library and kiosk settings to get started.</small>
+                    <div class="alert alert-info border-0" role="alert" style="background-color: #F9F6F1;">
+                        <i class="bi bi-info-circle-fill me-2" style="color: #245C4F;"></i>
+                        <small style="color: #2E2B28;">Please configure your library and kiosk settings to get started.</small>
                     </div>
                 </div>
             </div>

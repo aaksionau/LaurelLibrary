@@ -31,20 +31,20 @@
 
 .success-icon {
     font-size: 5rem;
-    color: #8fc5a2;
+    color: #245C4F;
     margin-bottom: 1rem;
     animation: scaleIn 0.5s ease-out;
 }
 
 .success-title {
-    color: #8fc5a2;
+    color: #245C4F;
     font-weight: bold;
     margin-bottom: 1rem;
 }
 
 .success-message {
     font-size: 1.2rem;
-    color: #333;
+    color: #2E2B28;
     margin-bottom: 0;
 }
 

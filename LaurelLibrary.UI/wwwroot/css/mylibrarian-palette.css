@@ -1,0 +1,337 @@
+/* MyLibrarian Community Focus Palette CSS Variables */
+:root {
+    /* Primary colors from MyLibrarian palette */
+    --color-primary: #245C4F;
+    /* Evergreen - Deep, organic green for headers and main accents */
+    --color-secondary: #D8A48F;
+    /* Dusty Rose - Soft warm accent for friendly, human tone */
+    --color-accent: #E6B655;
+    /* Honey Gold - Highlight or call-to-action tone for contrast */
+
+    /* Background colors */
+    --color-bg-light: #F9F6F1;
+    /* Linen - Gentle warm background for content areas */
+    --color-bg-dark: #3A3A3A;
+    /* Coffee Gray - Dark mode or footer background */
+
+    /* Text colors */
+    --color-text-primary: #2E2B28;
+    /* Walnut - Readable warm dark text color */
+    --color-text-secondary: #7A6F66;
+    /* Warm Taupe - Muted secondary text tone */
+
+    /* Derived colors for better UX */
+    --color-primary-hover: #1e4a3f;
+    /* Darker primary for hover states */
+    --color-primary-light: #2f6b5d;
+    /* Lighter primary for borders */
+    --color-secondary-hover: #d19277;
+    /* Darker secondary for hover states */
+    --color-accent-hover: #e2b143;
+    /* Darker accent for hover states */
+
+    /* Success/Info/Warning/Danger colors that complement the palette */
+    --color-success: #245C4F;
+    /* Use primary green for success */
+    --color-info: #7A6F66;
+    /* Use warm taupe for info */
+    --color-warning: #E6B655;
+    /* Use honey gold for warnings */
+    --color-danger: #c74545;
+    /* Warm red that complements the palette */
+
+    /* Border and shadow colors */
+    --color-border: #e8e3db;
+    /* Light warm border */
+    --color-shadow: rgba(46, 43, 40, 0.1);
+    /* Subtle shadow using primary text color */
+}
+
+/* Apply the palette to common elements */
+
+/* Links */
+a {
+    color: var(--color-primary) !important;
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-primary-hover) !important;
+    text-decoration: underline;
+}
+
+/* Navigation links */
+.nav-link {
+    color: var(--color-text-secondary) !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+    color: var(--color-primary) !important;
+    background-color: rgba(36, 92, 79, 0.05) !important;
+}
+
+.nav-link.active {
+    color: white !important;
+    background-color: var(--color-primary) !important;
+    font-weight: 500;
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary-light) !important;
+    color: white !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
+    color: white !important;
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary) !important;
+    border-color: var(--color-secondary) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--color-secondary-hover) !important;
+    border-color: var(--color-secondary-hover) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.btn-warning {
+    background-color: var(--color-accent) !important;
+    border-color: var(--color-accent) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.btn-warning:hover,
+.btn-warning:focus {
+    background-color: var(--color-accent-hover) !important;
+    border-color: var(--color-accent-hover) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.btn-success {
+    background-color: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+    color: white !important;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+    background-color: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
+    color: white !important;
+}
+
+.btn-info {
+    background-color: var(--color-info) !important;
+    border-color: var(--color-info) !important;
+    color: white !important;
+}
+
+.btn-info:hover,
+.btn-info:focus {
+    background-color: #6b5f57 !important;
+    border-color: #6b5f57 !important;
+    color: white !important;
+}
+
+.btn-danger {
+    background-color: var(--color-danger) !important;
+    border-color: var(--color-danger) !important;
+    color: white !important;
+}
+
+.btn-danger:hover,
+.btn-danger:focus {
+    background-color: #b33d3d !important;
+    border-color: #b33d3d !important;
+    color: white !important;
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--color-primary) !important;
+}
+
+/* Text colors */
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-secondary {
+    color: var(--color-text-secondary) !important;
+}
+
+.text-muted {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Card and background updates */
+.card {
+    background-color: white;
+    border-color: var(--color-border);
+}
+
+/* Sidebar styling with new palette */
+.app-sidebar {
+    background: var(--color-bg-light) !important;
+    border-right: 1px solid var(--color-border) !important;
+}
+
+/* Success overlay color update */
+.success-icon {
+    color: var(--color-success) !important;
+}
+
+.success-title {
+    color: var(--color-success) !important;
+}
+
+/* Pulse animation update for scan button */
+@keyframes scan-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(36, 92, 79, 0.6);
+    }
+
+    50% {
+        box-shadow: 0 0 0 10px rgba(36, 92, 79, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(36, 92, 79, 0);
+    }
+}
+
+/* Dropdown styling */
+.dropdown-menu {
+    border-color: var(--color-border);
+}
+
+.dropdown-item:hover {
+    background-color: rgba(36, 92, 79, 0.05);
+    color: var(--color-primary);
+}
+
+/* Table styling */
+.table th {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-border);
+}
+
+.table td {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-border);
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>td,
+.table-striped>tbody>tr:nth-of-type(odd)>th {
+    background-color: rgba(249, 246, 241, 0.5);
+}
+
+/* Badge styling */
+.badge.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--color-secondary) !important;
+    color: var(--color-text-primary) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--color-accent) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Alert styling */
+.alert-success {
+    background-color: rgba(36, 92, 79, 0.1);
+    border-color: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.alert-info {
+    background-color: rgba(122, 111, 102, 0.1);
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-secondary);
+}
+
+.alert-warning {
+    background-color: rgba(230, 182, 85, 0.1);
+    border-color: var(--color-accent);
+    color: #8a6a14;
+}
+
+/* Form styling */
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(36, 92, 79, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.2rem rgba(36, 92, 79, 0.25);
+}
+
+/* Pagination styling */
+.page-link {
+    color: var(--color-primary);
+}
+
+.page-link:hover {
+    color: var(--color-primary-hover);
+    background-color: rgba(36, 92, 79, 0.05);
+    border-color: var(--color-primary-light);
+}
+
+.page-item.active .page-link {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+/* Navbar styling */
+.navbar-light .navbar-nav .nav-link {
+    color: var(--color-text-secondary);
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: var(--color-primary);
+}
+
+.navbar-light .navbar-toggler {
+    border-color: var(--color-border);
+}
+
+/* Tab styling */
+.nav-tabs .nav-link {
+    color: var(--color-text-secondary);
+    border-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--color-primary);
+    border-color: var(--color-border);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--color-primary);
+    background-color: white;
+    border-color: var(--color-border) var(--color-border) white;
+}
+
+/* Progress bar styling */
+.progress-bar {
+    background-color: var(--color-primary);
+}

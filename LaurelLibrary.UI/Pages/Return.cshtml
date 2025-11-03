@@ -39,8 +39,8 @@
         <div class="card-body p-0">
             <div class="d-flex">
                 <div class="d-flex flex-column align-items-center justify-content-center text-white p-3"
-                    style="width: 140px; background-color: #7ba7d1;">
-                    <span class="badge bg-white fs-5 mb-2" style="color: #7ba7d1;">Step 1</span>
+                    style="width: 140px; background-color: #245C4F;">
+                    <span class="badge bg-white fs-5 mb-2" style="color: #245C4F;">Step 1</span>
                     <span class="text-white text-center fw-semibold h4">Scan Reader Barcode</span>
                 </div>
                 <div class="flex-grow-1 p-3 d-flex align-items-center">
@@ -53,7 +53,7 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="ReaderEan" name="ReaderEan"
                                     placeholder="Scan or enter reader barcode" autofocus required />
-                                <button type="submit" class="btn btn-primary" style="background-color: #7ba7d1; border-color: #6b96bf;">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-upc-scan"></i> Find Reader
                                 </button>
                             </div>
@@ -81,8 +81,8 @@
             <div class="card-body p-0">
                 <div class="d-flex">
                     <div class="d-flex flex-column align-items-center justify-content-center text-white p-3"
-                        style="width: 140px; background-color: #9ec5d4;">
-                        <span class="badge bg-white fs-5 mb-2" style="color: #9ec5d4;">Step 2</span>
+                        style="width: 140px; background-color: #D8A48F;">
+                        <span class="badge bg-white fs-5 mb-2" style="color: #D8A48F;">Step 2</span>
                         <span class="text-white text-center fw-semibold h4">Scan Books to Return</span>
                     </div>
                     <div class="flex-grow-1 p-3">
@@ -95,7 +95,7 @@
                                     placeholder="Scan or enter book ISBN" autofocus required />
                                 <div class="form-text">Scan the book barcode or enter the book ISBN</div>
                             </div>
-                            <button type="submit" class="btn btn-info" style="background-color: #9ec5d4; border-color: #8db4c3;">
+                            <button type="submit" class="btn btn-info">
                                 <i class="bi bi-plus-circle"></i> Add Book
                             </button>
                         </form>
@@ -145,7 +145,7 @@
                                                         </span>
                                                     }
                                                 </td>
-                                                <td><span class="badge" style="background-color: #e8c896; color: #6b5a3d;">@book.Status</span></td>
+                                                <td><span class="badge bg-warning">@book.Status</span></td>
                                                 <td>
                                                     <form method="post" asp-page-handler="RemoveBook" class="d-inline">
                                                         <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
@@ -169,7 +169,7 @@
                                     <input type="hidden" name="LibraryId" value="@Model.LibraryId" />
                                     <input type="hidden" name="KioskId" value="@Model.KioskId" />
                                     <input type="hidden" name="BrowserFingerprint" value="@Model.BrowserFingerprint" />
-                                    <button type="submit" class="btn btn-lg btn-primary" style="background-color: #7ba7d1; border-color: #6b96bf;">
+                                    <button type="submit" class="btn btn-lg btn-primary">
                                         <i class="bi bi-box-arrow-in-left"></i> Return Books
                                     </button>
                                 </form>
