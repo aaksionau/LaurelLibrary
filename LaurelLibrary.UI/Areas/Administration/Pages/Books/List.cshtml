@@ -1,5 +1,6 @@
 ﻿@page "{pageNumber:int?}/{pageSize:int?}"
 @model LaurelLibrary.UI.Areas.Administration.Pages.Books.ListModel
+@using LaurelLibrary.UI.Extensions
 
 @{
     ViewData["Title"] = "Books";
@@ -139,7 +140,7 @@
                         <td style="width: 80px; cursor: pointer;" onclick="window.location='@Url.Page("/Books/Details", new { area = "Administration", id = book.BookId })'">
                             @if (!string.IsNullOrWhiteSpace(book.Image))
                             {
-                                <img src="@book.Image" alt="@book.Title" class="img-thumbnail" style="max-width: 60px; max-height: 80px; object-fit: cover;" />
+                                <img src="@Html.GetBlobUrl(book.Image)" alt="@book.Title" class="img-thumbnail" style="max-width: 60px; max-height: 80px; object-fit: cover;" />
                             }
                             else
                             {

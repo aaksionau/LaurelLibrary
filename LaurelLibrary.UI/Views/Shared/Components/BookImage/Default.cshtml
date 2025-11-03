@@ -1,0 +1,26 @@
+@model LaurelLibrary.UI.ViewComponents.BookImageViewModel
+
+@if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+{
+    <img src="@Model.ImageUrl" 
+         alt="@Model.AltText" 
+         class="@Model.CssClass"
+         @if (!string.IsNullOrWhiteSpace(Model.Style))
+         {
+             <text>style="@Model.Style"</text>
+         } />
+}
+else
+{
+    <div class="border bg-light d-flex align-items-center justify-content-center @Model.CssClass" 
+         @if (!string.IsNullOrWhiteSpace(Model.Style))
+         {
+             <text>style="@Model.Style"</text>
+         } 
+         else
+         {
+             <text>style="height:300px;"</text>
+         }>
+        <span class="text-muted">No image</span>
+    </div>
+}

@@ -3,6 +3,7 @@
 @using System.Text.RegularExpressions
 @using System.Net
 @using Microsoft.CodeAnalysis.CSharp.Syntax
+@using LaurelLibrary.UI.Extensions
 
 <style>
     /* Fix dropdown visibility in table containers */
@@ -74,7 +75,7 @@ else
             <div class="col-md-3 d-flex align-items-center justify-content-center p-3">
                 @if (!string.IsNullOrWhiteSpace(Model.Book.Image))
                 {
-                    <img src="@Model.Book.Image" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;"
+                    <img src="@Html.GetBlobUrl(Model.Book.Image)" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;"
                         alt="@Model.Book.Title">
                 }
                 else

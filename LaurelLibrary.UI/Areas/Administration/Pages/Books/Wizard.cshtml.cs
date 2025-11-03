@@ -44,33 +44,13 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             // If user is searching by ISBN
             if (!string.IsNullOrWhiteSpace(SearchIsbn))
             {
-                // Check if current Book is not null and has Title and Isbn
                 if (
                     Book != null
-                    && !string.IsNullOrWhiteSpace(Book.Title)
+                    && string.IsNullOrWhiteSpace(Book.Title)
                     && !string.IsNullOrWhiteSpace(Book.Isbn)
                 )
                 {
-                    // Get current user and library
-                    var currentUser = await _authenticationService.GetAppUserAsync();
-                    if (currentUser?.CurrentLibraryId == null)
-                    {
-                        ModelState.AddModelError(
-                            string.Empty,
-                            "Current user or library not found."
-                        );
-                        return Page();
-                    }
-
-                    var userFullName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
-
-                    // Save current book
-                    await _booksService.CreateOrUpdateBookAsync(
-                        Book,
-                        currentUser.Id,
-                        userFullName,
-                        currentUser.CurrentLibraryId.Value
-                    );
+                    await CreateBookAsync();
                 }
 
                 // Now perform the search by ISBN
@@ -92,9 +72,46 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 ModelState.Remove(nameof(SearchIsbn)); // Clear from ModelState
                 return Page();
             }
+            else
+            {
+                await CreateBookAsync();
+            }
+
             SearchIsbn = string.Empty; // Clear search field
             // If not searching by ISBN, just reload page
             return Page();
+        }
+
+        private async Task CreateBookAsync()
+        {
+            // Check if current Book is not null and has Title and Isbn
+            if (
+                Book == null
+                || string.IsNullOrWhiteSpace(Book.Title)
+                || !string.IsNullOrWhiteSpace(Book.Isbn)
+            )
+            {
+                return;
+            }
+            // Get current user and library
+            var currentUser = await _authenticationService.GetAppUserAsync();
+            if (currentUser?.CurrentLibraryId == null)
+            {
+                ModelState.AddModelError(string.Empty, "Current user or library not found.");
+                return;
+            }
+
+            var userFullName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
+
+            // Save current book
+            await _booksService.CreateOrUpdateBookAsync(
+                Book,
+                currentUser.Id,
+                userFullName,
+                currentUser.CurrentLibraryId.Value
+            );
+
+            return;
         }
     }
 }

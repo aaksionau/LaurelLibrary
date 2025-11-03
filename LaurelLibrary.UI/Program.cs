@@ -73,6 +73,7 @@ builder.Services.AddScoped<IBarcodeService, BarcodeService>();
 builder.Services.AddScoped<IReadersService, ReadersService>();
 builder.Services.AddScoped<IReaderAuthService, ReaderAuthService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IBlobUrlService, BlobUrlService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 

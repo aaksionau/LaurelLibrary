@@ -62,14 +62,15 @@ public class BlobStorageService : IBlobStorageService
                 );
             }
 
-            var blobUrl = blobClient.Uri.ToString();
+            // Return just the container and blob path, not the full URL
+            var blobPath = $"{containerName}/{finalBlobName}";
             _logger.LogInformation(
-                "File uploaded successfully to {Url} in container {Container}",
-                blobUrl,
+                "File uploaded successfully to {BlobPath} in container {Container}",
+                blobPath,
                 containerName
             );
 
-            return blobUrl;
+            return blobPath;
         }
         catch (Exception ex)
         {
@@ -110,14 +111,15 @@ public class BlobStorageService : IBlobStorageService
                 new BlobUploadOptions { HttpHeaders = blobHttpHeaders }
             );
 
-            var blobUrl = blobClient.Uri.ToString();
+            // Return just the container and blob path, not the full URL
+            var blobPath = $"{containerName}/{blobName}";
             _logger.LogInformation(
-                "Stream uploaded successfully to {Url} in container {Container}",
-                blobUrl,
+                "Stream uploaded successfully to {BlobPath} in container {Container}",
+                blobPath,
                 containerName
             );
 
-            return blobUrl;
+            return blobPath;
         }
         catch (Exception ex)
         {
@@ -126,28 +128,49 @@ public class BlobStorageService : IBlobStorageService
         }
     }
 
-    public async Task<bool> DeleteFileAsync(string blobUrl)
+    public async Task<bool> DeleteFileAsync(string blobPath)
     {
-        if (string.IsNullOrWhiteSpace(blobUrl))
+        if (string.IsNullOrWhiteSpace(blobPath))
         {
-            _logger.LogWarning("Attempted to delete blob with null or empty URL");
+            _logger.LogWarning("Attempted to delete blob with null or empty path");
             return false;
         }
 
         try
         {
-            // Parse the blob URL to get container and blob name
-            var uri = new Uri(blobUrl);
-            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            string containerName;
+            string blobName;
 
-            if (segments.Length < 2)
+            // Check if it's a full URL (backward compatibility) or just a path
+            if (blobPath.StartsWith("http://") || blobPath.StartsWith("https://"))
             {
-                _logger.LogWarning("Invalid blob URL format: {Url}", blobUrl);
-                return false;
-            }
+                // Parse the blob URL to get container and blob name (backward compatibility)
+                var uri = new Uri(blobPath);
+                var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-            var containerName = segments[0];
-            var blobName = string.Join("/", segments.Skip(1));
+                if (segments.Length < 2)
+                {
+                    _logger.LogWarning("Invalid blob URL format: {Path}", blobPath);
+                    return false;
+                }
+
+                containerName = segments[0];
+                blobName = string.Join("/", segments.Skip(1));
+            }
+            else
+            {
+                // Handle path-only format: "container/path/to/blob"
+                var pathSegments = blobPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+                if (pathSegments.Length < 2)
+                {
+                    _logger.LogWarning("Invalid blob path format: {Path}", blobPath);
+                    return false;
+                }
+
+                containerName = pathSegments[0];
+                blobName = string.Join("/", pathSegments.Skip(1));
+            }
 
             var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
@@ -156,18 +179,18 @@ public class BlobStorageService : IBlobStorageService
 
             if (response.Value)
             {
-                _logger.LogInformation("Blob deleted successfully: {Url}", blobUrl);
+                _logger.LogInformation("Blob deleted successfully: {Path}", blobPath);
             }
             else
             {
-                _logger.LogWarning("Blob not found for deletion: {Url}", blobUrl);
+                _logger.LogWarning("Blob not found for deletion: {Path}", blobPath);
             }
 
             return response.Value;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete blob: {Url}", blobUrl);
+            _logger.LogError(ex, "Failed to delete blob: {Path}", blobPath);
             return false;
         }
     }

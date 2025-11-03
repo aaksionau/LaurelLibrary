@@ -11,7 +11,7 @@ public interface IBlobStorageService
     /// <param name="file">The file to upload</param>
     /// <param name="containerName">The container name where the file will be stored</param>
     /// <param name="blobName">The name for the blob (if null, uses the original filename)</param>
-    /// <returns>The URL of the uploaded blob</returns>
+    /// <returns>The path of the uploaded blob (container/blobname) without domain</returns>
     Task<string?> UploadFileAsync(IFormFile file, string containerName, string? blobName = null);
 
     /// <summary>
@@ -22,7 +22,7 @@ public interface IBlobStorageService
     /// <param name="blobName">The name for the blob</param>
     /// <param name="contentType">The content type of the file</param>
     /// <param name="publicAccess">The public access level for the container</param>
-    /// <returns>The URL of the uploaded blob</returns>
+    /// <returns>The path of the uploaded blob (container/blobname) without domain</returns>
     Task<string?> UploadStreamAsync(
         Stream stream,
         string containerName,
@@ -34,7 +34,7 @@ public interface IBlobStorageService
     /// <summary>
     /// Deletes a file from Azure Blob Storage
     /// </summary>
-    /// <param name="blobUrl">The URL of the blob to delete</param>
+    /// <param name="blobPath">The path of the blob to delete (can be full URL for backward compatibility or just container/blobname)</param>
     /// <returns>True if deletion was successful, false otherwise</returns>
-    Task<bool> DeleteFileAsync(string blobUrl);
+    Task<bool> DeleteFileAsync(string blobPath);
 }
