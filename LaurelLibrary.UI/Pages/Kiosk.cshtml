@@ -1,7 +1,7 @@
-﻿@page
-@model IndexModel
+@page
+@model KioskModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Kiosk";
 }
 
 @section Head {
@@ -53,9 +53,10 @@
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
                                     class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
                                     style="font-size: 1.5rem; background: linear-gradient(135deg, #245C4F 0%, #1e4a3f 100%); color: white; border: none; min-height: 280px;">
-                                    <i class="bi bi-box-arrow-in-left mb-4" style="font-size: 4rem;"></i>
-                                    <span class="fw-bold mb-2">Return Books</span>
-                                    <small class="opacity-75" style="font-size: 0.9rem;">Drop off your borrowed
+                                    <i class="bi bi-box-arrow-in-left mb-4" style="font-size: 4rem; color: white;"></i>
+                                    <span class="fw-bold mb-2" style="color: white;">Return Books</span>
+                                    <small style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">Drop off your
+                                        borrowed
                                         items</small>
                                 </a>
                             </div>
@@ -71,9 +72,9 @@
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
                                     class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
                                     style="font-size: 1.5rem; background: linear-gradient(135deg, #E6B655 0%, #e2b143 100%); color: white; border: none; min-height: 280px;">
-                                    <i class="bi bi-box-arrow-right mb-4" style="font-size: 4rem;"></i>
-                                    <span class="fw-bold mb-2">Checkout Books</span>
-                                    <small class="opacity-75" style="font-size: 0.9rem;">Borrow items from the
+                                    <i class="bi bi-box-arrow-right mb-4" style="font-size: 4rem; color: white;"></i>
+                                    <span class="fw-bold mb-2" style="color: white;">Checkout Books</span>
+                                    <small style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">Borrow items from the
                                         library</small>
                                 </a>
                             </div>
@@ -103,7 +104,8 @@ else
                     <hr class="my-4">
                     <div class="alert alert-info border-0" role="alert" style="background-color: #F9F6F1;">
                         <i class="bi bi-info-circle-fill me-2" style="color: #245C4F;"></i>
-                        <small style="color: #2E2B28;">Please configure your library and kiosk settings to get started.</small>
+                        <small style="color: #2E2B28;">Please configure your library and kiosk settings to get
+                            started.</small>
                     </div>
                 </div>
             </div>
@@ -141,13 +143,13 @@ else
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
-    <script src="~/js/index.js"></script>
+    <script src="~/js/kiosk.js"></script>
     <script>
-        // Initialize index page functionality
-        initializeIndexPage({
+        // Initialize kiosk page functionality
+        initializeKioskPage({
             showCheckoutSuccess: @Json.Serialize(Model.ShowCheckoutSuccess && !string.IsNullOrEmpty(Model.Message)),
             showReturnSuccess: @Json.Serialize(Model.ShowReturnSuccess && !string.IsNullOrEmpty(Model.Message))
-                    });
+                            });
 
         // Initialize fingerprint and redirect functionality
         initializeFingerprintAndRedirect();

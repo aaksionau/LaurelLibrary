@@ -1,4 +1,4 @@
-// Index page JavaScript functionality
+// Kiosk page JavaScript functionality
 
 // Success overlay functionality
 function closeSuccessOverlay() {
@@ -11,8 +11,8 @@ function closeReturnSuccessOverlay() {
     overlay.style.display = 'none';
 }
 
-// Initialize index page functionality
-function initializeIndexPage(options) {
+// Initialize kiosk page functionality
+function initializeKioskPage(options) {
     const { showCheckoutSuccess = false, showReturnSuccess = false } = options;
 
     // Show success overlay if checkout was successful

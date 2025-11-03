@@ -10,17 +10,17 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LaurelLibrary.UI.Pages;
 
-public class IndexModel : PageModel
+public class KioskModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    private readonly ILogger<KioskModel> _logger;
     private readonly UserManager<AppUser> manager;
     private readonly IAuthenticationService userService;
     private readonly ILibrariesRepository librariesRepository;
     private readonly IKiosksRepository kiosksRepository;
     private readonly SignInManager<AppUser> signInManager;
 
-    public IndexModel(
-        ILogger<IndexModel> logger,
+    public KioskModel(
+        ILogger<KioskModel> logger,
         UserManager<AppUser> manager,
         IAuthenticationService userService,
         ILibrariesRepository librariesRepository,
@@ -89,6 +89,6 @@ public class IndexModel : PageModel
         var user = await this.userService.GetAppUserAsync();
         user.CurrentLibraryId = SelectedLibraryId.HasValue ? SelectedLibraryId.Value : null;
         await this.manager.UpdateAsync(user);
-        return RedirectToPage("/Index");
+        return RedirectToPage("/Kiosk");
     }
 }

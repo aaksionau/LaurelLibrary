@@ -353,8 +353,8 @@ namespace LaurelLibrary.UI.Pages
                 ScannedBooks.Clear();
                 CurrentReader = null;
 
-                // Redirect to index page so someone else can start from the beginning
-                return RedirectToPage("/Index", new { libraryId = LibraryId });
+                // Redirect to kiosk page so someone else can start from the beginning
+                return RedirectToPage("/Kiosk", new { libraryId = LibraryId });
             }
             else
             {
