@@ -6,13 +6,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Checkout Confirmation - Laurel Library</title>
+    <title>Book Checkout Confirmation - MyLibrarian</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333333;
-            background-color: #f8f9fa;
+            color: #2E2B28;
+            background-color: #F9F6F1;
             margin: 0;
             padding: 0;
         }
@@ -21,13 +21,10 @@
             max-width: 600px;
             margin: 0 auto;
             background-color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #245C4F;
             color: white;
             padding: 30px;
             text-align: center;
@@ -52,24 +49,23 @@
         .greeting {
             font-size: 18px;
             margin-bottom: 20px;
-            color: #2c3e50;
+            color: #245C4F;
         }
 
         .message {
             font-size: 16px;
             margin-bottom: 30px;
             line-height: 1.8;
-            color: #555555;
+            color: #7A6F66;
         }
 
         .due-date-box {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background-color: rgba(36, 92, 79, 0.1);
+            border: 1px solid #245C4F;
+            color: #245C4F;
             padding: 20px;
-            border-radius: 8px;
             text-align: center;
             margin: 30px 0;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
         }
 
         .due-date-box .label {
@@ -87,11 +83,9 @@
         }
 
         .checkout-info {
-            background-color: #e7f3ff;
-            border-left: 4px solid #2196f3;
+            background-color: #F9F6F1;
             padding: 20px;
             margin: 30px 0;
-            border-radius: 0 8px 8px 0;
         }
 
         .checkout-info .info-row {
@@ -103,11 +97,11 @@
 
         .checkout-info .label {
             font-weight: 600;
-            color: #0d47a1;
+            color: #245C4F;
         }
 
         .checkout-info .value {
-            color: #1565c0;
+            color: #2E2B28;
         }
 
         .books-section {
@@ -115,47 +109,43 @@
         }
 
         .books-section h2 {
-            color: #2c3e50;
+            color: #245C4F;
             font-size: 20px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #245C4F;
             padding-bottom: 10px;
         }
 
         .book-item {
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            background-color: #F9F6F1;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s ease;
         }
 
         .book-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #f0ede5;
         }
 
         .book-item .book-title {
             font-size: 18px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #2E2B28;
             margin-bottom: 10px;
         }
 
         .book-item .book-authors {
             font-size: 14px;
-            color: #6c757d;
+            color: #7A6F66;
             margin-bottom: 8px;
             font-style: italic;
         }
 
         .book-item .book-details {
             font-size: 13px;
-            color: #868e96;
+            color: #7A6F66;
             margin-top: 10px;
             padding-top: 10px;
-            border-top: 1px dashed #dee2e6;
+            border-top: 1px solid #e8e3db;
         }
 
         .book-item .book-details span {
@@ -163,32 +153,30 @@
         }
 
         .reminder-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 20px;
-            border-radius: 8px;
+            background-color: rgba(230, 182, 85, 0.1);
+            border-left: 4px solid #E6B655;
+            padding: 15px 20px;
             margin: 30px 0;
         }
 
         .reminder-box .icon {
-            font-size: 20px;
-            margin-right: 10px;
+            color: #8a6a14;
+            font-weight: bold;
+            margin-right: 8px;
         }
 
         .reminder-box strong {
-            color: #533f03;
+            color: #2E2B28;
         }
 
         .library-info-box {
-            background-color: #f8f9fa;
-            border-radius: 8px;
+            background-color: #F9F6F1;
             padding: 20px;
             margin: 30px 0;
         }
 
         .library-info-box h3 {
-            color: #2c3e50;
+            color: #245C4F;
             font-size: 18px;
             margin-top: 0;
             margin-bottom: 15px;
@@ -196,30 +184,30 @@
 
         .library-info-box p {
             margin: 8px 0;
-            color: #495057;
+            color: #7A6F66;
             line-height: 1.6;
         }
 
         .library-info-box .library-name {
             font-weight: 700;
             font-size: 16px;
-            color: #667eea;
+            color: #245C4F;
             margin-bottom: 10px;
         }
 
         .footer {
-            background-color: #f8f9fa;
+            background-color: #F9F6F1;
             padding: 30px;
             text-align: center;
-            border-top: 1px solid #dee2e6;
+            border-top: 1px solid #e8e3db;
             font-size: 14px;
-            color: #6c757d;
+            color: #7A6F66;
         }
 
         .footer .library-info {
             margin-bottom: 15px;
             font-weight: 600;
-            color: #495057;
+            color: #2E2B28;
         }
 
         .footer .support-info {
@@ -228,16 +216,15 @@
         }
 
         .tips-section {
-            background-color: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 20px;
+            background-color: rgba(36, 92, 79, 0.1);
+            border-left: 4px solid #245C4F;
+            padding: 15px 20px;
             margin: 30px 0;
-            border-radius: 0 8px 8px 0;
         }
 
         .tips-section h3 {
             margin-top: 0;
-            color: #155724;
+            color: #245C4F;
             font-size: 16px;
         }
 
@@ -247,16 +234,15 @@
         }
 
         .tips-section li {
-            color: #155724;
+            color: #2E2B28;
             margin: 8px 0;
         }
 
         .book-count {
-            background-color: #667eea;
+            background-color: #245C4F;
             color: white;
             display: inline-block;
             padding: 5px 15px;
-            border-radius: 20px;
             font-weight: 600;
             font-size: 14px;
             margin-left: 10px;
@@ -267,9 +253,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <span class="icon">📚</span>
-            <h1>Book Checkout Confirmation</h1>
-            <p>Your books are ready!</p>
+            <h1>MyLibrarian</h1>
+            <p>Book Checkout Confirmation</p>
         </div>
 
         <div class="content">
@@ -308,7 +293,7 @@
                 @foreach (var book in Model.Books)
                 {
                     <div class="book-item">
-                        <div class="book-title">📖 @book.Title</div>
+                        <div class="book-title">@book.Title</div>
                         <div class="book-authors">by @book.Authors</div>
                         @if (!string.IsNullOrEmpty(book.Isbn) || !string.IsNullOrEmpty(book.Publisher))
                         {
@@ -328,7 +313,6 @@
             </div>
 
             <div class="reminder-box">
-                <span class="icon">⏰</span>
                 <strong>Important Reminder:</strong>
                 Please return all books by <strong>@Model.DueDate.ToString("MMMM dd, yyyy")</strong>
                 to avoid late fees. You can renew your books online if you need more time,
@@ -336,7 +320,7 @@
             </div>
 
             <div class="tips-section">
-                <h3>📌 Quick Tips</h3>
+                <h3>Quick Tips</h3>
                 <ul>
                     <li>Keep your books in good condition to avoid replacement fees</li>
                     <li>Set a reminder a few days before the due date</li>
@@ -365,17 +349,17 @@
 
         <div class="footer">
             <div class="library-info">
-                @Model.LibraryName
+                MyLibrarian System
             </div>
             <div>
-                This is an automated message from the Laurel Library system.
+                This is an automated message from the MyLibrarian system.
                 Please do not reply to this email.
             </div>
             <div class="support-info">
                 Need help? Contact our support team for assistance with your library account.
             </div>
             <div style="margin-top: 15px; font-size: 12px; color: #adb5bd;">
-                © @DateTime.Now.Year Laurel Library. All rights reserved.
+                © @DateTime.Now.Year MyLibrarian. All rights reserved.
             </div>
         </div>
     </div>

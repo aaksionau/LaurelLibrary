@@ -6,26 +6,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reader Login Verification Code</title>
+    <title>Reader Login Verification Code - MyLibrarian</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f4;
+            line-height: 1.6;
+            color: #2E2B28;
+            background-color: #F9F6F1;
             margin: 0;
             padding: 0;
         }
 
         .container {
             max-width: 600px;
-            margin: 40px auto;
+            margin: 0 auto;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
         }
 
         .header {
-            background-color: #0066cc;
+            background-color: #245C4F;
             color: white;
             padding: 30px;
             text-align: center;
@@ -33,7 +32,8 @@
 
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 300;
         }
 
         .content {
@@ -42,21 +42,19 @@
 
         .greeting {
             font-size: 18px;
-            color: #333;
             margin-bottom: 20px;
+            color: #245C4F;
         }
 
         .message {
             font-size: 16px;
-            color: #555;
-            line-height: 1.6;
             margin-bottom: 30px;
+            line-height: 1.8;
+            color: #7A6F66;
         }
 
         .verification-code {
-            background-color: #f8f9fa;
-            border: 2px solid #0066cc;
-            border-radius: 8px;
+            background-color: #F9F6F1;
             padding: 25px;
             text-align: center;
             margin: 30px 0;
@@ -65,32 +63,39 @@
         .code {
             font-size: 36px;
             font-weight: bold;
-            color: #0066cc;
+            color: #245C4F;
             letter-spacing: 8px;
             font-family: 'Courier New', monospace;
         }
 
         .code-label {
             font-size: 14px;
-            color: #666;
+            color: #7A6F66;
             margin-bottom: 10px;
         }
 
-        .warning {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
+        .security-note {
+            background-color: rgba(230, 182, 85, 0.1);
+            border-left: 4px solid #E6B655;
+            padding: 15px 20px;
+            margin: 30px 0;
             font-size: 14px;
-            color: #856404;
+            color: #8a6a14;
         }
 
         .footer {
-            background-color: #f8f9fa;
-            padding: 20px 30px;
+            background-color: #F9F6F1;
+            padding: 30px;
             text-align: center;
-            font-size: 12px;
-            color: #666;
+            border-top: 1px solid #e8e3db;
+            font-size: 14px;
+            color: #7A6F66;
+        }
+
+        .footer .library-info {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2E2B28;
         }
     </style>
 </head>
@@ -98,31 +103,40 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 Reader Login Verification</h1>
+            <h1>MyLibrarian</h1>
+            <p>Reader Login Verification</p>
         </div>
         <div class="content">
             <div class="greeting">
                 Hello @Model.ReaderName,
             </div>
             <div class="message">
-                You have requested to log in to your library account. Please use the verification code below to complete
-                your login:
+                You have requested to log in to your MyLibrarian account. Please use the verification code below to
+                complete your login and access your borrowed books.
             </div>
             <div class="verification-code">
                 <div class="code-label">YOUR VERIFICATION CODE</div>
                 <div class="code">@Model.VerificationCode</div>
             </div>
             <div class="message">
-                Enter this code on the verification page to access your borrowed books.
+                Enter this code on the verification page to access your library account.
             </div>
-            <div class="warning">
-                ⚠️ <strong>Security Notice:</strong> This code will expire in 10 minutes. If you did not request this
-                code, please ignore this email.
+            <div class="security-note">
+                <strong>Security Notice:</strong> This code will expire in 10 minutes for your security. If you did not
+                request this code, you can safely ignore this email. Your account remains secure.
             </div>
         </div>
         <div class="footer">
-            <p>This is an automated message from Laurel Library System.</p>
-            <p>Please do not reply to this email.</p>
+            <div class="library-info">
+                MyLibrarian System
+            </div>
+            <div>
+                This is an automated message from the MyLibrarian system.
+                Please do not reply to this email.
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: #adb5bd;">
+                © @DateTime.Now.Year MyLibrarian. All rights reserved.
+            </div>
         </div>
     </div>
 </body>

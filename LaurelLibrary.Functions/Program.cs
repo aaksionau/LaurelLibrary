@@ -30,7 +30,6 @@ builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>();
 builder.Services.AddScoped<IReadersRepository, ReadersRepository>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
-builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
@@ -38,6 +37,7 @@ builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
 
 // Register services
 // BooksService is registered with HttpClient below
+builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
