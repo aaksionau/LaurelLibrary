@@ -52,6 +52,37 @@ else
                         <span class="ms-1">@Model.Reader.Email</span>
                     </p>
                 }
+                @if (!string.IsNullOrWhiteSpace(Model.Reader.Address) || !string.IsNullOrWhiteSpace(Model.Reader.City) ||
+                            !string.IsNullOrWhiteSpace(Model.Reader.State) || !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                {
+                    <p class="mb-2">
+                        <i class="bi bi-geo-alt text-primary me-2"></i>
+                        <strong>Address:</strong>
+                        <span class="ms-1">
+                            @if (!string.IsNullOrWhiteSpace(Model.Reader.Address))
+                            {
+                                @Model.Reader.Address
+                                @if (!string.IsNullOrWhiteSpace(Model.Reader.City) || !string.IsNullOrWhiteSpace(Model.Reader.State)
+                                                    || !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                                {
+                                    <br />
+                                }
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.Reader.City) || !string.IsNullOrWhiteSpace(Model.Reader.State)
+                                                || !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                            {
+                                @Model.Reader.City
+                                @(!string.IsNullOrWhiteSpace(Model.Reader.City) &&
+                                                    (!string.IsNullOrWhiteSpace(Model.Reader.State) || !string.IsNullOrWhiteSpace(Model.Reader.Zip)) ?
+                                                    ", " : "")
+                                @Model.Reader.State
+                                @(!string.IsNullOrWhiteSpace(Model.Reader.State) &&
+                                                    !string.IsNullOrWhiteSpace(Model.Reader.Zip) ? " " : "")
+                                @Model.Reader.Zip
+                            }
+                        </span>
+                    </p>
+                }
                 @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
                 {
                     <p class="mb-2">
@@ -124,8 +155,57 @@ else
                             </div>
                         </div>
 
-                        <!-- Associated Libraries -->
+                        <!-- Contact Information -->
                         <div class="col-md-6">
+                            <h5 class="text-muted mb-3"><i class="bi bi-envelope me-2"></i>Contact Information</h5>
+                            <div>
+                                @if (!string.IsNullOrWhiteSpace(Model.Reader.Email))
+                                {
+                                    <div class="mb-2"><strong>Email:</strong> <span class="ms-1">@Model.Reader.Email</span>
+                                    </div>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(Model.Reader.Address) ||
+                                                            !string.IsNullOrWhiteSpace(Model.Reader.City) ||
+                                                            !string.IsNullOrWhiteSpace(Model.Reader.State) ||
+                                                            !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                                {
+                                    <div class="mb-2">
+                                        <strong>Full Address:</strong>
+                                        <span class="ms-1">
+                                            @if (!string.IsNullOrWhiteSpace(Model.Reader.Address))
+                                            {
+                                                @Model.Reader.Address
+                                                @if (!string.IsNullOrWhiteSpace(Model.Reader.City) ||
+                                                                                    !string.IsNullOrWhiteSpace(Model.Reader.State) ||
+                                                                                    !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                                                {
+                                                    <br />
+                                                }
+                                            }
+                                            @if (!string.IsNullOrWhiteSpace(Model.Reader.City) ||
+                                                                                !string.IsNullOrWhiteSpace(Model.Reader.State) ||
+                                                                                !string.IsNullOrWhiteSpace(Model.Reader.Zip))
+                                            {
+                                                @Model.Reader.City
+                                                @(!string.IsNullOrWhiteSpace(Model.Reader.City) &&
+                                                                                    (!string.IsNullOrWhiteSpace(Model.Reader.State) ||
+                                                                                    !string.IsNullOrWhiteSpace(Model.Reader.Zip)) ? ", " :
+                                                                                    "")
+                                                @Model.Reader.State
+                                                @(!string.IsNullOrWhiteSpace(Model.Reader.State) &&
+                                                                                    !string.IsNullOrWhiteSpace(Model.Reader.Zip) ? " " : "")
+                                                @Model.Reader.Zip
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Associated Libraries Section -->
+                    <div class="row g-4 mt-3">
+                        <div class="col-12">
                             <h5 class="text-muted mb-3"><i class="bi bi-building me-2"></i>Associated Libraries</h5>
                             <div>
                                 @if (Model.Reader.LibraryNames.Any())
@@ -178,7 +258,9 @@ else
                                     <p class="text-muted font-monospace fs-5">@Model.Reader.Ean</p>
                                 }
                                 <div class="d-flex gap-2 justify-content-center mt-4">
-                                    <form method="post" asp-page-handler="RegenerateBarcode" asp-route-id="@Model.Reader.ReaderId" onsubmit="return confirm('Are you sure you want to regenerate the barcode? This will create a new barcode image.');">
+                                    <form method="post" asp-page-handler="RegenerateBarcode"
+                                        asp-route-id="@Model.Reader.ReaderId"
+                                        onsubmit="return confirm('Are you sure you want to regenerate the barcode? This will create a new barcode image.');">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-warning">
                                             <i class="bi bi-arrow-clockwise me-1"></i>Regenerate Barcode
@@ -197,7 +279,8 @@ else
                                     <div class="font-monospace mt-3 fs-5">@Model.Reader.Ean</div>
                                 </div>
                                 <div class="d-flex gap-2 justify-content-center mt-3">
-                                    <form method="post" asp-page-handler="RegenerateBarcode" asp-route-id="@Model.Reader.ReaderId">
+                                    <form method="post" asp-page-handler="RegenerateBarcode"
+                                        asp-route-id="@Model.Reader.ReaderId">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-primary">
                                             <i class="bi bi-arrow-clockwise me-1"></i>Generate Barcode
@@ -459,14 +542,17 @@ else
                     size: auto;
                     margin: 10mm;
                 }
+
                 body {
                     margin: 0;
                 }
+
                 .print-container {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 15px;
                 }
+
                 .print-barcode-card {
                     page-break-inside: avoid;
                     width: calc(50% - 10px);
@@ -475,14 +561,17 @@ else
                     text-align: center;
                     box-sizing: border-box;
                 }
+
                 .print-barcode-card h4 {
                     margin: 10px 0 5px 0;
                     font-size: 16px;
                 }
+
                 .print-barcode-card p {
                     margin: 5px 0;
                     font-size: 12px;
                 }
+
                 .print-barcode-card img {
                     max-width: 100%;
                     height: auto;
@@ -508,7 +597,7 @@ else
         function printBarcode() {
             // Clone the print area
             var printContent = document.getElementById('printArea').innerHTML;
-            
+
             // Create a new window for printing
             var printWindow = window.open('', '_blank');
             printWindow.document.write('<html><head><title>Print Barcode</title>');
@@ -525,9 +614,9 @@ else
             printWindow.document.write(printContent);
             printWindow.document.write('</body></html>');
             printWindow.document.close();
-            
+
             // Wait for images to load before printing
-            printWindow.onload = function() {
+            printWindow.onload = function () {
                 printWindow.focus();
                 printWindow.print();
                 printWindow.close();

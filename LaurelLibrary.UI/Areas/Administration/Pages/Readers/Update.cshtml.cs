@@ -29,6 +29,10 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Readers
                 LastName = "",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.Today),
                 Email = "",
+                Address = "",
+                City = "",
+                State = "",
+                Zip = "",
             };
 
         public async Task OnGetAsync(int? id)

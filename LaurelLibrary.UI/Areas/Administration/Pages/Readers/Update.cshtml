@@ -39,6 +39,29 @@
                     <i class="bi bi-info-circle me-1"></i>Required for reader login verification
                 </div>
             </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Reader.Address">Address</label>
+                <textarea class="form-control" asp-for="Reader.Address" rows="3"
+                    placeholder="Enter full address"></textarea>
+                <span asp-validation-for="Reader.Address" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" asp-for="Reader.City">City</label>
+                    <input class="form-control" asp-for="Reader.City" placeholder="Enter city" />
+                    <span asp-validation-for="Reader.City" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" asp-for="Reader.State">State</label>
+                    <input class="form-control" asp-for="Reader.State" placeholder="Enter state" />
+                    <span asp-validation-for="Reader.State" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" asp-for="Reader.Zip">Zip Code</label>
+                    <input class="form-control" asp-for="Reader.Zip" placeholder="Enter zip code" />
+                    <span asp-validation-for="Reader.Zip" class="text-danger"></span>
+                </div>
+            </div>
             @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
             {
                 <div class="mb-3">

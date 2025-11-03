@@ -20,6 +20,18 @@ public class ReaderDto
     [EmailAddress(ErrorMessage = "Please enter a valid email address")]
     public required string Email { get; set; }
 
+    [Required(ErrorMessage = "Address is required")]
+    public required string Address { get; set; }
+
+    [Required(ErrorMessage = "City is required")]
+    public required string City { get; set; }
+
+    [Required(ErrorMessage = "State is required")]
+    public required string State { get; set; }
+
+    [Required(ErrorMessage = "Zip code is required")]
+    public required string Zip { get; set; }
+
     public string FullName => $"{FirstName} {LastName}".Trim();
     public string? Ean { get; set; }
     public string? BarcodeImageUrl { get; set; }

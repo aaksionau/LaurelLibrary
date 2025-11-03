@@ -88,6 +88,10 @@ public class ReadersRepository : IReadersRepository
         existing.LastName = reader.LastName;
         existing.DateOfBirth = reader.DateOfBirth;
         existing.Email = reader.Email;
+        existing.Address = reader.Address;
+        existing.City = reader.City;
+        existing.State = reader.State;
+        existing.Zip = reader.Zip;
         // Only update EAN if it's provided (not null or empty)
         if (!string.IsNullOrWhiteSpace(reader.Ean))
         {

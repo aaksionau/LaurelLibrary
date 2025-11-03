@@ -359,6 +359,10 @@ public class ReadersService : IReadersService
             LastName = entity.LastName,
             DateOfBirth = entity.DateOfBirth,
             Email = entity.Email,
+            Address = entity.Address,
+            City = entity.City,
+            State = entity.State,
+            Zip = entity.Zip,
             Ean = entity.Ean,
             BarcodeImageUrl = entity.BarcodeImageUrl,
             LibraryIds = entity.Libraries.Select(l => l.LibraryId).ToList(),
@@ -379,6 +383,10 @@ public class ReadersService : IReadersService
             LastName = dto.LastName,
             DateOfBirth = dto.DateOfBirth,
             Email = dto.Email,
+            Address = dto.Address,
+            City = dto.City,
+            State = dto.State,
+            Zip = dto.Zip,
         };
 
         // Attach libraries if specified
