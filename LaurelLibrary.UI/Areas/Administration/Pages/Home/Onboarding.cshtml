@@ -1,0 +1,345 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Home.OnboardingModel
+@{
+    ViewData["Title"] = "Getting Started";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4 text-primary mb-3">
+                    <i class="fas fa-rocket me-3"></i>Welcome to Laurel Library!
+                </h1>
+                <p class="lead text-muted">Let's get your library system set up. Complete these 4 simple steps to get
+                    started.</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-2">Setup Progress</h5>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                    style="width: @(Model.OnboardingStatus.CompletedSteps * 100.0 / Model.OnboardingStatus.TotalSteps)%"
+                                    aria-valuenow="@Model.OnboardingStatus.CompletedSteps" aria-valuemin="0"
+                                    aria-valuemax="@Model.OnboardingStatus.TotalSteps">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span
+                                class="h4 text-success">@Model.OnboardingStatus.CompletedSteps/@Model.OnboardingStatus.TotalSteps</span>
+                            <small class="text-muted d-block">Steps completed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onboarding Steps -->
+            <div class="row">
+                <!-- Step 1: Create Library -->
+                <div class="col-md-6 mb-4">
+                    <div
+                        class="card h-100 @(Model.OnboardingStatus.HasLibrary ? "border-success" : "border-secondary")">
+                        <div
+                            class="card-header @(Model.OnboardingStatus.HasLibrary ? "bg-success text-white" : "bg-light")">
+                            <div class="d-flex align-items-center">
+                                @if (Model.OnboardingStatus.HasLibrary)
+                                {
+                                    <i class="fas fa-check-circle me-2"></i>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary me-2">1</span>
+                                }
+                                <h5 class="mb-0">Create Your Library</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Set up your library with basic information like name, address, and
+                                settings.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @if (Model.OnboardingStatus.HasLibrary)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                    <a href="~/Administration/Libraries" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Manage
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not started</span>
+                                    <a href="~/Administration/Libraries/Update" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Create Library
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Add a Kiosk -->
+                <div class="col-md-6 mb-4">
+                    <div
+                        class="card h-100 @(Model.OnboardingStatus.HasKiosk ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        <div
+                            class="card-header @(Model.OnboardingStatus.HasKiosk ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            <div class="d-flex align-items-center">
+                                @if (Model.OnboardingStatus.HasKiosk)
+                                {
+                                    <i class="fas fa-check-circle me-2"></i>
+                                }
+                                else
+                                {
+                                    <span
+                                        class="badge @(Model.OnboardingStatus.HasLibrary ? "bg-primary" : "bg-secondary") me-2">2</span>
+                                }
+                                <h5 class="mb-0">Add a Kiosk</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Set up a kiosk location where readers can check out and return books.
+                            </p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @if (Model.OnboardingStatus.HasKiosk)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                    <a href="~/Administration/Kiosks" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Manage
+                                    </a>
+                                }
+                                else if (Model.OnboardingStatus.HasLibrary)
+                                {
+                                    <span class="text-muted">Not started</span>
+                                    <a href="~/Administration/Kiosks/Update/@Model.OnboardingStatus.LibraryId"
+                                        class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Add Kiosk
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>Complete step 1 first
+                                    </span>
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-plus me-1"></i>Add Kiosk
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Add a Reader -->
+                <div class="col-md-6 mb-4">
+                    <div
+                        class="card h-100 @(Model.OnboardingStatus.HasReader ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        <div
+                            class="card-header @(Model.OnboardingStatus.HasReader ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            <div class="d-flex align-items-center">
+                                @if (Model.OnboardingStatus.HasReader)
+                                {
+                                    <i class="fas fa-check-circle me-2"></i>
+                                }
+                                else
+                                {
+                                    <span
+                                        class="badge @(Model.OnboardingStatus.HasLibrary ? "bg-primary" : "bg-secondary") me-2">3</span>
+                                }
+                                <h5 class="mb-0">Add a Reader</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Register your first reader who will be able to borrow books from your
+                                library.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @if (Model.OnboardingStatus.HasReader)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                    <a href="~/Administration/Readers" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Manage
+                                    </a>
+                                }
+                                else if (Model.OnboardingStatus.HasLibrary)
+                                {
+                                    <span class="text-muted">Not started</span>
+                                    <a href="~/Administration/Readers/Update" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-user-plus me-1"></i>Add Reader
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>Complete step 1 first
+                                    </span>
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-user-plus me-1"></i>Add Reader
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Add a Book -->
+                <div class="col-md-6 mb-4">
+                    <div
+                        class="card h-100 @(Model.OnboardingStatus.HasBook ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        <div
+                            class="card-header @(Model.OnboardingStatus.HasBook ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            <div class="d-flex align-items-center">
+                                @if (Model.OnboardingStatus.HasBook)
+                                {
+                                    <i class="fas fa-check-circle me-2"></i>
+                                }
+                                else
+                                {
+                                    <span
+                                        class="badge @(Model.OnboardingStatus.HasLibrary ? "bg-primary" : "bg-secondary") me-2">4</span>
+                                }
+                                <h5 class="mb-0">Add a Book</h5>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Add your first book to the library collection so readers can start
+                                borrowing.</p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                @if (Model.OnboardingStatus.HasBook)
+                                {
+                                    <span class="text-success">
+                                        <i class="fas fa-check me-1"></i>Completed
+                                    </span>
+                                    <a href="~/Administration/Books" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Manage
+                                    </a>
+                                }
+                                else if (Model.OnboardingStatus.HasLibrary)
+                                {
+                                    <span class="text-muted">Not started</span>
+                                    <a href="~/Administration/Books/Wizard" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-book-open me-1"></i>Add Book
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">
+                                        <i class="fas fa-lock me-1"></i>Complete step 1 first
+                                    </span>
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-book-open me-1"></i>Add Book
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completion Message -->
+            @if (Model.OnboardingStatus.IsCompleted)
+            {
+                <div class="alert alert-success text-center" role="alert">
+                    <h4 class="alert-heading">
+                        <i class="fas fa-trophy me-2"></i>Congratulations!
+                    </h4>
+                    <p>You've completed all the setup steps! Your library is ready to go.</p>
+                    <hr>
+                    <a class="btn btn-success btn-lg" href="~/Administration/Home/Dashboard">
+                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                    </a>
+                </div>
+            }
+            else
+            {
+                <!-- Next Step Action -->
+                <div class="text-center mt-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Next Step</h5>
+                            @if (!Model.OnboardingStatus.HasLibrary)
+                            {
+                                <p class="card-text">Start by creating your library to unlock the other features.</p>
+                                <a href="~/Administration/Libraries/Update" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i>Create Your Library
+                                </a>
+                            }
+                            else if (!Model.OnboardingStatus.HasKiosk)
+                            {
+                                <p class="card-text">Add a kiosk location where readers can check out books.</p>
+                                <a href="~/Administration/Kiosks/Update?libraryId=@Model.OnboardingStatus.LibraryId"
+                                    class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i>Add Your First Kiosk
+                                </a>
+                            }
+                            else if (!Model.OnboardingStatus.HasReader)
+                            {
+                                <p class="card-text">Register your first reader to start lending books.</p>
+                                <a href="~/Administration/Readers/Update" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i>Add Your First Reader
+                                </a>
+                            }
+                            else if (!Model.OnboardingStatus.HasBook)
+                            {
+                                <p class="card-text">Add your first book to complete the setup.</p>
+                                <a href="~/Administration/Books/Update" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-book-open me-2"></i>Add Your First Book
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Skip Option -->
+            @if (!Model.OnboardingStatus.IsCompleted)
+            {
+                <div class="text-center mt-4">
+                    <a href="~/Administration/Home/Dashboard?skip=true" class="btn btn-link text-muted">
+                        <i class="fas fa-skip-forward me-1"></i>Skip for now and go to dashboard
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress {
+        border-radius: 10px;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .border-success {
+        border-color: #28a745 !important;
+        border-width: 2px !important;
+    }
+
+    .border-secondary {
+        border-color: #6c757d !important;
+    }
+
+    .border-light {
+        border-color: #e9ecef !important;
+    }
+</style>

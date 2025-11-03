@@ -91,6 +91,7 @@ builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
+builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 
 builder.Services.AddHttpContextAccessor();
 

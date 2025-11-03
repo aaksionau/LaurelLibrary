@@ -17,7 +17,6 @@
     <header class="header">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Laurel Library</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -34,6 +33,11 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <aside class="col-auto app-sidebar">
+                    <div class="text-center">
+                        <img src="~/images/mylibrarian.png" alt="My Librarian Logo" class="img-fluid"
+                            style="max-width: 200px;" />
+                    </div>
+
                     <nav class="nav flex-column">
                         <a class="nav-link" asp-area="Administration" asp-page="/Home/Dashboard">
                             <i class="bi bi-house-door-fill me-2"></i>Dashboard
@@ -63,6 +67,10 @@
                 </aside>
             }
             <main role="main" class="col app-main pb-3 @(User.Identity?.IsAuthenticated == true ? "" : "no-sidebar")">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @await Component.InvokeAsync("OnboardingStatus")
+                }
                 @RenderBody()
             </main>
         </div>

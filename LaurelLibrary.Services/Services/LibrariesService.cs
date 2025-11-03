@@ -289,12 +289,12 @@ public class LibrariesService : ILibrariesService
 
             // Get the current user and add them as administrator
             var currentUser = await _authenticationService.GetAppUserAsync();
-            entity.Administrators.Add(currentUser);
             entity.CreatedBy = $"{currentUser.FirstName} {currentUser.LastName}".Trim();
             entity.UpdatedBy = entity.CreatedBy;
 
             // Create the library
             var createdLibrary = await _librariesRepository.CreateAsync(entity);
+            await AddAdministratorByEmailAsync(createdLibrary.LibraryId, currentUser.Email);
 
             // Create a free subscription for the new library if the user doesn't have one
             await _subscriptionService.CreateFreeSubscriptionAsync(createdLibrary.LibraryId);
