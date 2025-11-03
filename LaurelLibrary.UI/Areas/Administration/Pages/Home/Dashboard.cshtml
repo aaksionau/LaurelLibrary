@@ -5,11 +5,275 @@
 }
 
 <div class="container-fluid py-4">
-    <h2 class="mb-4">Dashboard</h2>
+    <h2 class="mb-4">Library Dashboard</h2>
 
+    <!-- KPI Cards Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">@Model.Statistics.TotalBooks</h4>
+                            <p class="mb-0">Total Books</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-book fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">@Model.Statistics.BorrowedBooks</h4>
+                            <p class="mb-0">Currently Borrowed</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-hand-holding fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card @(Model.Statistics.OverdueBooks > 0 ? "bg-danger" : "bg-info") text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">@Model.Statistics.OverdueBooks</h4>
+                            <p class="mb-0">Overdue Books</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">@Model.Statistics.TotalReaders</h4>
+                            <p class="mb-0">Registered Readers</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Due Soon Alerts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-warning h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-clock"></i> Due Today</h6>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-warning">@Model.Statistics.BooksDueToday</h4>
+                    <p class="mb-0">books due today</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-info h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-calendar-day"></i> Due Tomorrow</h6>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-info">@Model.Statistics.BooksDueTomorrow</h4>
+                    <p class="mb-0">books due tomorrow</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-secondary h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-calendar-week"></i> Due This Week</h6>
+                </div>
+                <div class="card-body">
+                    <h4 class="text-secondary">@Model.Statistics.BooksDueThisWeek</h4>
+                    <p class="mb-0">books due this week</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions Row -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a asp-area="Administration" asp-page="/Books/Wizard" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add New Book
+                        </a>
+                        <a asp-area="Administration" asp-page="/Readers/Update" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Register Reader
+                        </a>
+                        <a asp-area="Administration" asp-page="/Books/List" class="btn btn-info">
+                            <i class="fas fa-list"></i> Manage Books
+                        </a>
+                        <a asp-area="Administration" asp-page="/Readers/List" class="btn btn-warning">
+                            <i class="fas fa-users"></i> Manage Readers
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Books Alert -->
+    @if (Model.Statistics.OverdueBookInstances.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Critical: Overdue Books Require Attention</h5>
+                    <p class="mb-2">The following books are overdue and need immediate action:</p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrower</th>
+                                    <th>Due Date</th>
+                                    <th>Days Overdue</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var book in Model.Statistics.OverdueBookInstances.Take(5))
+                                {
+                                    var daysOverdue = (DateTimeOffset.Now.Date - book.DueDate!.Value.Date).Days;
+                                    <tr>
+                                        <td>
+                                            <a asp-area="Administration" asp-page="/Books/Details"
+                                                asp-route-id="@book.Book.BookId">
+                                                @book.Book.Title
+                                            </a>
+                                        </td>
+                                        <td>
+                                            @if (book.Reader != null)
+                                            {
+                                                <a asp-area="Administration" asp-page="/Readers/Details"
+                                                    asp-route-id="@book.Reader.ReaderId">
+                                                    @book.Reader.FirstName @book.Reader.LastName
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <em>Unknown</em>
+                                            }
+                                        </td>
+                                        <td>@book.DueDate!.Value.LocalDateTime.ToString("MM/dd/yyyy")</td>
+                                        <td><span class="badge bg-danger">@daysOverdue days</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                onclick="sendReminder(@book.Reader?.ReaderId)">
+                                                <i class="fas fa-envelope"></i> Send Reminder
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (Model.Statistics.OverdueBookInstances.Count > 5)
+                        {
+                            <p class="mt-2 mb-0 text-muted">... and @(Model.Statistics.OverdueBookInstances.Count - 5) more
+                                overdue books</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Analytics Row -->
+    <div class="row mb-4">
+        @if (Model.Statistics.MostPopularBooks.Any())
+        {
+            <div class="col-lg-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-fire"></i> Most Popular Books (Last 30 Days)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            @foreach (var book in Model.Statistics.MostPopularBooks.Take(5))
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a asp-area="Administration" asp-page="/Books/Details" asp-route-id="@book.BookId">
+                                            <strong>@book.Title</strong>
+                                        </a>
+                                        @if (!string.IsNullOrEmpty(book.Authors))
+                                        {
+                                            <br>
+
+                                            <small class="text-muted">by @book.Authors</small>
+                                        }
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">@book.CheckoutCount checkouts</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (Model.Statistics.MostActiveReaders.Any())
+        {
+            <div class="col-lg-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-star"></i> Most Active Readers (Last 30 Days)</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            @foreach (var reader in Model.Statistics.MostActiveReaders.Take(5))
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <a asp-area="Administration" asp-page="/Readers/Details"
+                                            asp-route-id="@reader.ReaderId">
+                                            <strong>@reader.FirstName @reader.LastName</strong>
+                                        </a>
+                                        <br><small class="text-muted">@reader.Email</small>
+                                    </div>
+                                    <span class="badge bg-success rounded-pill">Active</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Currently Borrowed Books - Enhanced Version -->
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">Currently Borrowed Books</h4>
+            <small class="text-muted">@Model.BorrowedBooks.Count total</small>
         </div>
         <div class="card-body">
             @if (Model.BorrowedBooks.Any())
@@ -30,11 +294,13 @@
                             @foreach (var instance in Model.BorrowedBooks)
                             {
                                 var isOverdue = instance.DueDate.HasValue && instance.DueDate.Value < DateTimeOffset.Now;
-                                var dueSoon = instance.DueDate.HasValue && !isOverdue && instance.DueDate.Value < DateTimeOffset.Now.AddDays(3);
-                                
+                                var dueSoon = instance.DueDate.HasValue && !isOverdue && instance.DueDate.Value <
+                                DateTimeOffset.Now.AddDays(3);
+
                                 <tr class="@(isOverdue ? "table-danger" : dueSoon ? "table-warning" : "")">
                                     <td>
-                                        <a asp-area="Administration" asp-page="/Books/Details" asp-route-id="@instance.Book.BookId">
+                                        <a asp-area="Administration" asp-page="/Books/Details"
+                                            asp-route-id="@instance.Book.BookId">
                                             @instance.Book.Title
                                         </a>
                                     </td>
@@ -51,7 +317,8 @@
                                     <td>
                                         @if (instance.Reader != null)
                                         {
-                                            <a asp-area="Administration" asp-page="/Readers/Details" asp-route-id="@instance.Reader.ReaderId">
+                                            <a asp-area="Administration" asp-page="/Readers/Details"
+                                                asp-route-id="@instance.Reader.ReaderId">
                                                 @instance.Reader.FirstName @instance.Reader.LastName
                                             </a>
                                         }
@@ -102,8 +369,49 @@
             }
             else
             {
-                <p class="text-muted mb-0">No books are currently borrowed from this library.</p>
+                <div class="text-center py-4">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">No books are currently borrowed from this library.</p>
+                    <p class="text-muted">Books will appear here when readers check them out.</p>
+                </div>
             }
         </div>
     </div>
 </div>
+
+<script>
+    function sendReminder(readerId) {
+        if (!readerId) {
+            alert('Cannot send reminder: Reader information not available.');
+            return;
+        }
+
+        // TODO: Implement AJAX call to send reminder email
+        alert('Reminder functionality will be implemented. Reader ID: ' + readerId);
+    }
+</script>
+
+<style>
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transition: box-shadow 0.15s ease-in-out;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 0.75rem 0;
+    }
+
+    .list-group-item:not(:last-child) {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>

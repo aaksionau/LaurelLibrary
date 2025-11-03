@@ -76,6 +76,7 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBlobUrlService, BlobUrlService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // BooksService is registered with HttpClient below
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
