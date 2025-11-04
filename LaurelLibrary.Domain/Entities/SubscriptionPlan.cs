@@ -103,7 +103,7 @@ public class SubscriptionPlan
                 "Multi-library support",
                 "Kiosk checkout system",
                 "Priority support",
-                "Advanced analytics",
+                "Advanced analytics (*)",
                 "Custom integrations",
             },
             StripeMonthlyPriceId = "price_1SPawWDrPbflF5o5zvW6nr0e",

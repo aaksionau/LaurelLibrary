@@ -1,3 +1,4 @@
+using System.Linq;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
 
@@ -23,6 +24,8 @@ public static class ReaderDtoExtensions
             Zip = entity.Zip,
             Ean = entity.Ean,
             BarcodeImageUrl = entity.BarcodeImageUrl,
+            LibraryIds = entity.Libraries.Select(l => l.LibraryId).ToList(),
+            LibraryNames = entity.Libraries.Select(l => l.Name).ToList(),
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             CreatedBy = entity.CreatedBy,

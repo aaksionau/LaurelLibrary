@@ -2,6 +2,7 @@ using System;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Domain.Exceptions;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -20,7 +21,6 @@ public class ReadersService : IReadersService
     private readonly IAuditLogService _auditLogService;
     private readonly IReaderActionService _readerActionService;
     private readonly ILogger<ReadersService> _logger;
-    private readonly string? _wwwrootPath;
 
     public ReadersService(
         IReadersRepository readersRepository,
@@ -45,7 +45,6 @@ public class ReadersService : IReadersService
         _auditLogService = auditLogService;
         _readerActionService = readerActionService;
         _logger = logger;
-        _wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "reader-eans");
     }
 
     public async Task<ReaderDto?> GetReaderByIdAsync(int readerId)
@@ -65,7 +64,7 @@ public class ReadersService : IReadersService
             return null;
         }
 
-        return MapReaderToDto(entity);
+        return entity.ToReaderDto();
     }
 
     public async Task<ReaderDto?> GetReaderByIdWithoutUserContextAsync(int readerId)
@@ -76,7 +75,7 @@ public class ReadersService : IReadersService
             return null;
         }
 
-        return MapReaderToDto(entity);
+        return entity.ToReaderDto();
     }
 
     public async Task<ReaderDto?> GetReaderByEanAsync(string ean, Guid libraryId)
@@ -87,7 +86,7 @@ public class ReadersService : IReadersService
             return null;
         }
 
-        return MapReaderToDto(entity);
+        return entity.ToReaderDto();
     }
 
     public async Task<List<ReaderDto>> GetAllReadersAsync(
@@ -108,7 +107,7 @@ public class ReadersService : IReadersService
             pageSize,
             searchName
         );
-        return entities.Select(MapReaderToDto).ToList();
+        return entities.Select(e => e.ToReaderDto()).ToList();
     }
 
     public async Task<int> GetReadersCountAsync(string? searchName = null)
@@ -348,30 +347,6 @@ public class ReadersService : IReadersService
             _logger.LogWarning("Reader {ReaderId} not found for deletion", readerId);
         }
         return result;
-    }
-
-    private static ReaderDto MapReaderToDto(Reader entity)
-    {
-        return new ReaderDto
-        {
-            ReaderId = entity.ReaderId,
-            FirstName = entity.FirstName,
-            LastName = entity.LastName,
-            DateOfBirth = entity.DateOfBirth,
-            Email = entity.Email,
-            Address = entity.Address,
-            City = entity.City,
-            State = entity.State,
-            Zip = entity.Zip,
-            Ean = entity.Ean,
-            BarcodeImageUrl = entity.BarcodeImageUrl,
-            LibraryIds = entity.Libraries.Select(l => l.LibraryId).ToList(),
-            LibraryNames = entity.Libraries.Select(l => l.Name).ToList(),
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt,
-            CreatedBy = entity.CreatedBy,
-            UpdatedBy = entity.UpdatedBy,
-        };
     }
 
     private async Task<Reader> MapDtoToEntityAsync(ReaderDto dto)
