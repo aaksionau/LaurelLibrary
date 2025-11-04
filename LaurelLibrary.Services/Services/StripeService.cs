@@ -48,7 +48,6 @@ public class StripeService : IStripeService
                 Metadata = metadata ?? new Dictionary<string, string>(),
                 AllowPromotionCodes = true,
                 BillingAddressCollection = "required",
-                CustomerCreation = "always",
             };
 
             // Add library ID to metadata

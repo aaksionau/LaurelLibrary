@@ -142,16 +142,10 @@ else
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
-    <script src="~/js/kiosk.js"></script>
     <script>
-        // Initialize kiosk page functionality
         initializeKioskPage({
             showCheckoutSuccess: @Json.Serialize(Model.ShowCheckoutSuccess && !string.IsNullOrEmpty(Model.Message)),
             showReturnSuccess: @Json.Serialize(Model.ShowReturnSuccess && !string.IsNullOrEmpty(Model.Message))
-                            });
-
-        // Initialize fingerprint and redirect functionality
-        initializeFingerprintAndRedirect();
+                                    });
     </script>
 }

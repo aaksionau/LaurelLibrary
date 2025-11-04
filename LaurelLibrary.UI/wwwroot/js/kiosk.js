@@ -42,24 +42,15 @@ function initializeKioskPage(options) {
     }
 }
 
-// Initialize FingerprintJS and handle redirect with localStorage parameters
-async function initializeFingerprintAndRedirect() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasLibraryId = urlParams.has('libraryId');
-    const hasKioskId = urlParams.has('kioskId');
-    const hasBrowserFingerprint = urlParams.has('browserFingerprint');
-
-    // If all parameters are already in the URL, do nothing
-    if (hasLibraryId && hasKioskId && hasBrowserFingerprint) {
-        return;
-    }
-
+// Check for kiosk parameters and redirect if available (for Index page)
+async function checkAndRedirectToKiosk() {
     // Get or generate browserFingerprint
     let browserFingerprint = localStorage.getItem('browserFingerprint');
 
     if (!browserFingerprint) {
         try {
             // Initialize FingerprintJS
+            const FingerprintJS = await import('https://openfpcdn.io/fingerprintjs/v4');
             const fp = await FingerprintJS.load();
             const result = await fp.get();
             browserFingerprint = result.visitorId;
@@ -78,17 +69,42 @@ async function initializeFingerprintAndRedirect() {
     const libraryId = localStorage.getItem('libraryId');
     const kioskId = localStorage.getItem('kioskId');
 
-    // If we have all required parameters in localStorage, redirect
+    // If we have all required parameters in localStorage, redirect to kiosk
     if (libraryId && kioskId && browserFingerprint) {
         const params = new URLSearchParams();
         params.set('libraryId', libraryId);
         params.set('kioskId', kioskId);
         params.set('browserFingerprint', browserFingerprint);
 
-        // Redirect to the same page with parameters
-        window.location.href = `${window.location.pathname}Kiosk/?${params.toString()}`;
-    } else {
-        // If no parameters available, show error message
-        console.warn('Missing library/kiosk information in localStorage');
+        // Redirect to kiosk page with parameters
+        window.location.href = `/Kiosk?${params.toString()}`;
     }
+}
+
+// Smooth scrolling for anchor links
+function initializeSmoothScrolling() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// Add scroll effect to hero section
+function initializeParallaxEffect() {
+    window.addEventListener('scroll', function () {
+        const scrolled = window.pageYOffset;
+        const parallax = document.querySelector('.hero-section');
+        if (parallax) {
+            const speed = scrolled * 0.5;
+            parallax.style.transform = `translateY(${speed}px)`;
+        }
+    });
 }

@@ -14,7 +14,7 @@
             asp-route-kioskId="@Model.Kiosk?.KioskId">
             <i class="bi bi-pencil me-2"></i>Edit Kiosk
         </a>
-        <button type="button" class="btn btn-success" id="makeKioskBtn" onclick="makeCurrentComputerKiosk()">
+        <button type="button" class="btn btn-success" id="makeKioskBtn" onclick="toggleKioskStatus()">
             <i class="bi bi-pc-display me-2"></i>Make Current Computer a Kiosk
         </button>
     </div>
@@ -118,6 +118,57 @@ else
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/@@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
     <script>
+        let isCurrentComputerKiosk = false;
+
+        async function checkIfCurrentComputerIsKiosk() {
+            try {
+                // Check localStorage first
+                const storedKioskId = localStorage.getItem('kioskId');
+                const storedLibraryId = localStorage.getItem('libraryId');
+                const currentKioskId = @Model.Kiosk?.KioskId ?? 0;
+                const currentLibraryId = '@Model.Kiosk?.LibraryId';
+
+                if (storedKioskId == currentKioskId && storedLibraryId === currentLibraryId) {
+                    // Get current browser fingerprint
+                    const fp = await FingerprintJS.load();
+                    const result = await fp.get();
+                    const currentFingerprint = result.visitorId;
+                    const kioskFingerprint = '@Model.Kiosk?.BrowserFingerprint';
+
+                    // Check if current browser fingerprint matches kiosk fingerprint
+                    if (currentFingerprint === kioskFingerprint) {
+                        isCurrentComputerKiosk = true;
+                    }
+                }
+
+                updateButtonState();
+            } catch (error) {
+                console.error('Error checking kiosk status:', error);
+                updateButtonState();
+            }
+        }
+
+        function updateButtonState() {
+            const btn = document.getElementById('makeKioskBtn');
+            if (isCurrentComputerKiosk) {
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-warning');
+                btn.innerHTML = '<i class="bi bi-pc-display-horizontal me-2"></i>Unregister This Computer';
+            } else {
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-success');
+                btn.innerHTML = '<i class="bi bi-pc-display me-2"></i>Make Current Computer a Kiosk';
+            }
+        }
+
+        async function toggleKioskStatus() {
+            if (isCurrentComputerKiosk) {
+                await removeCurrentComputerAsKiosk();
+            } else {
+                await makeCurrentComputerKiosk();
+            }
+        }
+
         async function makeCurrentComputerKiosk() {
             const btn = document.getElementById('makeKioskBtn');
 
@@ -153,6 +204,9 @@ else
                 });
 
                 if (response.ok) {
+                    // Update state
+                    isCurrentComputerKiosk = true;
+
                     // Show success message
                     btn.classList.remove('btn-success');
                     btn.classList.add('btn-outline-success');
@@ -174,10 +228,75 @@ else
                 // Reset button after 3 seconds
                 setTimeout(() => {
                     btn.classList.remove('btn-danger');
-                    btn.classList.add('btn-success');
-                    btn.innerHTML = '<i class="bi bi-pc-display me-2"></i>Make Current Computer a Kiosk';
+                    updateButtonState();
+                    btn.disabled = false;
                 }, 3000);
             }
         }
+
+        async function removeCurrentComputerAsKiosk() {
+            const btn = document.getElementById('makeKioskBtn');
+
+            try {
+                // Disable button and show loading state
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Removing...';
+
+                // Get kiosk details from the page
+                const kioskId = @Model.Kiosk?.KioskId ?? 0;
+                const libraryId = '@Model.Kiosk?.LibraryId';
+
+                // Send request to server to clear fingerprint
+                const response = await fetch(`/Administration/Kiosks/Details/${libraryId}/${kioskId}?handler=UpdateFingerprint`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    },
+                    body: JSON.stringify({
+                        kioskId: kioskId,
+                        browserFingerprint: null
+                    })
+                });
+
+                if (response.ok) {
+                    // Clear localStorage
+                    localStorage.removeItem('kioskId');
+                    localStorage.removeItem('libraryId');
+
+                    // Update state
+                    isCurrentComputerKiosk = false;
+
+                    // Show success message
+                    btn.classList.remove('btn-warning');
+                    btn.classList.add('btn-outline-success');
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Kiosk Removed!';
+
+                    // Reload page after 2 seconds to show updated fingerprint
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error('Failed to remove kiosk');
+                }
+            } catch (error) {
+                console.error('Error removing kiosk:', error);
+                btn.disabled = false;
+                btn.classList.add('btn-danger');
+                btn.innerHTML = '<i class="bi bi-x-circle me-2"></i>Removal Failed';
+
+                // Reset button after 3 seconds
+                setTimeout(() => {
+                    btn.classList.remove('btn-danger');
+                    updateButtonState();
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            checkIfCurrentComputerIsKiosk();
+        });
     </script>
 }
