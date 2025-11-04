@@ -15,12 +15,12 @@ public class StripeService : IStripeService
     public StripeService(IConfiguration configuration, ILogger<StripeService> logger)
     {
         _logger = logger;
-        // _stripeSecretKey =
-        //     configuration["Stripe:SecretKey"]
-        //     ?? throw new ArgumentNullException("Stripe:SecretKey");
-        // _webhookSecret =
-        //     configuration["Stripe:WebhookSecret"]
-        //     ?? throw new ArgumentNullException("Stripe:WebhookSecret");
+        _stripeSecretKey =
+            configuration["Stripe:SecretKey"]
+            ?? throw new ArgumentNullException("Stripe:SecretKey");
+        _webhookSecret =
+            configuration["Stripe:WebhookSecret"]
+            ?? throw new ArgumentNullException("Stripe:WebhookSecret");
 
         StripeConfiguration.ApiKey = _stripeSecretKey;
     }

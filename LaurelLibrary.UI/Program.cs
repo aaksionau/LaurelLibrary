@@ -43,6 +43,12 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddControllers();
 
+// Configure antiforgery to handle JSON requests
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
+
 builder.Services.AddSignalR();
 
 builder.Services.AddMemoryCache();

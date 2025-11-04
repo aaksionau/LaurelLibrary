@@ -8,31 +8,32 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="text-center mb-5">
-                <h1 class="display-4 text-primary mb-3">
+                <h1 class="display-4 mb-3" style="color: var(--color-primary);">
                     <i class="fas fa-rocket me-3"></i>Welcome to Laurel Library!
                 </h1>
-                <p class="lead text-muted">Let's get your library system set up. Complete these 4 simple steps to get
+                <p class="lead" style="color: var(--color-text-secondary);">Let's get your library system set up.
+                    Complete these 4 simple steps to get
                     started.</p>
             </div>
 
             <!-- Progress Bar -->
-            <div class="card mb-4">
+            <div class="card mb-4" style="border-color: var(--color-border);">
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-8">
-                            <h5 class="mb-2">Setup Progress</h5>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-success" role="progressbar"
-                                    style="width: @(Model.OnboardingStatus.CompletedSteps * 100.0 / Model.OnboardingStatus.TotalSteps)%"
+                            <h5 class="mb-2" style="color: var(--color-text-primary);">Setup Progress</h5>
+                            <div class="progress" style="height: 10px; background-color: var(--color-bg-light);">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: @(Model.OnboardingStatus.CompletedSteps * 100.0 / Model.OnboardingStatus.TotalSteps)%; background-color: var(--color-primary);"
                                     aria-valuenow="@Model.OnboardingStatus.CompletedSteps" aria-valuemin="0"
                                     aria-valuemax="@Model.OnboardingStatus.TotalSteps">
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-end">
-                            <span
-                                class="h4 text-success">@Model.OnboardingStatus.CompletedSteps/@Model.OnboardingStatus.TotalSteps</span>
-                            <small class="text-muted d-block">Steps completed</small>
+                            <span class="h4"
+                                style="color: var(--color-primary);">@Model.OnboardingStatus.CompletedSteps/@Model.OnboardingStatus.TotalSteps</span>
+                            <small style="color: var(--color-text-secondary);" class="d-block">Steps completed</small>
                         </div>
                     </div>
                 </div>
@@ -43,9 +44,9 @@
                 <!-- Step 1: Create Library -->
                 <div class="col-md-6 mb-4">
                     <div
-                        class="card h-100 @(Model.OnboardingStatus.HasLibrary ? "border-success" : "border-secondary")">
+                        class="card h-100 @(Model.OnboardingStatus.HasLibrary ? "border-success-custom" : "border-secondary-custom")">
                         <div
-                            class="card-header @(Model.OnboardingStatus.HasLibrary ? "bg-success text-white" : "bg-light")">
+                            class="card-header @(Model.OnboardingStatus.HasLibrary ? "bg-success-custom text-white" : "bg-light-custom")">
                             <div class="d-flex align-items-center">
                                 @if (Model.OnboardingStatus.HasLibrary)
                                 {
@@ -59,12 +60,13 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Set up your library with basic information like name, address, and
+                            <p class="card-text" style="color: var(--color-text-secondary);">Set up your library with
+                                basic information like name, address, and
                                 settings.</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasLibrary)
                                 {
-                                    <span class="text-success">
+                                    <span style="color: var(--color-primary);">
                                         <i class="fas fa-check me-1"></i>Completed
                                     </span>
                                     <a href="~/Administration/Libraries" class="btn btn-outline-secondary btn-sm">
@@ -73,7 +75,7 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted">Not started</span>
+                                    <span style="color: var(--color-text-secondary);">Not started</span>
                                     <a href="~/Administration/Libraries/Update" class="btn btn-primary btn-sm">
                                         <i class="fas fa-plus me-1"></i>Create Library
                                     </a>
@@ -86,9 +88,9 @@
                 <!-- Step 2: Add a Kiosk -->
                 <div class="col-md-6 mb-4">
                     <div
-                        class="card h-100 @(Model.OnboardingStatus.HasKiosk ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        class="card h-100 @(Model.OnboardingStatus.HasKiosk ? "border-success-custom" : Model.OnboardingStatus.HasLibrary ? "border-secondary-custom" : "border-light-custom")">
                         <div
-                            class="card-header @(Model.OnboardingStatus.HasKiosk ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            class="card-header @(Model.OnboardingStatus.HasKiosk ? "bg-success-custom text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light-custom" : "bg-light-custom text-muted")">
                             <div class="d-flex align-items-center">
                                 @if (Model.OnboardingStatus.HasKiosk)
                                 {
@@ -103,12 +105,12 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Set up a kiosk location where readers can check out and return books.
+                            <p class="card-text" style="color: var(--color-text-secondary);">Set up a kiosk location where readers can check out and return books.
                             </p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasKiosk)
                                 {
-                                    <span class="text-success">
+                                    <span style="color: var(--color-primary);">
                                         <i class="fas fa-check me-1"></i>Completed
                                     </span>
                                     <a href="~/Administration/Kiosks" class="btn btn-outline-secondary btn-sm">
@@ -117,7 +119,7 @@
                                 }
                                 else if (Model.OnboardingStatus.HasLibrary)
                                 {
-                                    <span class="text-muted">Not started</span>
+                                    <span style="color: var(--color-text-secondary);">Not started</span>
                                     <a href="~/Administration/Kiosks/Update/@Model.OnboardingStatus.LibraryId"
                                         class="btn btn-primary btn-sm">
                                         <i class="fas fa-plus me-1"></i>Add Kiosk
@@ -125,7 +127,7 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted">
+                                    <span style="color: var(--color-text-secondary);">
                                         <i class="fas fa-lock me-1"></i>Complete step 1 first
                                     </span>
                                     <button class="btn btn-secondary btn-sm" disabled>
@@ -140,9 +142,9 @@
                 <!-- Step 3: Add a Reader -->
                 <div class="col-md-6 mb-4">
                     <div
-                        class="card h-100 @(Model.OnboardingStatus.HasReader ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        class="card h-100 @(Model.OnboardingStatus.HasReader ? "border-success-custom" : Model.OnboardingStatus.HasLibrary ? "border-secondary-custom" : "border-light-custom")">
                         <div
-                            class="card-header @(Model.OnboardingStatus.HasReader ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            class="card-header @(Model.OnboardingStatus.HasReader ? "bg-success-custom text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light-custom" : "bg-light-custom text-muted")">
                             <div class="d-flex align-items-center">
                                 @if (Model.OnboardingStatus.HasReader)
                                 {
@@ -157,12 +159,12 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Register your first reader who will be able to borrow books from your
+                            <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader who will be able to borrow books from your
                                 library.</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasReader)
                                 {
-                                    <span class="text-success">
+                                    <span style="color: var(--color-primary);">
                                         <i class="fas fa-check me-1"></i>Completed
                                     </span>
                                     <a href="~/Administration/Readers" class="btn btn-outline-secondary btn-sm">
@@ -171,14 +173,14 @@
                                 }
                                 else if (Model.OnboardingStatus.HasLibrary)
                                 {
-                                    <span class="text-muted">Not started</span>
+                                    <span style="color: var(--color-text-secondary);">Not started</span>
                                     <a href="~/Administration/Readers/Update" class="btn btn-primary btn-sm">
                                         <i class="fas fa-user-plus me-1"></i>Add Reader
                                     </a>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">
+                                    <span style="color: var(--color-text-secondary);">
                                         <i class="fas fa-lock me-1"></i>Complete step 1 first
                                     </span>
                                     <button class="btn btn-secondary btn-sm" disabled>
@@ -193,9 +195,9 @@
                 <!-- Step 4: Add a Book -->
                 <div class="col-md-6 mb-4">
                     <div
-                        class="card h-100 @(Model.OnboardingStatus.HasBook ? "border-success" : Model.OnboardingStatus.HasLibrary ? "border-secondary" : "border-light")">
+                        class="card h-100 @(Model.OnboardingStatus.HasBook ? "border-success-custom" : Model.OnboardingStatus.HasLibrary ? "border-secondary-custom" : "border-light-custom")">
                         <div
-                            class="card-header @(Model.OnboardingStatus.HasBook ? "bg-success text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light" : "bg-light text-muted")">
+                            class="card-header @(Model.OnboardingStatus.HasBook ? "bg-success-custom text-white" : Model.OnboardingStatus.HasLibrary ? "bg-light-custom" : "bg-light-custom text-muted")">
                             <div class="d-flex align-items-center">
                                 @if (Model.OnboardingStatus.HasBook)
                                 {
@@ -210,12 +212,12 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text">Add your first book to the library collection so readers can start
+                            <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to the library collection so readers can start
                                 borrowing.</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasBook)
                                 {
-                                    <span class="text-success">
+                                    <span style="color: var(--color-primary);">
                                         <i class="fas fa-check me-1"></i>Completed
                                     </span>
                                     <a href="~/Administration/Books" class="btn btn-outline-secondary btn-sm">
@@ -224,14 +226,14 @@
                                 }
                                 else if (Model.OnboardingStatus.HasLibrary)
                                 {
-                                    <span class="text-muted">Not started</span>
+                                    <span style="color: var(--color-text-secondary);">Not started</span>
                                     <a href="~/Administration/Books/Wizard" class="btn btn-primary btn-sm">
                                         <i class="fas fa-book-open me-1"></i>Add Book
                                     </a>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">
+                                    <span style="color: var(--color-text-secondary);">
                                         <i class="fas fa-lock me-1"></i>Complete step 1 first
                                     </span>
                                     <button class="btn btn-secondary btn-sm" disabled>
@@ -247,13 +249,13 @@
             <!-- Completion Message -->
             @if (Model.OnboardingStatus.IsCompleted)
             {
-                <div class="alert alert-success text-center" role="alert">
+                <div class="alert" role="alert" style="background-color: rgba(36, 92, 79, 0.1); border-color: var(--color-primary); color: var(--color-primary); text-align: center;">
                     <h4 class="alert-heading">
                         <i class="fas fa-trophy me-2"></i>Congratulations!
                     </h4>
                     <p>You've completed all the setup steps! Your library is ready to go.</p>
-                    <hr>
-                    <a class="btn btn-success btn-lg" href="~/Administration/Home/Dashboard">
+                    <hr style="border-color: var(--color-primary);">
+                    <a class="btn btn-primary btn-lg" href="~/Administration/Home/Dashboard">
                         <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
                     </a>
                 </div>
@@ -262,19 +264,19 @@
             {
                 <!-- Next Step Action -->
                 <div class="text-center mt-4">
-                    <div class="card bg-light">
+                    <div class="card" style="background-color: var(--color-bg-light); border-color: var(--color-border);">
                         <div class="card-body">
-                            <h5 class="card-title">Next Step</h5>
+                            <h5 class="card-title" style="color: var(--color-text-primary);">Next Step</h5>
                             @if (!Model.OnboardingStatus.HasLibrary)
                             {
-                                <p class="card-text">Start by creating your library to unlock the other features.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Start by creating your library to unlock the other features.</p>
                                 <a href="~/Administration/Libraries/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-plus me-2"></i>Create Your Library
                                 </a>
                             }
                             else if (!Model.OnboardingStatus.HasKiosk)
                             {
-                                <p class="card-text">Add a kiosk location where readers can check out books.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Add a kiosk location where readers can check out books.</p>
                                 <a href="~/Administration/Kiosks/Update?libraryId=@Model.OnboardingStatus.LibraryId"
                                     class="btn btn-primary btn-lg">
                                     <i class="fas fa-plus me-2"></i>Add Your First Kiosk
@@ -282,14 +284,14 @@
                             }
                             else if (!Model.OnboardingStatus.HasReader)
                             {
-                                <p class="card-text">Register your first reader to start lending books.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader to start lending books.</p>
                                 <a href="~/Administration/Readers/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-user-plus me-2"></i>Add Your First Reader
                                 </a>
                             }
                             else if (!Model.OnboardingStatus.HasBook)
                             {
-                                <p class="card-text">Add your first book to complete the setup.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to complete the setup.</p>
                                 <a href="~/Administration/Books/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-book-open me-2"></i>Add Your First Book
                                 </a>
@@ -303,7 +305,7 @@
             @if (!Model.OnboardingStatus.IsCompleted)
             {
                 <div class="text-center mt-4">
-                    <a href="~/Administration/Home/Dashboard?skip=true" class="btn btn-link text-muted">
+                    <a href="~/Administration/Home/Dashboard?skip=true" class="btn btn-link" style="color: var(--color-text-secondary);">
                         <i class="fas fa-skip-forward me-1"></i>Skip for now and go to dashboard
                     </a>
                 </div>
@@ -315,31 +317,82 @@
 <style>
     .progress {
         border-radius: 10px;
+        background-color: var(--color-bg-light);
     }
 
     .progress-bar {
         border-radius: 10px;
+        background-color: var(--color-primary);
     }
 
     .card {
         transition: all 0.3s ease;
+        border-color: var(--color-border);
+        background-color: white;
     }
 
     .card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px var(--color-shadow);
     }
 
-    .border-success {
-        border-color: #28a745 !important;
+    /* Custom border classes using site palette */
+    .border-success-custom {
+        border-color: var(--color-primary) !important;
         border-width: 2px !important;
     }
 
-    .border-secondary {
-        border-color: #6c757d !important;
+    .border-secondary-custom {
+        border-color: var(--color-text-secondary) !important;
+        border-width: 1px !important;
     }
 
-    .border-light {
-        border-color: #e9ecef !important;
+    .border-light-custom {
+        border-color: var(--color-border) !important;
+        border-width: 1px !important;
+    }
+
+    /* Custom background classes using site palette */
+    .bg-success-custom {
+        background-color: var(--color-primary) !important;
+        color: white !important;
+    }
+
+    .bg-light-custom {
+        background-color: var(--color-bg-light) !important;
+        color: var(--color-text-primary) !important;
+    }
+
+    /* Ensure text in muted backgrounds is readable */
+    .bg-light-custom.text-muted {
+        color: var(--color-text-secondary) !important;
+    }
+
+    /* Badge styling to match site palette */
+    .badge.bg-primary {
+        background-color: var(--color-primary) !important;
+        color: white !important;
+    }
+
+    .badge.bg-secondary {
+        background-color: var(--color-secondary) !important;
+        color: var(--color-text-primary) !important;
+    }
+
+    /* Card header typography */
+    .card-header h5 {
+        color: inherit;
+    }
+
+    /* Button enhancements */
+    .btn-outline-secondary {
+        border-color: var(--color-secondary);
+        color: var(--color-secondary);
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--color-secondary);
+        border-color: var(--color-secondary);
+        color: var(--color-text-primary);
     }
 </style>

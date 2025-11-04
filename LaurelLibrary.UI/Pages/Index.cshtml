@@ -1,4 +1,690 @@
 ﻿@page
 @model LaurelLibrary.UI.Pages.IndexModel
 @{
+    ViewData["Title"] = "MyLibrarian - Your Personal Library Management Solution";
+}
+
+<!-- Hero Section -->
+<section id="home" class="hero-section"
+    style="background: linear-gradient(135deg, var(--color-bg-light) 0%, #f0ede7 100%); padding: 60px 0; min-height: 40vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-2 fw-bold mb-4" style="color: var(--color-text-primary);">MyLibrarian</h1>
+                    <p class="lead mb-4" style="color: var(--color-text-secondary); font-size: 1.5rem;">
+                        The perfect library management solution for private libraries, homeschool libraries, and church
+                        libraries
+                    </p>
+                    <p class="mb-5" style="color: var(--color-text-secondary); font-size: 1.1rem;">
+                        Transform your book collection into a professionally managed library with our intuitive,
+                        community-focused platform designed for smaller libraries that need powerful features without
+                        the complexity.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <img src="~/images/mylibrarian.png" alt="MyLibrarian Logo" class="hero-logo-large"
+                        style="max-height: 300px; width: auto; opacity: 0.8;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose MyLibrarian Section -->
+<section id="why-choose" class="py-5" style="background-color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-4" style="color: var(--color-text-primary);">Why Choose MyLibrarian?
+                </h2>
+                <p class="lead" style="color: var(--color-text-secondary);">Built specifically for the unique needs of
+                    smaller, community-focused libraries</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="feature-card h-100 p-4 text-center"
+                    style="background-color: var(--color-bg-light); border-radius: 15px; border: 2px solid var(--color-border);">
+                    <i class="bi bi-house-heart"
+                        style="font-size: 3rem; color: var(--color-secondary); margin-bottom: 20px;"></i>
+                    <h4 class="mb-3" style="color: var(--color-text-primary);">Perfect for Private Libraries</h4>
+                    <p style="color: var(--color-text-secondary);">
+                        Designed for personal collections, family libraries, and private reading spaces. Easy setup,
+                        intuitive interface, and features that scale with your growing collection.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="feature-card h-100 p-4 text-center"
+                    style="background-color: var(--color-bg-light); border-radius: 15px; border: 2px solid var(--color-border);">
+                    <i class="bi bi-mortarboard"
+                        style="font-size: 3rem; color: var(--color-accent); margin-bottom: 20px;"></i>
+                    <h4 class="mb-3" style="color: var(--color-text-primary);">Homeschool Friendly</h4>
+                    <p style="color: var(--color-text-secondary);">
+                        Track reading levels, manage curriculum resources, and encourage reading habits. Built-in age
+                        classification and progress tracking make it perfect for educational environments.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="feature-card h-100 p-4 text-center"
+                    style="background-color: var(--color-bg-light); border-radius: 15px; border: 2px solid var(--color-border);">
+                    <i class="bi bi-people"
+                        style="font-size: 3rem; color: var(--color-primary); margin-bottom: 20px;"></i>
+                    <h4 class="mb-3" style="color: var(--color-text-primary);">Community Libraries</h4>
+                    <p style="color: var(--color-text-secondary);">
+                        Ideal for church libraries, community centers, and small organizations. Manage multiple user
+                        groups, track usage, and foster community engagement through reading.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-5" style="background-color: var(--color-bg-light);">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-4" style="color: var(--color-text-primary);">Powerful Features</h2>
+                <p class="lead" style="color: var(--color-text-secondary);">Everything you need to manage your library
+                    professionally</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-primary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-book" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Smart Book Management</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Catalog your books with ISBN
+                            scanning, automatic metadata retrieval, and barcode generation for easy check-in/check-out.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-secondary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-people-fill" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Reader Management</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Track reader profiles, reading
+                            history, and preferences. Perfect for families, students, or community members.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-accent); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-search" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Advanced Search</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Find books quickly with
+                            semantic search that understands context and meaning, not just keywords.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-primary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-robot" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">AI Age Classification</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Automatically classify books by
+                            appropriate reading age and content level using AI technology.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-secondary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-envelope" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Email Notifications</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Automatic reminders for due
+                            dates, overdue books, and library updates keep everyone informed.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-accent); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-building" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Multi-Library Support</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Manage multiple library
+                            locations or collections from one account. Perfect for growing organizations.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-primary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-upc-scan" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Barcode Generation</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Generate professional barcodes
+                            for all your books, making checkout and inventory management effortless.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-6">
+                <div class="feature-item d-flex align-items-start p-3">
+                    <div class="feature-icon me-3"
+                        style="background-color: var(--color-secondary); border-radius: 50%; width: 60px; height: 60px; min-width: 60px; min-height: 60px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="bi bi-graph-up" style="color: white; font-size: 1.2rem;"></i>
+                    </div>
+                    <div>
+                        <h5 style="color: var(--color-text-primary);">Usage Analytics</h5>
+                        <p style="color: var(--color-text-secondary); margin-bottom: 0;">Track library usage, popular
+                            books, and reading trends to make informed decisions about your collection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Subscription Plans Section -->
+<section id="plans" class="py-5" style="background-color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-4" style="color: var(--color-text-primary);">Choose Your Plan</h2>
+                <p class="lead" style="color: var(--color-text-secondary);">Flexible pricing options that grow with your
+                    library</p>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            @foreach (var plan in Model.SubscriptionPlans)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm @(plan.Name == "Library Lover" ? "shadow" : "")"
+                        style="border-radius: 15px; overflow: hidden; @(plan.Name == "Library Lover" ? "transform: scale(1.05); border: 3px solid var(--color-secondary) !important;" : "")">
+                        <div class="card-header text-center py-4"
+                            style="@(plan.Name == "Bookworm Basic" ? "background-color: var(--color-bg-light); border-bottom: 2px solid var(--color-border);" : 
+                                                                                                                                                                                                                                          plan.Name == "Library Lover" ? "background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-hover)); color: white;" :
+                                                                                                                                                                                                                                          "background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white;")">
+                            @if (plan.Name == "Library Lover")
+                            {
+                                <div class="badge mb-2"
+                                    style="background-color: rgba(255,255,255,0.2); color: white; padding: 5px 15px; border-radius: 20px;">
+                                    Most Popular</div>
+                            }
+                            <h4 class="mb-0"
+                                style="@(plan.Name == "Bookworm Basic" ? "color: var(--color-text-primary);" : "")">
+                                @plan.Name</h4>
+                            <p class="@(plan.Name == "Bookworm Basic" ? "text-muted" : "opacity-90") mb-0">@plan.Description
+                            </p>
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <div class="text-center mb-4">
+                                @if (plan.MonthlyPrice == 0)
+                                {
+                                    <h2 class="fw-bold" style="color: var(--color-primary);">Free</h2>
+                                    <p class="text-muted">Forever</p>
+                                }
+                                else
+                                {
+                                    var monthlyCost = plan.MonthlyPrice * 12;
+                                    var savings = monthlyCost - plan.YearlyPrice;
+                                    var savingsPercentage = Math.Round((savings / monthlyCost) * 100);
+
+                                    <h2 class="fw-bold"
+                                        style="color: @(plan.Name == "Library Lover" ? "var(--color-secondary)" : "var(--color-primary)");">
+                                        $@plan.MonthlyPrice.ToString("F2")</h2>
+                                    <p class="text-muted">per month</p>
+                                    <p class="small text-muted">or $@plan.YearlyPrice.ToString("F2")/year (save
+                                        @(savingsPercentage)%)</p>
+                                }
+                            </div>
+                            <ul class="list-unstyled mb-4">
+                                @foreach (var feature in plan.Features)
+                                {
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle-fill me-2" style="color: var(--color-success);"></i>
+                                        @if (feature.Contains("(*)"))
+                                        {
+                                            <span>@feature.Replace("(*)", " *")</span>
+                                        }
+                                        else if (plan.Name != "Bookworm Basic" && (feature.Contains("Unlimited") ||
+                                        feature.Contains("Advanced") || feature.Contains("AI-powered") ||
+                                        feature.Contains("Priority") || feature.Contains("Custom")))
+                                        {
+                                            <strong>@feature</strong>
+                                        }
+                                        else
+                                        {
+                                            <span>@feature</span>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                            <div class="mt-auto">
+                                @if (plan.MonthlyPrice == 0)
+                                {
+                                    <a href="/Account/Register" class="btn btn-outline-primary w-100"
+                                        style="border-color: var(--color-primary); color: var(--color-primary); border-radius: 10px; padding: 12px;">Get
+                                        Started Free</a>
+                                }
+                                else
+                                {
+                                    <a href="/Account/Register" class="btn w-100"
+                                        style="background-color: @(plan.Name == "Library Lover" ? "var(--color-secondary)" : "var(--color-primary)"); color: white; border-radius: 10px; padding: 12px; border: none;">Start
+                                        Free Trial</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <p class="text-muted">All plans include a 30-day free trial. No credit card required for the free
+                        tier.</p>
+                    <p class="text-muted"><small>* Features marked with an asterisk are on our roadmap and will be added
+                            in future updates.</small></p>
+                </div>
+            </div>
+        </div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq" class="py-5" style="background-color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="text-center mb-5">
+                    <h2 class="display-4 fw-bold mb-4" style="color: var(--color-text-primary);">Frequently Asked
+                        Questions</h2>
+                    <p class="lead" style="color: var(--color-text-secondary);">Get answers to common questions about
+                        MyLibrarian</p>
+                </div>
+
+                <div class="accordion" id="faqAccordion">
+                    <!-- FAQ Item 1 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>What is the difference between kiosk and mobile checkout?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                For homeschools and small public organizations, patrons typically use a computer kiosk
+                                to search for books and check them out, providing a centralized checkout experience.
+                                For private collections, readers use their mobile phones to scan barcodes and manage
+                                their book checkouts, offering more convenient and personal access to the library
+                                system.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 2 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>How do I add books to my library?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                You can add books in several ways: manually enter book details, scan ISBN barcodes using
+                                your device's camera, or upload a CSV file with multiple books. Our system automatically
+                                fetches book information from online databases to save you time.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 3 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>What is AI-powered age classification?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Our AI system automatically analyzes book content, themes, and complexity to suggest
+                                appropriate age ranges. This helps librarians, parents, and educators quickly identify
+                                suitable books for different reading levels and age groups. Once age classification is
+                                added to your books, users can incorporate it into their semantic search queries, such
+                                as "find adventure books for 8-10 year olds" or "mystery novels appropriate for teens",
+                                making it easier to discover age-appropriate content.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 4 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>Can I manage multiple libraries with one account?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Yes! The Bibliotheca Plus and Pro plans support multiple libraries. This is perfect for
+                                organizations with multiple locations, individuals managing separate collections
+                                (e.g., home library, classroom library, and office library), or professionals managing
+                                completely unrelated libraries such as consulting for different schools, churches, or
+                                community organizations. Each library is kept completely separate with its own books,
+                                readers, and settings.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 6 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq6" aria-expanded="false" aria-controls="faq6"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>Is MyLibrarian suitable for homeschooling?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Absolutely! MyLibrarian is designed with homeschooling families in mind. Track reading
+                                progress, manage curriculum resources, organize books by subject or reading level, and
+                                encourage reading habits with built-in progress tracking and rewards.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 7 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq7" aria-expanded="false" aria-controls="faq7"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>What happens to my data if I cancel?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                You can export all your library data (books, readers, checkout history) at any time.
+                                After cancellation, your data is retained for 30 days to allow for reactivation. After
+                                that period, data is permanently deleted for your privacy and security.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 8 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq8" aria-expanded="false" aria-controls="faq8"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>Do you offer support and training?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Yes! All plans include access to our knowledge base and community forums. Plus and Pro
+                                plans include email support, while Pro plans get priority support with faster response
+                                times. We also offer video tutorials and setup assistance.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 10 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq10" aria-expanded="false" aria-controls="faq10"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>Is my library data secure?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq10" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Absolutely! Security is our top priority. We host MyLibrarian on Microsoft's Azure
+                                platform,
+                                which provides enterprise-level security with industry-leading compliance certifications
+                                including SOC 2 Type II, ISO 27001, and GDPR compliance. Your data is protected with
+                                enterprise-grade encryption both in transit and at rest, and we maintain regular
+                                automated
+                                backups with point-in-time recovery capabilities. Microsoft's global infrastructure
+                                ensures
+                                99.9% uptime and world-class security monitoring. Your library data is never shared with
+                                third parties and you maintain full ownership of your content.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item 11 -->
+                    <div class="accordion-item mb-3"
+                        style="border-radius: 10px; border: 1px solid var(--color-border);">
+                        <h3 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq11" aria-expanded="false" aria-controls="faq11"
+                                style="background-color: var(--color-bg-light); border-radius: 10px; padding: 20px;">
+                                <strong>Can multiple people manage the same library?</strong>
+                            </button>
+                        </h3>
+                        <div id="faq11" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body" style="padding: 20px;">
+                                Yes! Each library can have multiple administrators with full access to all library
+                                features.
+                                You can invite other users to help manage your library, whether it's a co-teacher,
+                                spouse, library volunteer, or organization staff member. All administrative actions
+                                are tracked in comprehensive audit logs, so you can see who performed what actions
+                                and when. This provides full accountability and transparency for team-managed libraries
+                                while maintaining security and control over your collection.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feedback Section -->
+<section id="feedback" class="py-5" style="background-color: var(--color-bg-light);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="card shadow-lg border-0" style="border-radius: 15px;">
+                    <div class="card-header text-center py-4"
+                        style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white; border-radius: 15px 15px 0 0;">
+                        <h2 class="mb-0">
+                            <i class="bi bi-chat-heart me-2"></i>
+                            Send Us Your Feedback
+                        </h2>
+                        <p class="mb-0 opacity-90">We'd love to hear from you!</p>
+                    </div>
+
+                    <div class="card-body p-5">
+                        <form method="post" asp-page-handler="Feedback">
+                            @Html.AntiForgeryToken()
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Feedback.Name" class="form-label fw-bold">
+                                        <i class="bi bi-person me-1"></i>
+                                        Your Name *
+                                    </label>
+                                    <input asp-for="Feedback.Name" class="form-control form-control-lg"
+                                        style="border-radius: 10px; border: 2px solid var(--color-border);"
+                                        placeholder="Enter your full name" required>
+                                    <span asp-validation-for="Feedback.Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Feedback.Email" class="form-label fw-bold">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        Your Email *
+                                    </label>
+                                    <input asp-for="Feedback.Email" type="email" class="form-control form-control-lg"
+                                        style="border-radius: 10px; border: 2px solid var(--color-border);"
+                                        placeholder="your.email@example.com" required>
+                                    <span asp-validation-for="Feedback.Email" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feedback.FeedbackType" class="form-label fw-bold">
+                                    <i class="bi bi-tags me-1"></i>
+                                    Feedback Type *
+                                </label>
+                                <select asp-for="Feedback.FeedbackType" class="form-select form-select-lg"
+                                    style="border-radius: 10px; border: 2px solid var(--color-border);" required>
+                                    <option value="General">General Feedback</option>
+                                    <option value="Bug Report">Bug Report</option>
+                                    <option value="Feature Request">Feature Request</option>
+                                    <option value="Support">Support Request</option>
+                                    <option value="Compliment">Compliment</option>
+                                    <option value="Complaint">Complaint</option>
+                                </select>
+                                <span asp-validation-for="Feedback.FeedbackType" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Feedback.Subject" class="form-label fw-bold">
+                                    <i class="bi bi-chat-text me-1"></i>
+                                    Subject *
+                                </label>
+                                <input asp-for="Feedback.Subject" class="form-control form-control-lg"
+                                    style="border-radius: 10px; border: 2px solid var(--color-border);"
+                                    placeholder="Brief description of your feedback" required>
+                                <span asp-validation-for="Feedback.Subject" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Feedback.Message" class="form-label fw-bold">
+                                    <i class="bi bi-chat-square-text me-1"></i>
+                                    Your Message *
+                                </label>
+                                <textarea asp-for="Feedback.Message" class="form-control" rows="4"
+                                    style="border-radius: 10px; border: 2px solid var(--color-border);"
+                                    placeholder="Please share your detailed feedback, suggestions, or concerns..."
+                                    required></textarea>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Please be as specific as possible to help us better understand your feedback.
+                                </div>
+                                <span asp-validation-for="Feedback.Message" class="text-danger"></span>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-lg"
+                                    style="background-color: var(--color-primary); color: white; border-radius: 10px; padding: 12px 40px; border: none;">
+                                    <i class="bi bi-send me-2"></i>
+                                    Send Feedback
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5"
+    style="background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%); color: white;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h2 class="display-5 fw-bold mb-4">Ready to Transform Your Library?</h2>
+                <p class="lead mb-4">
+                    Join thousands of libraries who have already discovered the power of MyLibrarian.
+                    Start your journey today with our free plan and upgrade as you grow.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/Identity/Account/Register" class="btn btn-light btn-lg"
+                        style="color: var(--color-primary); padding: 12px 30px; border-radius: 10px;">Start Your Free
+                        Library</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to hero section
+        window.addEventListener('scroll', function () {
+            const scrolled = window.pageYOffset;
+            const parallax = document.querySelector('.hero-section');
+            if (parallax) {
+                const speed = scrolled * 0.5;
+                parallax.style.transform = `translateY(${speed}px)`;
+            }
+        });
+    </script>
 }

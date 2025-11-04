@@ -6,10 +6,21 @@
 }
 
 <div class="container-fluid">
+    @Html.AntiForgeryToken()
+    
+    <!-- Debug: Show if token exists -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            console.log('Antiforgery token element:', token);
+            console.log('Token value:', token ? token.value : 'Not found');
+        });
+    </script>
+    
     <div class="row">
         <div class="col-12">
-            <h2 class="mb-4">
-                <i class="fas fa-credit-card me-2"></i>
+            <h2 class="mb-4" style="color: var(--color-text-primary); font-weight: 700;">
+                <i class="fas fa-credit-card me-3" style="color: var(--color-primary);"></i>
                 Subscription Management
             </h2>
 
@@ -44,40 +55,48 @@
     {
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+                <div class="card border-0 shadow-sm" style="background-color: var(--color-bg-light);">
+                    <div class="card-header border-0" style="background-color: var(--color-primary); color: white;">
                         <h5 class="mb-0">
-                            <i class="fas fa-info-circle me-2"></i>
+                            <i class="fas fa-crown me-2"></i>
                             Current Subscription
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <h6 class="fw-bold">@Model.CurrentSubscription.PlanName</h6>
-                                <p class="text-muted mb-2">@Model.CurrentSubscription.PlanDescription</p>
+                                <h6 class="fw-bold" style="color: var(--color-text-primary);">
+                                    @Model.CurrentSubscription.PlanName</h6>
+                                <p class="mb-2" style="color: var(--color-text-secondary);">
+                                    @Model.CurrentSubscription.PlanDescription</p>
                                 <p class="mb-1">
-                                    <strong>Status:</strong> 
-                                    <span class="badge bg-@(Model.CurrentSubscription.Status == SubscriptionStatus.Active ? "success" : "warning")">
+                                    <strong style="color: var(--color-text-primary);">Status:</strong>
+                                    <span
+                                        class="badge @(Model.CurrentSubscription.Status == SubscriptionStatus.Active ? "bg-success" : "")"
+                                        style="background-color: @(Model.CurrentSubscription.Status == SubscriptionStatus.Active ? "var(--color-success)" : "var(--color-accent)") !important; color: white;">
                                         @Model.CurrentSubscription.Status
                                     </span>
                                 </p>
                                 @if (Model.CurrentSubscription.Amount > 0)
                                 {
                                     <p class="mb-1">
-                                        <strong>Amount:</strong> 
-                                        @Model.CurrentSubscription.Amount.ToString("C") / @Model.CurrentSubscription.BillingInterval
+                                        <strong style="color: var(--color-text-primary);">Amount:</strong>
+                                        <span style="color: var(--color-accent); font-weight: 600;">@Model.CurrentSubscription.Amount.ToString("C")</span>
+                                        <span style="color: var(--color-text-secondary);">/
+                                        @Model.CurrentSubscription.BillingInterval</span>
                                     </p>
                                     <p class="mb-1">
-                                        <strong>Next Billing:</strong> 
-                                        @Model.CurrentSubscription.NextBillingDate.ToString("MMMM dd, yyyy")
+                                        <strong style="color: var(--color-text-primary);">Next Billing:</strong>
+                                        <span style="color: var(--color-text-secondary);">@Model.CurrentSubscription.NextBillingDate.ToString("MMMM dd, yyyy")</span>
                                     </p>
                                 }
                             </div>
                             <div class="col-md-6">
-                                @if (Model.CurrentSubscription.Status == SubscriptionStatus.Active && Model.CurrentSubscription.Amount > 0)
+                                @if (Model.CurrentSubscription.Status == SubscriptionStatus.Active &&
+                                Model.CurrentSubscription.Amount > 0)
                                 {
-                                    <button type="button" class="btn btn-outline-danger" onclick="confirmCancelSubscription()">
+                                    <button type="button" class="btn btn-outline-danger border-2" onclick="confirmCancelSubscription()"
+                                            style="border-color: var(--color-danger) !important; color: var(--color-danger) !important;">
                                         <i class="fas fa-times me-2"></i>
                                         Cancel Subscription
                                     </button>
@@ -93,55 +112,61 @@
     <!-- Usage Summary -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-bar me-2"></i>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0" style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-line me-2"></i>
                         Usage Summary
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="background-color: var(--color-bg-light);">
                     <div class="row">
                         <div class="col-md-4">
-                            <h6>Books</h6>
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: @(Model.Usage?.BookUsagePercentage ?? 0)%"
-                                     aria-valuenow="@(Model.Usage?.BookUsagePercentage ?? 0)" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
+                            <h6 style="color: var(--color-text-primary); font-weight: 600;">
+                                <i class="fas fa-book text-primary me-2"></i>Books
+                            </h6>
+                            <div class="progress mb-3" style="height: 10px; background-color: rgba(122, 111, 102, 0.2);">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: @(Model.Usage?.BookUsagePercentage ?? 0)%; background-color: var(--color-primary);"
+                                    aria-valuenow="@(Model.Usage?.BookUsagePercentage ?? 0)" aria-valuemin="0"
+                                    aria-valuemax="100">
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                @(Model.Usage?.CurrentBooks ?? 0) / @(Model.Usage?.MaxBooks == -1 ? "Unlimited" : (Model.Usage?.MaxBooks ?? 0).ToString()) books
+                            <small style="color: var(--color-text-secondary);">
+                                <strong style="color: var(--color-primary);">@(Model.Usage?.CurrentBooks ?? 0)</strong> / @(Model.Usage?.MaxBooks == -1 ? "Unlimited" :
+                                                                (Model.Usage?.MaxBooks ?? 0).ToString()) books
                             </small>
                         </div>
                         <div class="col-md-4">
-                            <h6>Readers</h6>
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: @(Model.Usage?.ReaderUsagePercentage ?? 0)%"
-                                     aria-valuenow="@(Model.Usage?.ReaderUsagePercentage ?? 0)" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
+                            <h6 style="color: var(--color-text-primary); font-weight: 600;">
+                                <i class="fas fa-users text-primary me-2"></i>Readers
+                            </h6>
+                            <div class="progress mb-3" style="height: 10px; background-color: rgba(122, 111, 102, 0.2);">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: @(Model.Usage?.ReaderUsagePercentage ?? 0)%; background-color: var(--color-primary);"
+                                    aria-valuenow="@(Model.Usage?.ReaderUsagePercentage ?? 0)" aria-valuemin="0"
+                                    aria-valuemax="100">
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                @(Model.Usage?.CurrentReaders ?? 0) / @(Model.Usage?.MaxReaders == -1 ? "Unlimited" : (Model.Usage?.MaxReaders ?? 0).ToString()) readers
+                            <small style="color: var(--color-text-secondary);">
+                                <strong style="color: var(--color-primary);">@(Model.Usage?.CurrentReaders ?? 0)</strong> / @(Model.Usage?.MaxReaders == -1 ? "Unlimited" :
+                                (Model.Usage?.MaxReaders ?? 0).ToString()) readers
                             </small>
                         </div>
                         <div class="col-md-4">
-                            <h6>Libraries</h6>
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: @(Model.Usage?.LibraryUsagePercentage ?? 0)%"
-                                     aria-valuenow="@(Model.Usage?.LibraryUsagePercentage ?? 0)" 
-                                     aria-valuemin="0" 
-                                     aria-valuemax="100">
+                            <h6 style="color: var(--color-text-primary); font-weight: 600;">
+                                <i class="fas fa-building text-primary me-2"></i>Libraries
+                            </h6>
+                            <div class="progress mb-3" style="height: 10px; background-color: rgba(122, 111, 102, 0.2);">
+                                <div class="progress-bar" role="progressbar"
+                                    style="width: @(Model.Usage?.LibraryUsagePercentage ?? 0)%; background-color: var(--color-primary);"
+                                    aria-valuenow="@(Model.Usage?.LibraryUsagePercentage ?? 0)" aria-valuemin="0"
+                                    aria-valuemax="100">
                                 </div>
                             </div>
-                            <small class="text-muted">
-                                @(Model.Usage?.CurrentLibraries ?? 0) / @(Model.Usage?.MaxLibraries == -1 ? "Unlimited" : (Model.Usage?.MaxLibraries ?? 0).ToString()) libraries
+                            <small style="color: var(--color-text-secondary);">
+                                <strong style="color: var(--color-primary);">@(Model.Usage?.CurrentLibraries ?? 0)</strong> / @(Model.Usage?.MaxLibraries == -1 ? "Unlimited"
+                                                                : (Model.Usage?.MaxLibraries ?? 0).ToString()) libraries
                             </small>
                         </div>
                     </div>
@@ -153,7 +178,10 @@
     <!-- Available Plans -->
     <div class="row">
         <div class="col-12">
-            <h4 class="mb-3">Available Plans</h4>
+            <h4 class="mb-3" style="color: var(--color-text-primary); font-weight: 700;">
+                <i class="fas fa-star me-2" style="color: var(--color-accent);"></i>
+                Available Plans
+            </h4>
         </div>
     </div>
 
@@ -161,61 +189,64 @@
         @foreach (var plan in Model.AvailablePlans)
         {
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 @(plan.IsCurrentPlan ? "border-primary" : "")">
+                <div class="card h-100 border-0 shadow-sm @(plan.IsCurrentPlan ? "" : "")" 
+                     style="@(plan.IsCurrentPlan ? "border: 2px solid var(--color-primary) !important; background-color: rgba(36, 92, 79, 0.02);" : "")">
                     @if (plan.IsCurrentPlan)
                     {
-                        <div class="card-header bg-primary text-white text-center">
-                            <strong>Current Plan</strong>
+                        <div class="card-header text-center border-0" style="background-color: var(--color-primary); color: white;">
+                            <strong>
+                                <i class="fas fa-crown me-2"></i>Current Plan
+                            </strong>
                         </div>
                     }
-                    <div class="card-body d-flex flex-column">
+                    <div class="card-body d-flex flex-column" style="@(plan.IsCurrentPlan ? "" : "background-color: var(--color-bg-light);")">
                         <div class="text-center mb-3">
-                            <h5 class="card-title">@plan.Name</h5>
-                            <p class="card-text text-muted">@plan.Description</p>
+                            <h5 class="card-title" style="color: var(--color-text-primary); font-weight: 700;">@plan.Name</h5>
+                            <p class="card-text" style="color: var(--color-text-secondary);">@plan.Description</p>
                             <div class="pricing mb-3">
                                 @if (plan.MonthlyPrice == 0)
                                 {
-                                    <h3 class="text-primary">Free</h3>
+                                    <h3 style="color: var(--color-success); font-weight: 700;">Free</h3>
                                 }
                                 else
                                 {
                                     <div class="d-flex justify-content-center align-items-baseline">
-                                        <h3 class="text-primary me-2">@plan.MonthlyPrice.ToString("C")</h3>
-                                        <small class="text-muted">/month</small>
+                                        <h3 class="me-2" style="color: var(--color-primary); font-weight: 700;">@plan.MonthlyPrice.ToString("C")</h3>
+                                        <small style="color: var(--color-text-secondary);">/month</small>
                                     </div>
-                                    <div class="text-muted">
-                                        <small>or @plan.YearlyPrice.ToString("C")/year</small>
+                                    <div style="color: var(--color-text-secondary);">
+                                        <small>or <span style="color: var(--color-accent); font-weight: 600;">@plan.YearlyPrice.ToString("C")</span>/year</small>
                                     </div>
                                 }
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <strong>Limits:</strong>
+                            <strong style="color: var(--color-text-primary);">Limits:</strong>
                             <ul class="list-unstyled mt-2">
-                                <li>
-                                    <i class="fas fa-book text-primary me-2"></i>
-                                    @(plan.MaxBooks == -1 ? "Unlimited" : plan.MaxBooks.ToString()) books
+                                <li class="mb-1">
+                                    <i class="fas fa-book me-2" style="color: var(--color-primary);"></i>
+                                    <span style="color: var(--color-text-secondary);">@(plan.MaxBooks == -1 ? "Unlimited" : plan.MaxBooks.ToString()) books</span>
                                 </li>
-                                <li>
-                                    <i class="fas fa-users text-primary me-2"></i>
-                                    @(plan.MaxReaders == -1 ? "Unlimited" : plan.MaxReaders.ToString()) readers
+                                <li class="mb-1">
+                                    <i class="fas fa-users me-2" style="color: var(--color-primary);"></i>
+                                    <span style="color: var(--color-text-secondary);">@(plan.MaxReaders == -1 ? "Unlimited" : plan.MaxReaders.ToString()) readers</span>
                                 </li>
-                                <li>
-                                    <i class="fas fa-building text-primary me-2"></i>
-                                    @(plan.MaxLibraries == -1 ? "Unlimited" : plan.MaxLibraries.ToString()) libraries
+                                <li class="mb-1">
+                                    <i class="fas fa-building me-2" style="color: var(--color-primary);"></i>
+                                    <span style="color: var(--color-text-secondary);">@(plan.MaxLibraries == -1 ? "Unlimited" : plan.MaxLibraries.ToString()) libraries</span>
                                 </li>
                             </ul>
                         </div>
 
                         <div class="mb-3">
-                            <strong>Features:</strong>
+                            <strong style="color: var(--color-text-primary);">Features:</strong>
                             <ul class="list-unstyled mt-2">
                                 @foreach (var feature in plan.Features)
                                 {
-                                    <li>
-                                        <i class="fas fa-check text-success me-2"></i>
-                                        @feature
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle me-2" style="color: var(--color-success);"></i>
+                                        <span style="color: var(--color-text-secondary);">@feature</span>
                                     </li>
                                 }
                             </ul>
@@ -224,24 +255,29 @@
                         <div class="mt-auto">
                             @if (plan.IsCurrentPlan)
                             {
-                                <button class="btn btn-outline-primary w-100" disabled>
-                                    Current Plan
+                                <button class="btn w-100 border-2" disabled 
+                                        style="background: var(--color-bg-light); border-color: var(--color-primary) !important; color: var(--color-primary) !important; font-weight: 600;">
+                                    <i class="fas fa-check-circle me-2"></i>Current Plan
                                 </button>
                             }
                             else if (plan.MonthlyPrice == 0)
                             {
-                                <button class="btn btn-primary w-100" onclick="subscribeToPlan('@plan.Tier', 'month')">
-                                    Switch to Free Plan
+                                <button class="btn btn-success w-100" onclick="subscribeToPlan('@plan.Tier.ToString()', 'month')"
+                                        style="background-color: var(--color-success) !important; border-color: var(--color-success) !important; font-weight: 600;">
+                                    <i class="fas fa-arrow-right me-2"></i>Switch to Free Plan
                                 </button>
                             }
                             else
                             {
                                 <div class="d-grid gap-2">
-                                    <button class="btn btn-primary" onclick="subscribeToPlan('@plan.Tier', 'month')">
-                                        Subscribe Monthly
+                                    <button class="btn btn-primary fw-bold" onclick="subscribeToPlan('@plan.Tier.ToString()', 'month')"
+                                            style="background-color: var(--color-primary) !important; border-color: var(--color-primary) !important;">
+                                        <i class="fas fa-calendar-alt me-2"></i>Subscribe Monthly
                                     </button>
-                                    <button class="btn btn-outline-primary" onclick="subscribeToPlan('@plan.Tier', 'year')">
-                                        Subscribe Yearly (Save 17%)
+                                    <button class="btn border-2 fw-bold" onclick="subscribeToPlan('@plan.Tier.ToString()', 'year')"
+                                            style="background-color: transparent; border-color: var(--color-primary) !important; color: var(--color-primary) !important;">
+                                        <i class="fas fa-calendar me-2"></i>Subscribe Yearly 
+                                        <span class="badge ms-2" style="background-color: var(--color-accent); color: var(--color-text-primary);">Save 17%</span>
                                     </button>
                                 </div>
                             }
@@ -256,23 +292,36 @@
 <!-- Cancel Subscription Modal -->
 <div class="modal fade" id="cancelSubscriptionModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cancel Subscription</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0" style="background-color: var(--color-danger); color: white;">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Cancel Subscription
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to cancel your subscription? This action cannot be undone.</p>
-                <ul>
-                    <li>Your subscription will remain active until the end of your current billing period</li>
-                    <li>You will lose access to premium features after cancellation</li>
-                    <li>Your data will be preserved but may be subject to plan limits</li>
-                </ul>
+            <div class="modal-body" style="background-color: var(--color-bg-light);">
+                <div class="text-center mb-3">
+                    <i class="fas fa-sad-tear fa-3x mb-3" style="color: var(--color-danger);"></i>
+                    <p style="color: var(--color-text-primary); font-size: 1.1em;">Are you sure you want to cancel your subscription?</p>
+                </div>
+                <div class="alert border-0" style="background-color: rgba(199, 69, 69, 0.1); border-left: 4px solid var(--color-danger) !important;">
+                    <ul class="mb-0" style="color: var(--color-text-secondary);">
+                        <li>Your subscription will remain active until the end of your current billing period</li>
+                        <li>You will lose access to premium features after cancellation</li>
+                        <li>Your data will be preserved but may be subject to plan limits</li>
+                    </ul>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Subscription</button>
+            <div class="modal-footer border-0" style="background-color: var(--color-bg-light);">
+                <button type="button" class="btn border-2 me-2" data-bs-dismiss="modal"
+                        style="border-color: var(--color-text-secondary) !important; color: var(--color-text-secondary) !important;">
+                    <i class="fas fa-heart me-2"></i>Keep Subscription
+                </button>
                 <form method="post" asp-page-handler="Cancel" style="display: inline;">
-                    <button type="submit" class="btn btn-danger">Cancel Subscription</button>
+                    <button type="submit" class="btn fw-bold" 
+                            style="background-color: var(--color-danger) !important; border-color: var(--color-danger) !important; color: white;">
+                        <i class="fas fa-times me-2"></i>Cancel Subscription
+                    </button>
                 </form>
             </div>
         </div>
@@ -282,33 +331,52 @@
 @section Scripts {
     <script>
         function subscribeToPlan(tier, interval) {
+            console.log('subscribeToPlan called with:', tier, interval);
+            
             const data = {
                 tier: tier,
                 billingInterval: interval
             };
 
+            // Get the antiforgery token
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            console.log('Token found:', token ? 'Yes' : 'No');
+
             fetch('@Url.Page("Index", "Subscribe")', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    'RequestVerificationToken': token
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.redirectUrl) {
-                        window.location.href = data.redirectUrl;
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            console.log('Error response body:', text);
+                            throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                        });
                     }
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing your request.');
-            });
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your request: ' + error.message);
+                });
         }
 
         function confirmCancelSubscription() {

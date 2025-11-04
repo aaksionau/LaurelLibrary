@@ -86,7 +86,7 @@ async function initializeFingerprintAndRedirect() {
         params.set('browserFingerprint', browserFingerprint);
 
         // Redirect to the same page with parameters
-        window.location.href = `${window.location.pathname}?${params.toString()}`;
+        window.location.href = `${window.location.pathname}Kiosk/?${params.toString()}`;
     } else {
         // If no parameters available, show error message
         console.warn('Missing library/kiosk information in localStorage');

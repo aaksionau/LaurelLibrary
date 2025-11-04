@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace LaurelLibrary.UI.Areas.Administration.Pages.Subscriptions;
 
 [Authorize]
+[IgnoreAntiforgeryToken]
 public class IndexModel : PageModel
 {
     private readonly ISubscriptionService _subscriptionService;
@@ -81,23 +83,103 @@ public class IndexModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostSubscribeAsync([FromBody] CreateSubscriptionDto request)
+    public async Task<IActionResult> OnPostSubscribeAsync([FromBody] JsonElement requestBody)
     {
         try
         {
+            _logger.LogInformation(
+                "Subscribe request received. User: {User}",
+                User?.Identity?.Name
+            );
+            _logger.LogInformation("Request body: {RequestBody}", requestBody.ToString());
+
             var libraryId = await GetCurrentLibraryIdAsync();
             if (!libraryId.HasValue)
             {
+                _logger.LogWarning("No library found for user {User}", User?.Identity?.Name);
                 return BadRequest("No library selected");
             }
 
-            request.LibraryId = libraryId.Value;
+            // Manually parse the JSON to avoid model binding issues
+            if (
+                !requestBody.TryGetProperty("tier", out var tierElement)
+                || !requestBody.TryGetProperty("billingInterval", out var intervalElement)
+            )
+            {
+                _logger.LogWarning(
+                    "Subscribe request missing required fields for user {User}. Request: {RequestBody}",
+                    User?.Identity?.Name,
+                    requestBody.ToString()
+                );
+                return new JsonResult(
+                    new
+                    {
+                        success = false,
+                        message = "Missing required fields: tier and billingInterval are required.",
+                    }
+                );
+            }
+
+            var tierString = tierElement.GetString();
+            var billingInterval = intervalElement.GetString();
+
+            if (string.IsNullOrEmpty(tierString) || string.IsNullOrEmpty(billingInterval))
+            {
+                return new JsonResult(
+                    new { success = false, message = "Tier and billing interval cannot be empty." }
+                );
+            }
+
+            // Parse the tier enum
+            if (!Enum.TryParse<SubscriptionTier>(tierString, true, out var tier))
+            {
+                _logger.LogWarning(
+                    "Invalid subscription tier '{Tier}' for user {User}",
+                    tierString,
+                    User?.Identity?.Name
+                );
+                return new JsonResult(
+                    new { success = false, message = $"Invalid subscription tier: {tierString}" }
+                );
+            }
+
+            // Validate billing interval
+            if (billingInterval != "month" && billingInterval != "year")
+            {
+                return new JsonResult(
+                    new { success = false, message = "Billing interval must be 'month' or 'year'." }
+                );
+            }
+
+            // Create the request object manually
+            var request = new CreateSubscriptionDto
+            {
+                LibraryId = libraryId.Value,
+                Tier = tier,
+                BillingInterval = billingInterval,
+            };
+
+            // Log the parsed request for debugging
+            _logger.LogInformation(
+                "Parsed subscription request: Tier={Tier}, BillingInterval={BillingInterval}, User={User}",
+                request.Tier,
+                request.BillingInterval,
+                User?.Identity?.Name
+            );
 
             // For free tier, create subscription directly
             if (request.Tier == SubscriptionTier.BookwormBasic)
             {
+                _logger.LogInformation(
+                    "Creating free subscription for library {LibraryId}",
+                    libraryId.Value
+                );
                 var subscription = await _subscriptionService.CreateFreeSubscriptionAsync(
                     libraryId.Value
+                );
+                _logger.LogInformation(
+                    "Free subscription created successfully: {SubscriptionId}",
+                    subscription?.SubscriptionId
                 );
                 return new JsonResult(new { success = true, redirectUrl = Url.Page("Index") });
             }

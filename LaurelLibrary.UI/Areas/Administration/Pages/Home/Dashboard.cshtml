@@ -10,7 +10,7 @@
     <!-- KPI Cards Row -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-primary text-white h-100">
+            <div class="card text-white h-100" style="background-color: var(--color-primary);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-success text-white h-100">
+            <div class="card text-white h-100" style="background-color: var(--color-secondary);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -42,7 +42,8 @@
         </div>
 
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card @(Model.Statistics.OverdueBooks > 0 ? "bg-danger" : "bg-info") text-white h-100">
+            <div class="card text-white h-100"
+                style="background-color: @(Model.Statistics.OverdueBooks > 0 ? "var(--color-danger)" : "var(--color-info)");">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -58,7 +59,7 @@
         </div>
 
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-info text-white h-100">
+            <div class="card text-white h-100" style="background-color: var(--color-accent);">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -77,36 +78,36 @@
     <!-- Due Soon Alerts Row -->
     <div class="row mb-4">
         <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card border-warning h-100">
-                <div class="card-header bg-warning text-dark">
+            <div class="card h-100" style="border-color: var(--color-warning);">
+                <div class="card-header text-white" style="background-color: var(--color-warning);">
                     <h6 class="mb-0"><i class="fas fa-clock"></i> Due Today</h6>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-warning">@Model.Statistics.BooksDueToday</h4>
+                    <h4 style="color: var(--color-warning);">@Model.Statistics.BooksDueToday</h4>
                     <p class="mb-0">books due today</p>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card border-info h-100">
-                <div class="card-header bg-info text-white">
+            <div class="card h-100" style="border-color: var(--color-info);">
+                <div class="card-header text-white" style="background-color: var(--color-info);">
                     <h6 class="mb-0"><i class="fas fa-calendar-day"></i> Due Tomorrow</h6>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-info">@Model.Statistics.BooksDueTomorrow</h4>
+                    <h4 style="color: var(--color-info);">@Model.Statistics.BooksDueTomorrow</h4>
                     <p class="mb-0">books due tomorrow</p>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card border-secondary h-100">
-                <div class="card-header bg-secondary text-white">
+            <div class="card h-100" style="border-color: var(--color-secondary);">
+                <div class="card-header text-white" style="background-color: var(--color-secondary);">
                     <h6 class="mb-0"><i class="fas fa-calendar-week"></i> Due This Week</h6>
                 </div>
                 <div class="card-body">
-                    <h4 class="text-secondary">@Model.Statistics.BooksDueThisWeek</h4>
+                    <h4 style="color: var(--color-secondary);">@Model.Statistics.BooksDueThisWeek</h4>
                     <p class="mb-0">books due this week</p>
                 </div>
             </div>
@@ -122,16 +123,16 @@
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        <a asp-area="Administration" asp-page="/Books/Wizard" class="btn btn-primary">
+                        <a asp-area="Administration" asp-page="/Books/Wizard" class="btn text-white" style="background-color: var(--color-primary);">
                             <i class="fas fa-plus"></i> Add New Book
                         </a>
-                        <a asp-area="Administration" asp-page="/Readers/Update" class="btn btn-success">
+                        <a asp-area="Administration" asp-page="/Readers/Update" class="btn text-white" style="background-color: var(--color-secondary);">
                             <i class="fas fa-user-plus"></i> Register Reader
                         </a>
-                        <a asp-area="Administration" asp-page="/Books/List" class="btn btn-info">
+                        <a asp-area="Administration" asp-page="/Books/List" class="btn text-white" style="background-color: var(--color-info);">
                             <i class="fas fa-list"></i> Manage Books
                         </a>
-                        <a asp-area="Administration" asp-page="/Readers/List" class="btn btn-warning">
+                        <a asp-area="Administration" asp-page="/Readers/List" class="btn text-white" style="background-color: var(--color-accent);">
                             <i class="fas fa-users"></i> Manage Readers
                         </a>
                     </div>
@@ -145,7 +146,7 @@
     {
         <div class="row mb-4">
             <div class="col-12">
-                <div class="alert alert-danger">
+                <div class="alert alert-danger-custom">
                     <h5><i class="fas fa-exclamation-triangle"></i> Critical: Overdue Books Require Attention</h5>
                     <p class="mb-2">The following books are overdue and need immediate action:</p>
                     <div class="table-responsive">
@@ -184,7 +185,7 @@
                                             }
                                         </td>
                                         <td>@book.DueDate!.Value.LocalDateTime.ToString("MM/dd/yyyy")</td>
-                                        <td><span class="badge bg-danger">@daysOverdue days</span></td>
+                                        <td><span class="badge text-white" style="background-color: var(--color-danger);">@daysOverdue days</span></td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-primary"
                                                 onclick="sendReminder(@book.Reader?.ReaderId)">
@@ -231,7 +232,7 @@
                                             <small class="text-muted">by @book.Authors</small>
                                         }
                                     </div>
-                                    <span class="badge bg-primary rounded-pill">@book.CheckoutCount checkouts</span>
+                                    <span class="badge rounded-pill text-white" style="background-color: var(--color-primary);">@book.CheckoutCount checkouts</span>
                                 </div>
                             }
                         </div>
@@ -259,7 +260,7 @@
                                         </a>
                                         <br><small class="text-muted">@reader.Email</small>
                                     </div>
-                                    <span class="badge bg-success rounded-pill">Active</span>
+                                    <span class="badge rounded-pill text-white" style="background-color: var(--color-secondary);">Active</span>
                                 </div>
                             }
                         </div>
@@ -297,7 +298,7 @@
                                 var dueSoon = instance.DueDate.HasValue && !isOverdue && instance.DueDate.Value <
                                 DateTimeOffset.Now.AddDays(3);
 
-                                <tr class="@(isOverdue ? "table-danger" : dueSoon ? "table-warning" : "")">
+                                <tr class="@(isOverdue ? "table-danger-custom" : dueSoon ? "table-warning-custom" : "")">>
                                     <td>
                                         <a asp-area="Administration" asp-page="/Books/Details"
                                             asp-route-id="@instance.Book.BookId">
@@ -350,15 +351,15 @@
                                     <td>
                                         @if (isOverdue)
                                         {
-                                            <span class="badge bg-danger">Overdue</span>
+                                            <span class="badge text-white" style="background-color: var(--color-danger);">Overdue</span>
                                         }
                                         else if (dueSoon)
                                         {
-                                            <span class="badge bg-warning text-dark">Due Soon</span>
+                                            <span class="badge text-white" style="background-color: var(--color-warning);">Due Soon</span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success">Active</span>
+                                            <span class="badge text-white" style="background-color: var(--color-secondary);">Active</span>
                                         }
                                     </td>
                                 </tr>
@@ -413,5 +414,21 @@
 
     .list-group-item:not(:last-child) {
         border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    /* Custom table row highlighting using site palette */
+    .table-danger-custom {
+        background-color: rgba(199, 69, 69, 0.1) !important;
+    }
+
+    .table-warning-custom {
+        background-color: rgba(230, 182, 85, 0.1) !important;
+    }
+
+    /* Custom alert using site palette */
+    .alert-danger-custom {
+        background-color: rgba(199, 69, 69, 0.1);
+        border-color: var(--color-danger);
+        color: var(--color-danger);
     }
 </style>

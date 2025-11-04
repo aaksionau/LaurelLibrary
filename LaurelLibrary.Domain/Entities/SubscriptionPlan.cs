@@ -39,24 +39,25 @@ public class SubscriptionPlan
                 "Up to 100 books",
                 "Up to 10 readers",
                 "1 library",
-                "Basic checkout system",
+                "Mobile app checkout (*)",
+                "Export your data (*)",
                 "Barcode generation",
                 "Email notifications",
                 "Community support",
             },
-            StripeMonthlyPriceId = "", // Free tier - no Stripe
+            StripeMonthlyPriceId = "",
             StripeYearlyPriceId = "",
         },
         new SubscriptionPlan
         {
             Tier = SubscriptionTier.LibraryLover,
             Name = "Library Lover",
-            Description = "Ideal for growing libraries with advanced features",
-            MonthlyPrice = 29.99m,
-            YearlyPrice = 299.99m,
+            Description = "Ideal for personal libraries with advanced features",
+            MonthlyPrice = 11.99m,
+            YearlyPrice = 109.99m,
             MaxBooks = 1000,
             MaxReaders = 100,
-            MaxLibraries = 5,
+            MaxLibraries = 1,
             SemanticSearchEnabled = true,
             AgeClassificationEnabled = false,
             PrioritySupport = false,
@@ -64,23 +65,24 @@ public class SubscriptionPlan
             {
                 "Up to 1,000 books",
                 "Up to 100 readers",
-                "Up to 5 libraries",
+                "1 library",
+                "Mobile app checkout (*)",
                 "Advanced semantic search",
                 "Email notifications",
                 "Barcode generation",
-                "Multi-library support",
+                "Export your data (*)",
                 "Standard support",
             },
-            StripeMonthlyPriceId = "price_library_lover_monthly", // To be set in Stripe
-            StripeYearlyPriceId = "price_library_lover_yearly",
+            StripeMonthlyPriceId = "price_1SPatMDrPbflF5o5j3JGwPDU",
+            StripeYearlyPriceId = "price_1SPauVDrPbflF5o50fgYHZWK",
         },
         new SubscriptionPlan
         {
             Tier = SubscriptionTier.BibliothecaPro,
             Name = "Bibliotheca Pro",
-            Description = "Professional solution for large libraries and institutions",
-            MonthlyPrice = 79.99m,
-            YearlyPrice = 799.99m,
+            Description = "Choice for small to medium libraries with premium features",
+            MonthlyPrice = 14.99m,
+            YearlyPrice = 149.99m,
             MaxBooks = -1, // Unlimited
             MaxReaders = -1, // Unlimited
             MaxLibraries = -1, // Unlimited
@@ -96,13 +98,16 @@ public class SubscriptionPlan
                 "AI-powered age classification",
                 "Email notifications",
                 "Barcode generation",
+                "Export your data (*)",
+                "Mobile app checkout (*)",
                 "Multi-library support",
+                "Kiosk checkout system",
                 "Priority support",
                 "Advanced analytics",
                 "Custom integrations",
             },
-            StripeMonthlyPriceId = "price_bibliotheca_pro_monthly", // To be set in Stripe
-            StripeYearlyPriceId = "price_bibliotheca_pro_yearly",
+            StripeMonthlyPriceId = "price_1SPawWDrPbflF5o5zvW6nr0e",
+            StripeYearlyPriceId = "price_1SPaxfDrPbflF5o5UsvTdd9R",
         },
     };
 

@@ -15,12 +15,12 @@
 
     .library-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
-        border-color: #6c9bd1;
+        box-shadow: 0 4px 8px rgba(36, 92, 79, 0.15);
+        border-color: var(--color-primary);
     }
 
     .library-stats {
-        background-color: #f8f9fb;
+        background-color: var(--color-bg-light);
         border-radius: 0.375rem;
         padding: 0.75rem;
         margin-bottom: 0.75rem;
@@ -33,12 +33,12 @@
     .stat-number {
         font-size: 1.5rem;
         font-weight: bold;
-        color: #6c9bd1;
+        color: var(--color-primary);
     }
 
     .stat-label {
         font-size: 0.875rem;
-        color: #6c757d;
+        color: var(--color-text-secondary);
         margin-top: 0.25rem;
     }
 </style>
@@ -59,11 +59,11 @@
                         <div class="card library-card h-100">
                             <a asp-area="Administration" asp-page="/Libraries/Details" asp-route-id="@library.LibraryId"
                                 class="stretched-link text-decoration-none"></a>
-                            <div class="card-header" style="background-color: #e8f2f7; border-bottom: 1px solid #d1e7f0; color: #495057;">
+                            <div class="card-header" style="background-color: var(--color-bg-light); border-bottom: 1px solid var(--color-primary-light); color: var(--color-text-primary);">
                                 <h5 class="card-title mb-0">@library.Name</h5>
                                 @if (!string.IsNullOrWhiteSpace(library.Alias))
                                 {
-                                    <small style="color: #6c757d;">@library.Alias</small>
+                                    <small style="color: var(--color-text-secondary);">@library.Alias</small>
                                 }
                             </div>
                             <div class="card-body">
@@ -77,7 +77,7 @@
                                 @if (!string.IsNullOrWhiteSpace(library.Address))
                                 {
                                     <p class="card-text">
-                                        <i class="bi bi-geo-alt text-muted"></i>
+                                        <i class="bi bi-geo-alt" style="color: var(--color-secondary);"></i>
                                         <small class="text-muted">@library.Address</small>
                                     </p>
                                 }
@@ -101,12 +101,12 @@
 
                                 <div class="d-flex justify-content-between align-items-center text-muted">
                                     <small>
-                                        <i class="bi bi-calendar3"></i>
+                                        <i class="bi bi-calendar3" style="color: var(--color-accent);"></i>
                                         Created: @library.CreatedAt.ToString("MMM dd, yyyy")
                                     </small>
                                     <a class="btn btn-outline-secondary btn-sm" asp-area="Administration" asp-page="/Libraries/Update"
                                         asp-route-libraryId="@library.LibraryId" title="Edit Library"
-                                        style="position: relative; z-index: 10; border-color: #6c9bd1; color: #6c9bd1;">
+                                        style="position: relative; z-index: 10; border-color: var(--color-primary); color: var(--color-primary);">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
@@ -119,11 +119,11 @@
         else
         {
             <div class="text-center py-5">
-                <i class="bi bi-building display-1 text-muted"></i>
-                <h4 class="mt-3 text-muted">No libraries found</h4>
-                <p class="text-muted">Get started by adding your first library.</p>
+                <i class="bi bi-building display-1" style="color: var(--color-text-secondary);"></i>
+                <h4 class="mt-3" style="color: var(--color-text-secondary);">No libraries found</h4>
+                <p style="color: var(--color-text-secondary);">Get started by adding your first library.</p>
                 <a class="btn" asp-area="Administration" asp-page="/Libraries/Update"
-                   style="background-color: #6c9bd1; border-color: #6c9bd1; color: white;">
+                   style="background-color: var(--color-primary); border-color: var(--color-primary); color: white;">
                     <i class="bi bi-plus-circle"></i> Add Library
                 </a>
             </div>
