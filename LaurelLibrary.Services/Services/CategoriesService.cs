@@ -52,4 +52,13 @@ public class CategoriesService : ICategoriesService
     {
         return await _categoriesRepository.GetByNameAsync(name, libraryId);
     }
+
+    public async Task<IEnumerable<Category>> SearchCategoriesByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    )
+    {
+        return await _categoriesRepository.SearchByNameAsync(searchTerm, libraryId, limit);
+    }
 }

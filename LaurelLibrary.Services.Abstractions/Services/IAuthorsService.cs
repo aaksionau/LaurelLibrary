@@ -33,4 +33,13 @@ public interface IAuthorsService
     /// Gets an author by full name for a specific library.
     /// </summary>
     Task<Author?> GetAuthorByFullNameAsync(string fullName, Guid libraryId);
+
+    /// <summary>
+    /// Searches authors by name for autocomplete functionality.
+    /// </summary>
+    Task<IEnumerable<Author>> SearchAuthorsByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    );
 }

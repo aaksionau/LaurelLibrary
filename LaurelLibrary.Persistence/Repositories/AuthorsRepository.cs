@@ -118,4 +118,29 @@ public class AuthorsRepository : IAuthorsRepository
         await _dbContext.SaveChangesAsync();
         _logger.LogInformation("Removed author {AuthorId}", authorId);
     }
+
+    public async Task<IEnumerable<Author>> SearchByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    )
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return new List<Author>();
+
+        if (limit < 1)
+            limit = 10;
+
+        var normalizedSearchTerm = searchTerm.Trim().ToLower();
+
+        var result = await _dbContext
+            .Authors.Where(a =>
+                a.LibraryId == libraryId && a.FullName.ToLower().Contains(normalizedSearchTerm)
+            )
+            .OrderBy(a => a.FullName)
+            .Take(limit)
+            .ToListAsync();
+
+        return result;
+    }
 }

@@ -10,4 +10,5 @@ public interface IAuthorsRepository
     Task<IEnumerable<Author>> GetAllAsync(Guid libraryId, int page = 1, int pageSize = 20);
     Task<Author?> UpdateAsync(Author author);
     Task RemoveAsync(int authorId);
+    Task<IEnumerable<Author>> SearchByNameAsync(string searchTerm, Guid libraryId, int limit = 10);
 }

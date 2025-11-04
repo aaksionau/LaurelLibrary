@@ -116,4 +116,29 @@ public class CategoriesRepository : ICategoriesRepository
         await _dbContext.SaveChangesAsync();
         _logger.LogInformation("Removed category {CategoryId}", categoryId);
     }
+
+    public async Task<IEnumerable<Category>> SearchByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    )
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return new List<Category>();
+
+        if (limit < 1)
+            limit = 10;
+
+        var normalizedSearchTerm = searchTerm.Trim().ToLower();
+
+        var result = await _dbContext
+            .Categories.Where(c =>
+                c.LibraryId == libraryId && c.Name.ToLower().Contains(normalizedSearchTerm)
+            )
+            .OrderBy(c => c.Name)
+            .Take(limit)
+            .ToListAsync();
+
+        return result;
+    }
 }

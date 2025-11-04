@@ -38,11 +38,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         public IEnumerable<LaurelBookSummaryDto> Books { get; set; } =
             new List<LaurelBookSummaryDto>();
 
-        public IEnumerable<LaurelLibrary.Domain.Entities.Author> Authors { get; set; } =
-            new List<LaurelLibrary.Domain.Entities.Author>();
+        public LaurelLibrary.Domain.Entities.Author? SelectedAuthor { get; set; }
 
-        public IEnumerable<LaurelLibrary.Domain.Entities.Category> Categories { get; set; } =
-            new List<LaurelLibrary.Domain.Entities.Category>();
+        public LaurelLibrary.Domain.Entities.Category? SelectedCategory { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int? SelectedAuthorId { get; set; }
@@ -84,17 +82,20 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 return;
             }
 
-            // Load filters data
-            Authors = await this.authorsService.GetAllAuthorsAsync(
-                user.CurrentLibraryId.Value,
-                1,
-                500
-            );
-            Categories = await this.categoriesService.GetAllCategoriesAsync(
-                user.CurrentLibraryId.Value,
-                1,
-                500
-            );
+            // Load only selected author and category if they exist
+            if (SelectedAuthorId.HasValue)
+            {
+                SelectedAuthor = await this.authorsService.GetAuthorByIdAsync(
+                    SelectedAuthorId.Value
+                );
+            }
+
+            if (SelectedCategoryId.HasValue)
+            {
+                SelectedCategory = await this.categoriesService.GetCategoryByIdAsync(
+                    SelectedCategoryId.Value
+                );
+            }
 
             // Check if semantic search is available for this library
             CanUseSemanticSearch = await subscriptionService.IsSemanticSearchEnabledAsync(

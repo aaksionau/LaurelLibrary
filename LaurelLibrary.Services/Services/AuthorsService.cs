@@ -49,4 +49,13 @@ public class AuthorsService : IAuthorsService
     {
         return await _authorsRepository.GetByFullNameAsync(fullName, libraryId);
     }
+
+    public async Task<IEnumerable<Author>> SearchAuthorsByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    )
+    {
+        return await _authorsRepository.SearchByNameAsync(searchTerm, libraryId, limit);
+    }
 }

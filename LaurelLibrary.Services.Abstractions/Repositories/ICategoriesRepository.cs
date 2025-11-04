@@ -12,4 +12,9 @@ public interface ICategoriesRepository
     Task<IEnumerable<Category>> GetAllAsync(Guid libraryId, int page = 1, int pageSize = 20);
     Task<Category?> UpdateAsync(Category category);
     Task RemoveAsync(int categoryId);
+    Task<IEnumerable<Category>> SearchByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    );
 }

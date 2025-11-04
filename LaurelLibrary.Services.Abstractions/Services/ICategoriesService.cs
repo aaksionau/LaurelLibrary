@@ -37,4 +37,13 @@ public interface ICategoriesService
     /// Gets a category by name for a specific library.
     /// </summary>
     Task<Category?> GetCategoryByNameAsync(string name, Guid libraryId);
+
+    /// <summary>
+    /// Searches categories by name for autocomplete functionality.
+    /// </summary>
+    Task<IEnumerable<Category>> SearchCategoriesByNameAsync(
+        string searchTerm,
+        Guid libraryId,
+        int limit = 10
+    );
 }

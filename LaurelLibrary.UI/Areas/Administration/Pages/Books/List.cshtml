@@ -70,22 +70,22 @@
                             <input class="form-control" type="text" id="titleSearch" name="SearchTerm" value="@Model.SearchTerm" placeholder="Search by title" />
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3">
                             <select class="form-select" name="SelectedAuthorId" id="authorSelect" style="min-width: 200px;">
                                 <option value="">All Authors</option>
-                                @foreach (var a in Model.Authors)
+                                @if (Model.SelectedAuthor != null)
                                 {
-                                    <option value="@a.AuthorId" selected="@(Model.SelectedAuthorId == a.AuthorId ? "selected" : null)">@a.FullName</option>
+                                    <option value="@Model.SelectedAuthor.AuthorId" selected="selected">@Model.SelectedAuthor.FullName</option>
                                 }
                             </select>
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3">
                             <select class="form-select" name="SelectedCategoryId" id="categorySelect" style="min-width: 200px;">
                                 <option value="">All Categories</option>
-                                @foreach (var c in Model.Categories)
+                                @if (Model.SelectedCategory != null)
                                 {
-                                    <option value="@c.CategoryId" selected="@(Model.SelectedCategoryId == c.CategoryId ? "selected" : null)">@c.Name</option>
+                                    <option value="@Model.SelectedCategory.CategoryId" selected="selected">@Model.SelectedCategory.Name</option>
                                 }
                             </select>
                         </div>
@@ -204,104 +204,5 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    
-    <script>
-        $(document).ready(function() {
-            $('#authorSelect').select2({
-                theme: 'bootstrap-5',
-                placeholder: 'All Authors',
-                allowClear: true,
-                width: '100%'
-            });
-            
-            $('#categorySelect').select2({
-                theme: 'bootstrap-5',
-                placeholder: 'All Categories',
-                allowClear: true,
-                width: '100%'
-            });
-
-            // Multiple selection functionality
-            function updateSelectedCount() {
-                var selectedCount = $('.book-checkbox:checked').length;
-                
-                if (selectedCount > 0) {
-                    $('#selectedCount').text(selectedCount + ' selected').show();
-                } else {
-                    $('#selectedCount').hide();
-                }
-                
-                $('#deleteSelectedBtn').prop('disabled', selectedCount === 0);
-            }
-
-            // Handle individual checkbox changes
-            $('.book-checkbox').change(function() {
-                updateSelectedCount();
-                
-                // Update the "select all" checkbox state
-                var totalCheckboxes = $('.book-checkbox').length;
-                var checkedCheckboxes = $('.book-checkbox:checked').length;
-                
-                if (checkedCheckboxes === 0) {
-                    $('#selectAllCheckbox').prop('indeterminate', false).prop('checked', false);
-                } else if (checkedCheckboxes === totalCheckboxes) {
-                    $('#selectAllCheckbox').prop('indeterminate', false).prop('checked', true);
-                } else {
-                    $('#selectAllCheckbox').prop('indeterminate', true);
-                }
-            });
-
-            // Handle "select all" checkbox
-            $('#selectAllCheckbox').change(function() {
-                var isChecked = $(this).prop('checked');
-                $('.book-checkbox').prop('checked', isChecked);
-                updateSelectedCount();
-            });
-
-            // Initialize count
-            updateSelectedCount();
-        });
-
-        // Toggle between traditional and semantic search
-        function toggleSearchMode() {
-            var useSemanticSearch = document.getElementById('semanticSearchToggle').checked;
-            var semanticSection = document.getElementById('semanticSearchSection');
-            var traditionalSection = document.getElementById('traditionalSearchSection');
-            
-            if (useSemanticSearch) {
-                semanticSection.style.display = 'block';
-                traditionalSection.style.display = 'none';
-                // Clear traditional search fields when switching to semantic
-                document.getElementById('titleSearch').value = '';
-                document.getElementById('authorSelect').value = '';
-                document.getElementById('categorySelect').value = '';
-            } else {
-                semanticSection.style.display = 'none';
-                traditionalSection.style.display = 'block';
-                // Clear semantic search field when switching to traditional
-                document.getElementById('semanticSearchInput').value = '';
-            }
-        }
-
-        // Handle form submission for semantic search loading indicator
-        document.querySelector('form').addEventListener('submit', function(e) {
-            var useSemanticSearch = document.getElementById('semanticSearchToggle').checked;
-            var semanticQuery = document.getElementById('semanticSearchInput').value.trim();
-            
-            if (useSemanticSearch && semanticQuery) {
-                // Show loading state for semantic search
-                var searchButton = document.getElementById('searchButton');
-                var searchIcon = document.getElementById('searchIcon');
-                var searchSpinner = document.getElementById('searchSpinner');
-                var searchButtonText = document.getElementById('searchButtonText');
-                
-                searchButton.disabled = true;
-                searchIcon.style.display = 'none';
-                searchSpinner.style.display = 'inline-block';
-                searchButtonText.textContent = 'AI Processing...';
-            }
-        });
-    </script>
+    <script src="~/js/books-list.js" asp-append-version="true"></script>
 }
-    </div>
-</div>
