@@ -99,8 +99,9 @@ public class SubscriptionService : ISubscriptionService
         var baseUrl = GetBaseUrl();
         var successUrl =
             request.SuccessUrl
-            ?? $"{baseUrl}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}";
-        var cancelUrl = request.CancelUrl ?? $"{baseUrl}/subscription/cancel";
+            ?? $"{baseUrl}/administration/subscriptions/success?session_id={{CHECKOUT_SESSION_ID}}";
+        var cancelUrl =
+            request.CancelUrl ?? $"{baseUrl}/administration/subscriptions/cancelcheckout";
 
         var metadata = new Dictionary<string, string>
         {

@@ -138,7 +138,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= Url.Page("/Home/Dashboard", new { area = "Administration" });
             ExternalLogins = (
                 await _signInManager.GetExternalAuthenticationSchemesAsync()
             ).ToList();

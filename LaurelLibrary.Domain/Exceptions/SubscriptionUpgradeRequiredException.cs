@@ -27,7 +27,7 @@ public class SubscriptionUpgradeRequiredException : Exception
 
     public SubscriptionUpgradeRequiredException(
         string message,
-        string redirectUrl = "/Subscription"
+        string redirectUrl = "/Administration/Subscriptions"
     )
         : base(message)
     {
@@ -39,7 +39,7 @@ public class SubscriptionUpgradeRequiredException : Exception
         string feature,
         string currentTier,
         string recommendedTier,
-        string redirectUrl = "/Subscription"
+        string redirectUrl = "/Administration/Subscriptions"
     )
         : base(message)
     {
@@ -52,7 +52,7 @@ public class SubscriptionUpgradeRequiredException : Exception
     public SubscriptionUpgradeRequiredException(
         string message,
         Exception innerException,
-        string redirectUrl = "/Subscription"
+        string redirectUrl = "/Administration/Subscriptions"
     )
         : base(message, innerException)
     {

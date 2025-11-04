@@ -109,7 +109,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             string remoteError = null
         )
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl = returnUrl ?? Url.Page("/Home/Dashboard", new { area = "Administration" });
             if (remoteError != null)
             {
                 ErrorMessage = $"Error from external provider: {remoteError}";
@@ -160,7 +160,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
         {
-            returnUrl = returnUrl ?? Url.Content("~/");
+            returnUrl = returnUrl ?? Url.Page("/Home/Dashboard", new { area = "Administration" });
             // Get the information about the user from the external login provider
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)

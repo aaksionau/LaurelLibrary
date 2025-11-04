@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LaurelLibrary.UI</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mylibrarian-palette.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/LaurelLibrary.UI.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+</head>
+
+<body>
+    <header class="header admin-header">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    @await Component.InvokeAsync("CurrentUserLibraries")
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container-fluid">
+        <div class="row">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <aside class="col-auto app-sidebar">
+                    <div class="text-center">
+                        <img src="~/images/mylibrarian.png" alt="My Librarian Logo" class="img-fluid"
+                            style="max-width: 200px;" />
+                    </div>
+
+                    <!-- Main Navigation -->
+                    <nav class="nav flex-column">
+                        <a class="nav-link" asp-area="Administration" asp-page="/Home/Dashboard">
+                            <i class="bi bi-house-door-fill me-2"></i>Dashboard
+                        </a>
+                    </nav>
+
+                    <!-- Library Management -->
+                    <div class="nav-section-header text-muted mt-3 mb-2 px-3">
+                        <small><strong>LIBRARY MANAGEMENT</strong></small>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" asp-area="Administration" asp-page="/Libraries/List">
+                            <i class="bi bi-building me-2"></i>Libraries
+                        </a>
+                        <a class="nav-link" asp-area="Administration" asp-page="/Books/List">
+                            <i class="bi bi-book me-2"></i>Books
+                        </a>
+                        <a class="nav-link" asp-area="Administration" asp-page="/Books/ImportHistory">
+                            <i class="bi bi-file-arrow-up me-2"></i>Book Import
+                        </a>
+                        <a class="nav-link" asp-area="Administration" asp-page="/Readers/List">
+                            <i class="bi bi-people-fill me-2"></i>Readers
+                        </a>
+                    </nav>
+
+                    <!-- System & Administration -->
+                    <div class="nav-section-header text-muted mt-4 mb-2 px-3">
+                        <small><strong>SYSTEM & ADMIN</strong></small>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link" asp-area="Administration" asp-page="/Subscriptions/Index">
+                            <i class="bi bi-credit-card me-2"></i>Subscription
+                        </a>
+                        <a class="nav-link" asp-area="Administration" asp-page="/AuditLogs/List">
+                            <i class="bi bi-shield-check me-2"></i>Audit Logs
+                        </a>
+                    </nav>
+                </aside>
+            }
+            <main role="main" class="col app-main pb-3 @(User.Identity?.IsAuthenticated == true ? "" : "no-sidebar")">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @await Component.InvokeAsync("OnboardingStatus")
+                }
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        getComputerFingerPrint();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

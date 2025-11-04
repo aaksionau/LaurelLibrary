@@ -1,7 +1,7 @@
 @page
-@model LaurelLibrary.UI.Pages.Subscription.CancelCheckoutModel
+@model LaurelLibrary.UI.Areas.Administration.Pages.Subscriptions.SuccessModel
 @{
-    ViewData["Title"] = "Checkout Cancelled";
+    ViewData["Title"] = "Subscription Success";
 }
 
 <!-- This page automatically redirects, but we can add content if needed -->
@@ -10,9 +10,9 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-body text-center">
-                    <i class="fas fa-times-circle text-warning fa-3x mb-3"></i>
-                    <h3>Checkout Cancelled</h3>
-                    <p>Your subscription creation was cancelled.</p>
+                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                    <h3>Success!</h3>
+                    <p>Your subscription has been activated successfully!</p>
                     <p>Redirecting to subscription management...</p>
                 </div>
             </div>

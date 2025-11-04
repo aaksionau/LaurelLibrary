@@ -23,7 +23,6 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    @await Component.InvokeAsync("CurrentUserLibraries")
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -31,47 +30,7 @@
     </header>
     <div class="container-fluid">
         <div class="row">
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <aside class="col-auto app-sidebar">
-                    <div class="text-center">
-                        <img src="~/images/mylibrarian.png" alt="My Librarian Logo" class="img-fluid"
-                            style="max-width: 200px;" />
-                    </div>
-
-                    <nav class="nav flex-column">
-                        <a class="nav-link" asp-area="Administration" asp-page="/Home/Dashboard">
-                            <i class="bi bi-house-door-fill me-2"></i>Dashboard
-                        </a>
-                        <a class="nav-link" asp-area="Administration" asp-page="/Libraries/List">
-                            <i class="bi bi-building me-2"></i>Libraries
-                        </a>
-                        <a class="nav-link" asp-area="Administration" asp-page="/Books/List">
-                            <i class="bi bi-book me-2"></i>Books
-                        </a>
-                        <a class="nav-link" asp-area="Administration" asp-page="/Readers/List">
-                            <i class="bi bi-people-fill me-2"></i>Readers
-                        </a>
-                    </nav>
-                    <hr class="my-3">
-                    <nav class="nav flex-column">
-                        <a class="nav-link" asp-area="Administration" asp-page="/Books/ImportHistory">
-                            <i class="bi bi-file-arrow-up"></i> Book Import Management
-                        </a>
-                        <a class="nav-link" asp-area="Administration" asp-page="/AuditLogs/List">
-                            <i class="bi bi-shield-check"></i> Audit Logs
-                        </a>
-                        <a class="nav-link" asp-page="/Subscription/Index">
-                            <i class="bi bi-credit-card me-2"></i>Subscription
-                        </a>
-                    </nav>
-                </aside>
-            }
-            <main role="main" class="col app-main pb-3 @(User.Identity?.IsAuthenticated == true ? "" : "no-sidebar")">
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    @await Component.InvokeAsync("OnboardingStatus")
-                }
+            <main role="main" class="col pb-3">
                 @RenderBody()
             </main>
         </div>

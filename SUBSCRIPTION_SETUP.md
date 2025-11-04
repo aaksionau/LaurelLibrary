@@ -43,7 +43,7 @@ The subscription system includes three tiers:
   - Yearly: $799.99 (note the price ID)
 
 4. Set up webhooks:
-   - Endpoint URL: `https://yourdomain.com/subscription/stripewebhook`
+   - Endpoint URL: `https://yourdomain.com/administration/subscriptions/stripewebhook`
    - Events to listen for:
      - `checkout.session.completed`
      - `invoice.payment_succeeded`
