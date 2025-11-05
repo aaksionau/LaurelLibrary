@@ -3,39 +3,39 @@ output "resource_group_name" {
   value       = azurerm_resource_group.main.name
 }
 
-output "function_resource_group_name" {
-  description = "Name of the function app resource group"
-  value       = azurerm_resource_group.functions.name
+output "container_registry_name" {
+  description = "Name of the container registry"
+  value       = azurerm_container_registry.main.name
+}
+
+output "container_registry_login_server" {
+  description = "Login server of the container registry"
+  value       = azurerm_container_registry.main.login_server
 }
 
 output "web_app_name" {
-  description = "Name of the web app"
-  value       = azurerm_linux_web_app.main.name
+  description = "Name of the web container app"
+  value       = azurerm_container_app.web.name
 }
 
 output "web_app_url" {
-  description = "URL of the web app"
-  value       = "https://${azurerm_linux_web_app.main.default_hostname}"
+  description = "URL of the web container app"
+  value       = "https://${azurerm_container_app.web.latest_revision_fqdn}"
 }
 
 output "web_app_principal_id" {
-  description = "Principal ID of the web app managed identity"
-  value       = azurerm_linux_web_app.main.identity[0].principal_id
+  description = "Principal ID of the web container app managed identity"
+  value       = azurerm_container_app.web.identity[0].principal_id
 }
 
 output "function_app_name" {
-  description = "Name of the function app"
-  value       = azurerm_linux_function_app.main.name
-}
-
-output "function_app_url" {
-  description = "URL of the function app"
-  value       = "https://${azurerm_linux_function_app.main.default_hostname}"
+  description = "Name of the function container app"
+  value       = azurerm_container_app.functions.name
 }
 
 output "function_app_principal_id" {
-  description = "Principal ID of the function app managed identity"
-  value       = azurerm_linux_function_app.main.identity[0].principal_id
+  description = "Principal ID of the function container app managed identity"
+  value       = azurerm_container_app.functions.identity[0].principal_id
 }
 
 output "sql_server_fqdn" {
@@ -74,19 +74,24 @@ output "deployment_instructions" {
   value = <<-EOT
     Next steps:
     
-    1. Deploy the Web App:
-       az webapp deployment source config-zip \\
-         --resource-group ${azurerm_resource_group.main.name} \\
-         --name ${azurerm_linux_web_app.main.name} \\
-         --src <path-to-your-webapp-zip>
+    1. Build and push container images:
+       # Build and push web app
+       docker build -f LaurelLibrary.UI/Dockerfile -t ${azurerm_container_registry.main.login_server}/laurellibrary-web:latest .
+       docker push ${azurerm_container_registry.main.login_server}/laurellibrary-web:latest
+       
+       # Build and push functions
+       docker build -f LaurelLibrary.Functions/Dockerfile -t ${azurerm_container_registry.main.login_server}/laurellibrary-functions:latest .
+       docker push ${azurerm_container_registry.main.login_server}/laurellibrary-functions:latest
     
-    2. Deploy the Function App:
-       func azure functionapp publish ${azurerm_linux_function_app.main.name}
+    2. Deploy Container Apps:
+       az containerapp revision restart \\
+         --name ${azurerm_container_app.web.name} \\
+         --resource-group ${azurerm_resource_group.main.name}
     
     3. Run database migrations:
        - Set connection string in appsettings
        - Run: dotnet ef database update
     
-    4. Web App URL: https://${azurerm_linux_web_app.main.default_hostname}
+    4. Web App URL: https://${azurerm_container_app.web.latest_revision_fqdn}
   EOT
 }

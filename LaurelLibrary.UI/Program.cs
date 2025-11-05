@@ -175,6 +175,9 @@ app.UseSession();
 
 app.UseAuthorization();
 
+// Add health check endpoint for container orchestration
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
 app.MapControllers();
 app.MapRazorPages();
 app.MapHub<ImportProgressHub>("/hubs/importProgress");

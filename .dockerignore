@@ -1,0 +1,61 @@
+# Build artifacts
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Dependencies
+**/node_modules/
+**/packages/
+
+# Development files
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/*.cache
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+**/*.md
+**/README*
+**/CHANGELOG*
+
+# Test results
+**/TestResults/
+**/coverage/
+
+# Temporary files
+**/tmp/
+**/temp/
+**/.tmp/
+**/.temp/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Terraform
+**/terraform.tfstate*
+**/terraform.tfvars
+**/.terraform/
+
+# Azure
+**/local.settings.json
+**/Properties/launchSettings.json
+
+# Scripts
+**/scripts/
+**/migrations/
+
+# Infrastructure
+infrastructure/
+
+# Docker
+**/Dockerfile*
+**/.dockerignore

@@ -1,0 +1,134 @@
+name: Deploy Container Apps to Azure
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "LaurelLibrary.UI/**"
+            - "LaurelLibrary.Functions/**"
+            - "LaurelLibrary.Domain/**"
+            - "LaurelLibrary.Services/**"
+            - "LaurelLibrary.Services.Abstractions/**"
+            - "LaurelLibrary.Persistence/**"
+            - "LaurelLibrary.EmailSenderServices/**"
+            - "tests/**"
+            - ".github/workflows/deploy-container-apps.yml"
+    workflow_dispatch:
+
+env:
+    DOTNET_VERSION: "9.0.x"
+    AZURE_RESOURCE_GROUP: "mylibrarian-prod-rg"
+    CONTAINER_REGISTRY: "mylibrarianprodacrza8twn"
+    WEB_CONTAINER_APP: "mylibrarian-prod-web"
+    FUNCTIONS_CONTAINER_APP: "mylibrarian-prod-func"
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build solution
+              run: dotnet build --configuration Release --no-restore
+
+            - name: Run tests
+              run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+    build-and-deploy-containers:
+        needs: build-and-test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Log in to Azure
+              uses: azure/login@v1
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: Log in to Container Registry
+              run: |
+                  az acr login --name ${{ env.CONTAINER_REGISTRY }}
+
+            - name: Get Container Registry login server
+              id: acr-login-server
+              run: |
+                  echo "login_server=$(az acr show --name ${{ env.CONTAINER_REGISTRY }} --query loginServer --output tsv)" >> $GITHUB_OUTPUT
+
+            - name: Build and push Web App container
+              run: |
+                  docker build -f LaurelLibrary.UI/Dockerfile -t ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-web:${{ github.sha }} -t ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-web:latest .
+                  docker push ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-web:${{ github.sha }}
+                  docker push ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-web:latest
+
+            - name: Build and push Functions container
+              run: |
+                  docker build -f LaurelLibrary.Functions/Dockerfile -t ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-functions:${{ github.sha }} -t ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-functions:latest .
+                  docker push ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-functions:${{ github.sha }}
+                  docker push ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-functions:latest
+
+            - name: Deploy Web Container App
+              run: |
+                  az containerapp update \
+                    --name ${{ env.WEB_CONTAINER_APP }} \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --image ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-web:${{ github.sha }}
+
+            - name: Deploy Functions Container App
+              run: |
+                  az containerapp update \
+                    --name ${{ env.FUNCTIONS_CONTAINER_APP }} \
+                    --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                    --image ${{ steps.acr-login-server.outputs.login_server }}/laurellibrary-functions:${{ github.sha }}
+
+            - name: Wait for Web App deployment
+              run: |
+                  echo "Waiting for Web App to be ready..."
+                  sleep 30
+
+            - name: Get Web App URL
+              id: web-app-url
+              run: |
+                  url=$(az containerapp show --name ${{ env.WEB_CONTAINER_APP }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.configuration.ingress.fqdn" -o tsv)
+                  echo "web_app_url=https://$url" >> $GITHUB_OUTPUT
+                  echo "Web App URL: https://$url"
+
+            - name: Health check Web App
+              run: |
+                  echo "Performing health check on ${{ steps.web-app-url.outputs.web_app_url }}/health"
+                  for i in {1..10}; do
+                    if curl -f -s "${{ steps.web-app-url.outputs.web_app_url }}/health"; then
+                      echo "✅ Health check passed"
+                      exit 0
+                    fi
+                    echo "⏳ Attempt $i/10 failed, waiting 10 seconds..."
+                    sleep 10
+                  done
+                  echo "❌ Health check failed after 10 attempts"
+                  exit 1
+
+            - name: Verify Web App is responding
+              run: |
+                  echo "Verifying main page at ${{ steps.web-app-url.outputs.web_app_url }}"
+                  if curl -f -s "${{ steps.web-app-url.outputs.web_app_url }}" > /dev/null; then
+                    echo "✅ Web App is responding successfully"
+                  else
+                    echo "❌ Web App is not responding"
+                    exit 1
+                  fi
+
+            - name: Logout from Azure
+              run: az logout
+              if: always()

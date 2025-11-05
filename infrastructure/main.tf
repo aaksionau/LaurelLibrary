@@ -31,16 +31,9 @@ resource "random_string" "suffix" {
   upper   = false
 }
 
-# Resource Group for Web App and shared resources
+# Resource Group for all resources
 resource "azurerm_resource_group" "main" {
   name     = "${var.project_name}-${var.environment}-rg"
-  location = var.location
-  tags     = var.tags
-}
-
-# Separate Resource Group for Function App (required for Linux Consumption plan)
-resource "azurerm_resource_group" "functions" {
-  name     = "${var.project_name}-${var.environment}-func-rg"
   location = var.location
   tags     = var.tags
 }
@@ -138,115 +131,301 @@ resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
   end_ip_address   = "0.0.0.0"
 }
 
-# App Service Plan - F1 (Free tier)
-resource "azurerm_service_plan" "main" {
-  name                = "${var.project_name}-${var.environment}-asp"
+# Azure Container Registry
+resource "azurerm_container_registry" "main" {
+  name                = "${var.project_name}${var.environment}acr${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  os_type             = "Linux"
-  sku_name            = "F1"
+  sku                 = "Basic"
+  admin_enabled       = true
 
   tags = var.tags
 }
 
-# App Service for Web UI
-resource "azurerm_linux_web_app" "main" {
-  name                = "${var.project_name}-${var.environment}-web-${random_string.suffix.result}"
-  resource_group_name = azurerm_resource_group.main.name
+# Container Apps Environment
+resource "azurerm_container_app_environment" "main" {
+  name                = "${var.project_name}-${var.environment}-env"
   location            = azurerm_resource_group.main.location
-  service_plan_id     = azurerm_service_plan.main.id
+  resource_group_name = azurerm_resource_group.main.name
 
-  site_config {
-    always_on = false # Must be false for F1 tier
-    application_stack {
-      dotnet_version = "8.0"
-    }
-  }
+  tags = var.tags
+}
+
+# Container App for Web UI
+resource "azurerm_container_app" "web" {
+  name                         = "${var.project_name}-${var.environment}-web"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.main.name
+  revision_mode               = "Single"
 
   identity {
     type = "SystemAssigned"
   }
 
-  app_settings = {
-    "ASPNETCORE_ENVIRONMENT"                  = var.environment
-    "WEBSITE_RUN_FROM_PACKAGE"                = "1"
-    "AzureStorage__BarcodeContainerName"      = "barcodes"
-    "AzureStorage__LibraryLogoContainerName"  = "library-logos"
-    "AzureStorage__QueueName"                 = "emails"
-    "AzureStorage__IsbnImportQueueName"       = "isbns-to-import"
-    "AzureStorage__BlobStorageDomain"         = azurerm_storage_account.main.primary_blob_endpoint
-    "Admin__Email"                            = var.admin_email
-    "BulkImport__ChunkSize"                   = "1000"
-    "BulkImport__MaxIsbnsPerImport"           = "50000"
-    "ISBNdb__BaseUrl"                         = "https://api2.isbndb.com/"
+  registry {
+    server   = azurerm_container_registry.main.login_server
+    username = azurerm_container_registry.main.admin_username
+    password_secret_name = "registry-password"
   }
 
-  tags = var.tags
-}
+  secret {
+    name  = "registry-password"
+    value = azurerm_container_registry.main.admin_password
+  }
 
-# Function App Service Plan (Consumption plan - pay per use)
-# Uses separate resource group to avoid conflicts with Web App plan
-resource "azurerm_service_plan" "functions" {
-  name                = "${var.project_name}-${var.environment}-func-asp"
-  resource_group_name = azurerm_resource_group.functions.name
-  location            = azurerm_resource_group.functions.location
-  os_type             = "Linux"
-  sku_name            = "Y1" # Consumption plan
+  secret {
+    name                = "connectionstrings-defaultconnection"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.connection_string.id
+  }
 
-  tags = var.tags
-}
+  secret {
+    name                = "microsoft-client-id"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.microsoft_client_id.id
+  }
 
-# Function App
-resource "azurerm_linux_function_app" "main" {
-  name                                = "${var.project_name}-${var.environment}-func-${random_string.suffix.result}"
-  resource_group_name                 = azurerm_resource_group.functions.name
-  location                            = azurerm_resource_group.functions.location
-  service_plan_id                     = azurerm_service_plan.functions.id
-  storage_account_name                = azurerm_storage_account.main.name
-  storage_account_access_key          = azurerm_storage_account.main.primary_access_key
+  secret {
+    name                = "microsoft-client-secret"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.microsoft_client_secret.id
+  }
 
-  site_config {
-    application_stack {
-      dotnet_version              = "8.0"
-      use_dotnet_isolated_runtime = true
+  secret {
+    name                = "azureopenaiendpoint"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.openai_endpoint.id
+  }
+
+  secret {
+    name                = "azureopenaiapikey"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.openai_apikey.id
+  }
+
+  secret {
+    name                = "isbndbapikey"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.isbndb_apikey.id
+  }
+
+  secret {
+    name                = "stripepublishablekey"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.stripe_publishable_key.id
+  }
+
+  secret {
+    name                = "stripesecretkey"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.stripe_secret_key.id
+  }
+
+  secret {
+    name                = "stripewebhooksecret"
+    identity            = "System"
+    key_vault_secret_id = azurerm_key_vault_secret.stripe_webhook_secret.id
+  }
+
+  template {
+    min_replicas = 0
+    max_replicas = 5
+
+    container {
+      name   = "web-app"
+      image  = "${azurerm_container_registry.main.login_server}/laurellibrary-web:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+
+      env {
+        name  = "ASPNETCORE_ENVIRONMENT"
+        value = var.environment
+      }
+
+      env {
+        name  = "AzureStorage__BarcodeContainerName"
+        value = "barcodes"
+      }
+
+      env {
+        name  = "AzureStorage__LibraryLogoContainerName"
+        value = "library-logos"
+      }
+
+      env {
+        name  = "AzureStorage__QueueName"
+        value = "emails"
+      }
+
+      env {
+        name  = "AzureStorage__IsbnImportQueueName"
+        value = "isbns-to-import"
+      }
+
+      env {
+        name  = "AzureStorage__BlobStorageDomain"
+        value = azurerm_storage_account.main.primary_blob_endpoint
+      }
+
+      env {
+        name  = "Admin__Email"
+        value = var.admin_email
+      }
+
+      env {
+        name  = "BulkImport__ChunkSize"
+        value = "1000"
+      }
+
+      env {
+        name  = "BulkImport__MaxIsbnsPerImport"
+        value = "50000"
+      }
+
+      env {
+        name  = "ISBNdb__BaseUrl"
+        value = "https://api2.isbndb.com/"
+      }
+
+      env {
+        name        = "ConnectionStrings__DefaultConnection"
+        secret_name = "connectionstrings-defaultconnection"
+      }
+
+      env {
+        name        = "Microsoft__ClientId"
+        secret_name = "microsoft-client-id"
+      }
+
+      env {
+        name        = "Microsoft__ClientSecret"
+        secret_name = "microsoft-client-secret"
+      }
+
+      env {
+        name        = "AzureOpenAI__Endpoint"
+        secret_name = "azureopenaiendpoint"
+      }
+
+      env {
+        name        = "AzureOpenAI__ApiKey"
+        secret_name = "azureopenaiapikey"
+      }
+
+      env {
+        name        = "ISBNdb__ApiKey"
+        secret_name = "isbndbapikey"
+      }
+
+      env {
+        name        = "Stripe__PublishableKey"
+        secret_name = "stripepublishablekey"
+      }
+
+      env {
+        name        = "Stripe__SecretKey"
+        secret_name = "stripesecretkey"
+      }
+
+      env {
+        name        = "Stripe__WebhookSecret"
+        secret_name = "stripewebhooksecret"
+      }
     }
   }
+
+  ingress {
+    allow_insecure_connections = false
+    external_enabled          = true
+    target_port               = 8080
+
+    traffic_weight {
+      percentage = 100
+      latest_revision = true
+    }
+  }
+
+  tags = var.tags
+}
+
+# Container App for Functions
+resource "azurerm_container_app" "functions" {
+  name                         = "${var.project_name}-${var.environment}-func"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.main.name
+  revision_mode               = "Single"
 
   identity {
     type = "SystemAssigned"
   }
 
-  app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"                     = "dotnet-isolated"
-    "FUNCTIONS_EXTENSION_VERSION"                  = "~4"
-    "WEBSITE_CONTENTSHARE"                         = "${var.project_name}-${var.environment}-func-content"
-    # Explicitly set storage connection strings to override any Key Vault references
-    "AzureWebJobsStorage"                          = azurerm_storage_account.main.primary_connection_string
-    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"     = azurerm_storage_account.main.primary_connection_string
-    "AzureStorage__QueueName"                      = "emails"
-    "AzureStorage__IsbnImportQueueName"            = "isbns-to-import"
-    "ISBNdb__BaseUrl"                              = "https://api2.isbndb.com/"
+  registry {
+    server   = azurerm_container_registry.main.login_server
+    username = azurerm_container_registry.main.admin_username
+    password_secret_name = "registry-password-func"
+  }
+
+  secret {
+    name  = "registry-password-func"
+    value = azurerm_container_registry.main.admin_password
+  }
+
+  template {
+    min_replicas = 0
+    max_replicas = 3
+
+    container {
+      name   = "functions-app"
+      image  = "${azurerm_container_registry.main.login_server}/laurellibrary-functions:latest"
+      cpu    = 0.25
+      memory = "0.5Gi"
+
+      env {
+        name  = "AzureWebJobsStorage"
+        value = azurerm_storage_account.main.primary_connection_string
+      }
+
+      env {
+        name  = "FUNCTIONS_WORKER_RUNTIME"
+        value = "dotnet-isolated"
+      }
+
+      env {
+        name  = "AzureStorage__QueueName"
+        value = "emails"
+      }
+
+      env {
+        name  = "AzureStorage__IsbnImportQueueName"
+        value = "isbns-to-import"
+      }
+
+      env {
+        name  = "ISBNdb__BaseUrl"
+        value = "https://api2.isbndb.com/"
+      }
+    }
   }
 
   tags = var.tags
 }
 
-# Key Vault Access Policy for Web App
+# Key Vault Access Policy for Web Container App
 resource "azurerm_key_vault_access_policy" "web_app" {
   key_vault_id = azurerm_key_vault.main.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_linux_web_app.main.identity[0].principal_id
+  object_id    = azurerm_container_app.web.identity[0].principal_id
 
   secret_permissions = [
     "Get", "List"
   ]
 }
 
-# Key Vault Access Policy for Function App
+# Key Vault Access Policy for Function Container App
 resource "azurerm_key_vault_access_policy" "function_app" {
   key_vault_id = azurerm_key_vault.main.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_linux_function_app.main.identity[0].principal_id
+  object_id    = azurerm_container_app.functions.identity[0].principal_id
 
   secret_permissions = [
     "Get", "List"
@@ -254,6 +433,16 @@ resource "azurerm_key_vault_access_policy" "function_app" {
 }
 
 # Key Vault Secrets - Created AFTER Key Vault
+resource "azurerm_key_vault_secret" "connection_string" {
+  name         = "ConnectionStrings-DefaultConnection"
+  value        = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=${var.sql_admin_username};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  key_vault_id = azurerm_key_vault.main.id
+
+  depends_on = [
+    azurerm_key_vault.main
+  ]
+}
+
 resource "azurerm_key_vault_secret" "sql_connection_string" {
   name         = "SqlConnectionString"
   value        = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=${var.sql_admin_username};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
