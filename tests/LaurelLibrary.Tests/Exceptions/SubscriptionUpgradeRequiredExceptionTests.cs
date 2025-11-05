@@ -15,7 +15,7 @@ namespace LaurelLibrary.Tests.Exceptions
 
             // Assert
             Assert.Equal(message, exception.Message);
-            Assert.Equal("/Subscription", exception.RedirectUrl);
+            Assert.Equal("/Administration/Subscriptions", exception.RedirectUrl);
             Assert.Null(exception.Feature);
             Assert.Null(exception.CurrentTier);
             Assert.Null(exception.RecommendedTier);
