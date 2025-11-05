@@ -1,0 +1,83 @@
+name: Deploy Web App to Azure
+
+on:
+    push:
+        branches:
+            - main
+        paths:
+            - "LaurelLibrary.UI/**"
+            - "LaurelLibrary.Domain/**"
+            - "LaurelLibrary.Services/**"
+            - "LaurelLibrary.Services.Abstractions/**"
+            - "LaurelLibrary.Persistence/**"
+            - "tests/**"
+            - ".github/workflows/deploy-webapp.yml"
+    workflow_dispatch:
+
+env:
+    DOTNET_VERSION: "9.0.x"
+    AZURE_WEBAPP_NAME: "mylibrarian-prod-web-za8twn"
+    AZURE_RESOURCE_GROUP: "mylibrarian-prod-rg"
+    WORKING_DIRECTORY: "./LaurelLibrary.UI"
+
+jobs:
+    build-and-test:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build solution
+              run: dotnet build --configuration Release --no-restore
+
+            - name: Run tests
+              run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+            - name: Publish Web App
+              run: dotnet publish ${{ env.WORKING_DIRECTORY }}/LaurelLibrary.UI.csproj --configuration Release --no-build --output ./publish
+
+            - name: Upload artifact for deployment
+              uses: actions/upload-artifact@v4
+              with:
+                  name: webapp
+                  path: ./publish
+
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build-and-test
+        environment:
+            name: "Production"
+            url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+        steps:
+            - name: Download artifact from build job
+              uses: actions/download-artifact@v4
+              with:
+                  name: webapp
+                  path: ./publish
+
+            - name: Login to Azure
+              uses: azure/login@v2
+              with:
+                  creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: Deploy to Azure Web App
+              id: deploy-to-webapp
+              uses: azure/webapps-deploy@v3
+              with:
+                  app-name: ${{ env.AZURE_WEBAPP_NAME }}
+                  resource-group-name: ${{ env.AZURE_RESOURCE_GROUP }}
+                  package: ./publish
+
+            - name: Logout from Azure
+              run: az logout
+              if: always()
