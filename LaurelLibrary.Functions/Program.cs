@@ -46,6 +46,7 @@ builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
@@ -57,11 +58,14 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
     client.DefaultRequestHeaders.Add("Authorization", configuration["ISBNdb:ApiKey"]);
 });
 
-// Add HttpClient for BooksService to download images
-builder.Services.AddHttpClient<IBooksService, BooksService>(client =>
+// Add HttpClient for ImageService to download images
+builder.Services.AddHttpClient<IImageService, ImageService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
+
+// Register BooksService
+builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IMailgunService, MailgunService>();
 
 // register AI kernel

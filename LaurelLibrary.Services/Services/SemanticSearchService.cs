@@ -1,6 +1,5 @@
 using System.Text;
 using System.Text.Json;
-using Azure.Identity;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
@@ -22,25 +21,14 @@ public class SemanticSearchService : ISemanticSearchService
     public SemanticSearchService(
         ISemanticSearchRepository searchRepository,
         IConfiguration configuration,
-        ILogger<SemanticSearchService> logger
+        ILogger<SemanticSearchService> logger,
+        IChatCompletionService chatCompletionService
     )
     {
         _searchRepository = searchRepository;
         _configuration = configuration;
         _logger = logger;
-
-        // Initialize Azure OpenAI client using Semantic Kernel
-        var azureEndpoint =
-            configuration["AzureOpenAI:Endpoint"]
-            ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not configured");
-        var azureApiKey =
-            configuration["AzureOpenAI:ApiKey"]
-            ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not configured");
-
-        var kernelBuilder = Kernel.CreateBuilder();
-        kernelBuilder.AddAzureOpenAIChatCompletion("laurellibrarygpt4", azureEndpoint, azureApiKey);
-        var kernel = kernelBuilder.Build();
-        _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        _chatCompletionService = chatCompletionService;
     }
 
     public async Task<PagedResult<LaurelBookSummaryDto>> SearchBooksSemanticAsync(

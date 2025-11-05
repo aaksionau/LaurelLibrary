@@ -1,5 +1,6 @@
 using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 
@@ -104,22 +105,7 @@ public class DashboardService : IDashboardService
             var reader = await _readersRepository.GetByIdAsync(readerData.ReaderId, libraryId);
             if (reader != null)
             {
-                mostActiveReaders.Add(
-                    new ReaderDto
-                    {
-                        ReaderId = reader.ReaderId,
-                        FirstName = reader.FirstName,
-                        LastName = reader.LastName,
-                        Email = reader.Email,
-                        DateOfBirth = reader.DateOfBirth,
-                        Address = reader.Address,
-                        City = reader.City,
-                        State = reader.State,
-                        Zip = reader.Zip,
-                        Ean = reader.Ean,
-                        BarcodeImageUrl = reader.BarcodeImageUrl,
-                    }
-                );
+                mostActiveReaders.Add(reader.ToReaderDto());
             }
         }
 

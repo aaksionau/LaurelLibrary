@@ -9,19 +9,16 @@ namespace LaurelLibrary.Services.Services;
 public class KiosksService : IKiosksService
 {
     private readonly IKiosksRepository _kiosksRepository;
-    private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly ILogger<KiosksService> _logger;
 
     public KiosksService(
         IKiosksRepository kiosksRepository,
-        IUserService userService,
         IAuthenticationService authenticationService,
         ILogger<KiosksService> logger
     )
     {
         _kiosksRepository = kiosksRepository;
-        _userService = userService;
         _authenticationService = authenticationService;
         _logger = logger;
     }

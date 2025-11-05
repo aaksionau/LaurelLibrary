@@ -12,6 +12,8 @@ using LaurelLibrary.UI.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,22 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Configure Semantic Kernel for AI services
+var azureEndpoint =
+    builder.Configuration["AzureOpenAI:Endpoint"]
+    ?? throw new InvalidOperationException("AzureOpenAI:Endpoint not configured");
+var azureApiKey =
+    builder.Configuration["AzureOpenAI:ApiKey"]
+    ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not configured");
+
+var kernelBuilder = Kernel.CreateBuilder();
+kernelBuilder.AddAzureOpenAIChatCompletion("laurellibrarygpt4", azureEndpoint, azureApiKey);
+var kernel = kernelBuilder.Build();
+
+// Register the kernel and chat completion service
+builder.Services.AddSingleton(kernel);
+builder.Services.AddSingleton(kernel.GetRequiredService<IChatCompletionService>());
+
 builder.Services.AddScoped<ILibrariesRepository, LibrariesRepository>();
 builder.Services.AddScoped<IBooksRepository, BooksRepository>();
 builder.Services.AddScoped<IAuthorsRepository, AuthorsRepository>();
@@ -82,6 +100,7 @@ builder.Services.AddScoped<IReadersService, ReadersService>();
 builder.Services.AddScoped<IReaderAuthService, ReaderAuthService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBlobUrlService, BlobUrlService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -112,11 +131,14 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
     client.DefaultRequestHeaders.Add("Authorization", builder.Configuration["ISBNdb:ApiKey"]);
 });
 
-// Add HttpClient for BooksService to download images
-builder.Services.AddHttpClient<IBooksService, BooksService>(client =>
+// Add HttpClient for ImageService to download images
+builder.Services.AddHttpClient<IImageService, ImageService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
+
+// Register BooksService
+builder.Services.AddScoped<IBooksService, BooksService>();
 
 var app = builder.Build();
 

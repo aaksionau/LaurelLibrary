@@ -1,5 +1,6 @@
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -101,24 +102,7 @@ public class ReaderActionService : IReaderActionService
             pageSize
         );
 
-        return readerActions
-            .Select(ra => new ReaderActionDto
-            {
-                ReaderActionId = ra.ReaderActionId,
-                ReaderId = ra.ReaderId,
-                ReaderName = $"{ra.Reader.FirstName} {ra.Reader.LastName}",
-                BookInstanceId = ra.BookInstanceId,
-                ActionType = ra.ActionType,
-                ActionDate = ra.ActionDate,
-                BookTitle = ra.BookTitle,
-                BookIsbn = ra.BookIsbn,
-                BookAuthors = ra.BookAuthors,
-                DueDate = ra.DueDate,
-                LibraryId = ra.LibraryId,
-                LibraryName = ra.Library.Name,
-                Notes = ra.Notes,
-            })
-            .ToList();
+        return readerActions.Select(ra => ra.ToReaderActionDto()).ToList();
     }
 
     public async Task<int> GetReaderActionsCountAsync(int readerId)
@@ -130,23 +114,6 @@ public class ReaderActionService : IReaderActionService
     {
         var readerActions = await _readerActionRepository.GetRecentActionsAsync(libraryId, limit);
 
-        return readerActions
-            .Select(ra => new ReaderActionDto
-            {
-                ReaderActionId = ra.ReaderActionId,
-                ReaderId = ra.ReaderId,
-                ReaderName = $"{ra.Reader.FirstName} {ra.Reader.LastName}",
-                BookInstanceId = ra.BookInstanceId,
-                ActionType = ra.ActionType,
-                ActionDate = ra.ActionDate,
-                BookTitle = ra.BookTitle,
-                BookIsbn = ra.BookIsbn,
-                BookAuthors = ra.BookAuthors,
-                DueDate = ra.DueDate,
-                LibraryId = ra.LibraryId,
-                LibraryName = ra.Library.Name,
-                Notes = ra.Notes,
-            })
-            .ToList();
+        return readerActions.Select(ra => ra.ToReaderActionDto()).ToList();
     }
 }

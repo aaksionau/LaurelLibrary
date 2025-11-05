@@ -18,9 +18,8 @@ public class BooksService : IBooksService
     private readonly IAzureQueueService _queueService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
-    private readonly IBlobStorageService _blobStorageService;
+    private readonly IImageService _imageService;
     private readonly ILibrariesRepository _librariesRepository;
-    private readonly HttpClient _httpClient;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -31,9 +30,8 @@ public class BooksService : IBooksService
         IAzureQueueService queueService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
-        IBlobStorageService blobStorageService,
+        IImageService imageService,
         ILibrariesRepository librariesRepository,
-        HttpClient httpClient,
         ILogger<BooksService> logger
     )
     {
@@ -44,9 +42,8 @@ public class BooksService : IBooksService
         _queueService = queueService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
-        _blobStorageService = blobStorageService;
+        _imageService = imageService;
         _librariesRepository = librariesRepository;
-        _httpClient = httpClient;
         _logger = logger;
     }
 
@@ -207,7 +204,10 @@ public class BooksService : IBooksService
                 var library = await _librariesRepository.GetByIdAsync(libraryId);
                 if (library != null && !string.IsNullOrWhiteSpace(library.Alias))
                 {
-                    var blobUrl = await CopyImageToBlobStorageAsync(entity.Image, library.Alias);
+                    var blobUrl = await _imageService.CopyImageToBlobStorageAsync(
+                        entity.Image,
+                        library.Alias
+                    );
                     if (!string.IsNullOrWhiteSpace(blobUrl))
                     {
                         // Store the original URL and update with the blob URL
@@ -582,94 +582,5 @@ public class BooksService : IBooksService
         );
 
         return deletedCount;
-    }
-
-    /// <summary>
-    /// Copies an image from a URL to Azure blob storage in the book-images container
-    /// </summary>
-    /// <param name="imageUrl">The URL of the image to copy</param>
-    /// <param name="libraryAlias">The library alias for organizing images</param>
-    /// <returns>The blob URL of the copied image, or null if the operation failed</returns>
-    private async Task<string?> CopyImageToBlobStorageAsync(string imageUrl, string libraryAlias)
-    {
-        if (string.IsNullOrWhiteSpace(imageUrl) || string.IsNullOrWhiteSpace(libraryAlias))
-        {
-            return null;
-        }
-
-        try
-        {
-            // Download the image from the URL
-            var response = await _httpClient.GetAsync(imageUrl);
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogWarning(
-                    "Failed to download image from {ImageUrl}. Status: {StatusCode}",
-                    imageUrl,
-                    response.StatusCode
-                );
-                return null;
-            }
-
-            // Get the content type from the response
-            var contentType = response.Content.Headers.ContentType?.MediaType ?? "image/jpeg";
-
-            // Extract file extension from URL or use default based on content type
-            var uri = new Uri(imageUrl);
-            var fileName = Path.GetFileName(uri.LocalPath);
-            var extension = Path.GetExtension(fileName);
-
-            if (string.IsNullOrWhiteSpace(extension))
-            {
-                extension = contentType switch
-                {
-                    "image/jpeg" => ".jpg",
-                    "image/png" => ".png",
-                    "image/gif" => ".gif",
-                    "image/webp" => ".webp",
-                    _ => ".jpg",
-                };
-            }
-
-            // Generate a unique filename
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var blobPath = $"book-images/{libraryAlias}/{uniqueFileName}";
-
-            // Upload to blob storage
-            using var stream = await response.Content.ReadAsStreamAsync();
-            var blobUrl = await _blobStorageService.UploadStreamAsync(
-                stream,
-                "book-images",
-                $"{libraryAlias}/{uniqueFileName}",
-                contentType
-            );
-
-            if (blobUrl != null)
-            {
-                _logger.LogInformation(
-                    "Successfully copied image to blob storage: {BlobUrl}",
-                    blobUrl
-                );
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "Failed to upload image to blob storage for library {LibraryAlias}",
-                    libraryAlias
-                );
-            }
-
-            return blobUrl;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(
-                ex,
-                "Error copying image {ImageUrl} to blob storage for library {LibraryAlias}",
-                imageUrl,
-                libraryAlias
-            );
-            return null;
-        }
     }
 }

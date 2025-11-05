@@ -18,10 +18,7 @@ namespace LaurelLibrary.Services.Services;
 
 public class BookImportService : IBookImportService
 {
-    private readonly IIsbnService _isbnService;
-    private readonly IBooksService _booksService;
     private readonly IImportHistoryRepository _importHistoryRepository;
-    private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IAzureQueueService _queueService;
     private readonly ISubscriptionService _subscriptionService;
@@ -34,10 +31,7 @@ public class BookImportService : IBookImportService
     private readonly string _isbnImportQueueName;
 
     public BookImportService(
-        IIsbnService isbnService,
-        IBooksService booksService,
         IImportHistoryRepository importHistoryRepository,
-        IUserService userService,
         IAuthenticationService authenticationService,
         IAzureQueueService queueService,
         ISubscriptionService subscriptionService,
@@ -46,10 +40,7 @@ public class BookImportService : IBookImportService
         ILogger<BookImportService> logger
     )
     {
-        _isbnService = isbnService;
-        _booksService = booksService;
         _importHistoryRepository = importHistoryRepository;
-        _userService = userService;
         _authenticationService = authenticationService;
         _queueService = queueService;
         _subscriptionService = subscriptionService;
