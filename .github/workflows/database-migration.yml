@@ -46,7 +46,7 @@ jobs:
                     --startup-project LaurelLibrary.UI \
                     --idempotent \
                     --output migration_${{ github.event.inputs.environment }}.sql \
-                    --no-build
+                    --configuration Release
               env:
                   ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
 
@@ -63,7 +63,7 @@ jobs:
                   dotnet ef migrations list \
                     --project LaurelLibrary.Persistence \
                     --startup-project LaurelLibrary.UI \
-                    --no-build | tee -a $GITHUB_STEP_SUMMARY
+                    --configuration Release | tee -a $GITHUB_STEP_SUMMARY
               env:
                   ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
 
@@ -73,7 +73,7 @@ jobs:
                   dotnet ef database update \
                     --project LaurelLibrary.Persistence \
                     --startup-project LaurelLibrary.UI \
-                    --no-build
+                    --configuration Release
               env:
                   ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
 
