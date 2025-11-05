@@ -1,0 +1,12 @@
+# Migration Scripts and Archives
+
+# Generated migration scripts
+migration_*.sql
+rollback_*.sql
+temp_verify.sql
+
+# Applied migrations archive
+applied/
+
+# Backup files
+*.bak

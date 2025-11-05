@@ -1,0 +1,89 @@
+name: Database Migration
+
+on:
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: "Target environment"
+                required: true
+                type: choice
+                options:
+                    - staging
+                    - production
+            dry_run:
+                description: "Dry run (generate script only)"
+                required: true
+                type: boolean
+                default: true
+
+jobs:
+    migrate:
+        runs-on: ubuntu-latest
+        environment: ${{ github.event.inputs.environment }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: "9.0.x"
+
+            - name: Install EF Core tools
+              run: dotnet tool install --global dotnet-ef
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build projects
+              run: dotnet build --no-restore --configuration Release
+
+            - name: Generate migration script
+              run: |
+                  dotnet ef migrations script \
+                    --project LaurelLibrary.Persistence \
+                    --startup-project LaurelLibrary.UI \
+                    --idempotent \
+                    --output migration_${{ github.event.inputs.environment }}.sql \
+                    --no-build
+              env:
+                  ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
+
+            - name: Upload migration script
+              uses: actions/upload-artifact@v4
+              with:
+                  name: migration-script-${{ github.event.inputs.environment }}
+                  path: migration_${{ github.event.inputs.environment }}.sql
+                  retention-days: 30
+
+            - name: List pending migrations
+              run: |
+                  echo "### Pending Migrations" >> $GITHUB_STEP_SUMMARY
+                  dotnet ef migrations list \
+                    --project LaurelLibrary.Persistence \
+                    --startup-project LaurelLibrary.UI \
+                    --no-build | tee -a $GITHUB_STEP_SUMMARY
+              env:
+                  ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
+
+            - name: Apply migrations
+              if: ${{ github.event.inputs.dry_run == 'false' }}
+              run: |
+                  dotnet ef database update \
+                    --project LaurelLibrary.Persistence \
+                    --startup-project LaurelLibrary.UI \
+                    --no-build
+              env:
+                  ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTION_STRING }}
+
+            - name: Verify migration
+              if: ${{ github.event.inputs.dry_run == 'false' }}
+              run: |
+                  echo "✅ Migrations applied successfully to ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+
+            - name: Dry run notice
+              if: ${{ github.event.inputs.dry_run == 'true' }}
+              run: |
+                  echo "⚠️ Dry run mode - migrations NOT applied" >> $GITHUB_STEP_SUMMARY
+                  echo "Review the migration script artifact before applying" >> $GITHUB_STEP_SUMMARY

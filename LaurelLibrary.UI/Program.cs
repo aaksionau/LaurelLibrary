@@ -130,6 +130,15 @@ else
     app.UseHsts();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+    }
+}
+
 // Add global exception handling middleware
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 

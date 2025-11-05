@@ -48,14 +48,32 @@ az webapp config appsettings set \
     "AzureOpenAI__Endpoint=@Microsoft.KeyVault(SecretUri=${OPENAI_ENDPOINT_SECRET})" \
     "AzureOpenAI__ApiKey=@Microsoft.KeyVault(SecretUri=${OPENAI_APIKEY_SECRET})" \
     "ISBNdb__ApiKey=@Microsoft.KeyVault(SecretUri=${ISBNDB_APIKEY_SECRET})" \
-    "ConnectionStrings__DefaultConnection=@Microsoft.KeyVault(SecretUri=${SQL_CONN_SECRET})" \
-    "ConnectionStrings__AzureStorage=@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
     "Stripe__PublishableKey=@Microsoft.KeyVault(SecretUri=${STRIPE_PUB_SECRET})" \
     "Stripe__SecretKey=@Microsoft.KeyVault(SecretUri=${STRIPE_SEC_SECRET})" \
     "Stripe__WebhookSecret=@Microsoft.KeyVault(SecretUri=${STRIPE_WEBHOOK_SECRET})" \
   --output none
 
-echo "✓ Web App settings updated"
+echo "✓ Web App app settings updated"
+echo ""
+
+echo "Updating Web App connection strings..."
+az webapp config connection-string set \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "$WEB_APP_NAME" \
+  --connection-string-type SQLAzure \
+  --settings \
+    DefaultConnection="@Microsoft.KeyVault(SecretUri=${SQL_CONN_SECRET})" \
+  --output none
+
+az webapp config connection-string set \
+  --resource-group "$RESOURCE_GROUP" \
+  --name "$WEB_APP_NAME" \
+  --connection-string-type Custom \
+  --settings \
+    AzureStorage="@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
+  --output none
+
+echo "✓ Web App connection strings updated"
 echo ""
 
 echo "Updating Function App settings..."
@@ -65,14 +83,24 @@ az functionapp config appsettings set \
   --settings \
     "AzureWebJobsStorage=@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING=@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
-    "ConnectionStrings__DefaultConnection=@Microsoft.KeyVault(SecretUri=${SQL_CONN_SECRET})" \
-    "ConnectionStrings__AzureStorage=@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
     "AzureOpenAI__Endpoint=@Microsoft.KeyVault(SecretUri=${OPENAI_ENDPOINT_SECRET})" \
     "AzureOpenAI__ApiKey=@Microsoft.KeyVault(SecretUri=${OPENAI_APIKEY_SECRET})" \
     "ISBNdb__ApiKey=@Microsoft.KeyVault(SecretUri=${ISBNDB_APIKEY_SECRET})" \
   --output none
 
-echo "✓ Function App settings updated"
+echo "✓ Function App app settings updated"
+echo ""
+
+echo "Updating Function App connection strings..."
+az functionapp config appsettings set \
+  --resource-group "$FUNCTION_RESOURCE_GROUP" \
+  --name "$FUNCTION_APP_NAME" \
+  --settings \
+    "ConnectionStrings__DefaultConnection=@Microsoft.KeyVault(SecretUri=${SQL_CONN_SECRET})" \
+    "ConnectionStrings__AzureStorage=@Microsoft.KeyVault(SecretUri=${STORAGE_CONN_SECRET})" \
+  --output none
+
+echo "✓ Function App connection strings updated"
 echo ""
 
 echo "=========================================="
