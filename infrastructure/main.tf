@@ -198,12 +198,12 @@ resource "azurerm_service_plan" "functions" {
 
 # Function App
 resource "azurerm_linux_function_app" "main" {
-  name                       = "${var.project_name}-${var.environment}-func-${random_string.suffix.result}"
-  resource_group_name        = azurerm_resource_group.functions.name
-  location                   = azurerm_resource_group.functions.location
-  service_plan_id            = azurerm_service_plan.functions.id
-  storage_account_name       = azurerm_storage_account.main.name
-  storage_account_access_key = azurerm_storage_account.main.primary_access_key
+  name                                = "${var.project_name}-${var.environment}-func-${random_string.suffix.result}"
+  resource_group_name                 = azurerm_resource_group.functions.name
+  location                            = azurerm_resource_group.functions.location
+  service_plan_id                     = azurerm_service_plan.functions.id
+  storage_account_name                = azurerm_storage_account.main.name
+  storage_account_access_key          = azurerm_storage_account.main.primary_access_key
 
   site_config {
     application_stack {
@@ -217,12 +217,15 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    "FUNCTIONS_WORKER_RUNTIME"    = "dotnet-isolated"
-    "FUNCTIONS_EXTENSION_VERSION" = "~4"
-    "WEBSITE_CONTENTSHARE"        = "${var.project_name}-${var.environment}-func-content"
-    "AzureStorage__QueueName"     = "emails"
-    "AzureStorage__IsbnImportQueueName" = "isbns-to-import"
-    "ISBNdb__BaseUrl"             = "https://api2.isbndb.com/"
+    "FUNCTIONS_WORKER_RUNTIME"                     = "dotnet-isolated"
+    "FUNCTIONS_EXTENSION_VERSION"                  = "~4"
+    "WEBSITE_CONTENTSHARE"                         = "${var.project_name}-${var.environment}-func-content"
+    # Explicitly set storage connection strings to override any Key Vault references
+    "AzureWebJobsStorage"                          = azurerm_storage_account.main.primary_connection_string
+    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"     = azurerm_storage_account.main.primary_connection_string
+    "AzureStorage__QueueName"                      = "emails"
+    "AzureStorage__IsbnImportQueueName"            = "isbns-to-import"
+    "ISBNdb__BaseUrl"                              = "https://api2.isbndb.com/"
   }
 
   tags = var.tags
