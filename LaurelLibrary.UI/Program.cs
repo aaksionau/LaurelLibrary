@@ -134,6 +134,7 @@ else
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseRouting();
 
@@ -141,9 +142,8 @@ app.UseSession();
 
 app.UseAuthorization();
 
-app.MapStaticAssets();
 app.MapControllers();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages();
 app.MapHub<ImportProgressHub>("/hubs/importProgress");
 
 app.Run();
