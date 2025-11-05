@@ -57,19 +57,6 @@ variable "microsoft_client_secret" {
   sensitive   = true
 }
 
-# Azure OpenAI variables
-variable "openai_endpoint" {
-  description = "Azure OpenAI endpoint URL"
-  type        = string
-  sensitive   = true
-}
-
-variable "openai_apikey" {
-  description = "Azure OpenAI API key"
-  type        = string
-  sensitive   = true
-}
-
 # ISBNdb variables
 variable "isbndb_apikey" {
   description = "ISBNdb API key"

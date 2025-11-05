@@ -142,6 +142,73 @@ resource "azurerm_container_registry" "main" {
   tags = var.tags
 }
 
+# Application Insights for AI services
+resource "azurerm_application_insights" "main" {
+  name                = "${var.project_name}-${var.environment}-insights"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  application_type    = "web"
+  
+  tags = var.tags
+}
+
+# Azure Machine Learning Workspace (AI Foundry Project)
+resource "azurerm_machine_learning_workspace" "ai_project" {
+  name                = "${var.project_name}-${var.environment}-ai-project"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  
+  # Required dependencies
+  storage_account_id = azurerm_storage_account.main.id
+  key_vault_id       = azurerm_key_vault.main.id
+  
+  # Application Insights for logging
+  application_insights_id = azurerm_application_insights.main.id
+  
+  # Identity for the workspace
+  identity {
+    type = "SystemAssigned"
+  }
+  
+  # AI Project configuration
+  friendly_name = "MyLibrarian AI Project"
+  description   = "AI Project for MyLibrarian - includes GPT-4o model deployment"
+  
+  tags = var.tags
+}
+
+# Cognitive Services account for Azure OpenAI
+resource "azurerm_cognitive_account" "openai" {
+  name                = "${var.project_name}-${var.environment}-openai-${random_string.suffix.result}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  kind                = "OpenAI"
+  sku_name            = "S0"
+  
+  # Network and security configuration
+  public_network_access_enabled = true
+  custom_question_answering_search_service_id = null
+  
+  tags = var.tags
+}
+
+# GPT-4o model deployment
+resource "azurerm_cognitive_deployment" "gpt4o" {
+  name                 = "laurellibrarygpt4"
+  cognitive_account_id = azurerm_cognitive_account.openai.id
+  
+  model {
+    format  = "OpenAI"
+    name    = "gpt-4o"
+    version = "2024-08-06"
+  }
+  
+  scale {
+    type     = "Standard"
+    capacity = 10
+  }
+}
+
 # Container Apps Environment
 resource "azurerm_container_app_environment" "main" {
   name                = "${var.project_name}-${var.environment}-env"
@@ -485,7 +552,7 @@ resource "azurerm_key_vault_secret" "microsoft_client_secret" {
 
 resource "azurerm_key_vault_secret" "openai_endpoint" {
   name         = "OpenAIEndpoint"
-  value        = var.openai_endpoint
+  value        = azurerm_cognitive_account.openai.endpoint
   key_vault_id = azurerm_key_vault.main.id
 
   depends_on = [
@@ -495,7 +562,7 @@ resource "azurerm_key_vault_secret" "openai_endpoint" {
 
 resource "azurerm_key_vault_secret" "openai_apikey" {
   name         = "OpenAIApiKey"
-  value        = var.openai_apikey
+  value        = azurerm_cognitive_account.openai.primary_access_key
   key_vault_id = azurerm_key_vault.main.id
 
   depends_on = [

@@ -68,6 +68,33 @@ output "key_vault_uri" {
   value       = azurerm_key_vault.main.vault_uri
 }
 
+# AI Project and OpenAI outputs
+output "ai_project_name" {
+  description = "Name of the AI Project (ML Workspace)"
+  value       = azurerm_machine_learning_workspace.ai_project.name
+}
+
+output "openai_service_name" {
+  description = "Name of the Azure OpenAI service"
+  value       = azurerm_cognitive_account.openai.name
+}
+
+output "openai_endpoint" {
+  description = "Endpoint URL of the Azure OpenAI service"
+  value       = azurerm_cognitive_account.openai.endpoint
+  sensitive   = false
+}
+
+output "gpt4o_deployment_name" {
+  description = "Name of the GPT-4o model deployment"
+  value       = "laurellibrarygpt4"
+}
+
+output "application_insights_name" {
+  description = "Name of the Application Insights instance"
+  value       = azurerm_application_insights.main.name
+}
+
 # Instructions for deployment
 output "deployment_instructions" {
   description = "Instructions for deploying the application"
@@ -92,6 +119,12 @@ output "deployment_instructions" {
        - Set connection string in appsettings
        - Run: dotnet ef database update
     
-    4. Web App URL: https://${azurerm_container_app.web.latest_revision_fqdn}
+    4. AI Services Ready:
+       - AI Project: ${azurerm_machine_learning_workspace.ai_project.name}
+       - OpenAI Service: ${azurerm_cognitive_account.openai.name}
+       - GPT-4o Deployment: laurellibrarygpt4
+       - Endpoint: ${azurerm_cognitive_account.openai.endpoint}
+    
+    5. Web App URL: https://${azurerm_container_app.web.latest_revision_fqdn}
   EOT
 }
