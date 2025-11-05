@@ -22,7 +22,9 @@ var connectionString =
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<AppUser>().AddEntityFrameworkStores<AppDbContext>();
+builder
+    .Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<AppDbContext>();
 
 // Add Microsoft Authentication
 builder
