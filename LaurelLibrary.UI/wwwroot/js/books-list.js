@@ -122,6 +122,77 @@ $(document).ready(function () {
     updateSelectedCount();
 });
 
+// Function to handle delete multiple books
+function deleteMultipleBooks() {
+    console.log('Delete multiple button clicked');
+
+    var selectedCheckboxes = $('.book-checkbox:checked');
+    var selectedCount = selectedCheckboxes.length;
+    console.log('Selected count:', selectedCount);
+
+    if (selectedCount === 0) {
+        alert('Please select at least one book to delete.');
+        return false;
+    }
+
+    var confirmed = confirm(`Are you sure you want to delete ${selectedCount} selected book(s)?`);
+    if (!confirmed) {
+        console.log('User cancelled deletion');
+        return false;
+    }
+
+    console.log('User confirmed deletion, creating form');
+
+    // Create a form dynamically
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = window.location.pathname + '?handler=DeleteMultiple';
+
+    // Add anti-forgery token
+    var token = $('input[name="__RequestVerificationToken"]').val();
+    if (token) {
+        var tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = token;
+        form.appendChild(tokenInput);
+    }
+
+    // Add selected book IDs
+    selectedCheckboxes.each(function () {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'SelectedBookIds';
+        input.value = $(this).val();
+        form.appendChild(input);
+        console.log('Added book ID:', $(this).val());
+    });
+
+    // Add page number and page size if they exist
+    var pageNumberInput = $('input[name="pageNumber"]');
+    if (pageNumberInput.length > 0) {
+        var pageInput = document.createElement('input');
+        pageInput.type = 'hidden';
+        pageInput.name = 'pageNumber';
+        pageInput.value = pageNumberInput.val();
+        form.appendChild(pageInput);
+    }
+
+    var pageSizeInput = $('input[name="pageSize"]');
+    if (pageSizeInput.length > 0) {
+        var sizeInput = document.createElement('input');
+        sizeInput.type = 'hidden';
+        sizeInput.name = 'pageSize';
+        sizeInput.value = pageSizeInput.val();
+        form.appendChild(sizeInput);
+    }
+
+    // Add form to page and submit
+    document.body.appendChild(form);
+    console.log('Submitting form to:', form.action);
+    form.submit();
+}
+
 // Toggle between traditional and semantic search
 function toggleSearchMode() {
     var useSemanticSearch = document.getElementById('semanticSearchToggle').checked;
