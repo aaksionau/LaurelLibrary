@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
 
-namespace LaurelLibrary.Services.Abstractions.Repositories;
+namespace LaurelLibrary.Services.Abstractions.Services;
 
-public interface IImportHistoryRepository
+public interface IImportHistoryService
 {
     Task<ImportHistory> AddAsync(ImportHistory importHistory);
     Task<ImportHistory?> GetByIdAsync(Guid importHistoryId);
@@ -20,8 +17,7 @@ public interface IImportHistoryRepository
         Guid importHistoryId,
         int successCount,
         int failedCount,
-        List<string> failedIsbns,
-        int? maxRetries = 3
+        List<string> failedIsbns
     );
     Task<List<ImportHistory>> GetActiveImportsAsync();
 }

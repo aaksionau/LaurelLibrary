@@ -8,7 +8,6 @@ using LaurelLibrary.Persistence.Repositories;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
-using LaurelLibrary.UI.Hubs;
 using LaurelLibrary.UI.Middleware;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -79,8 +78,6 @@ builder.Services.AddAntiforgery(options =>
     options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
-builder.Services.AddSignalR();
-
 builder.Services.AddMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -133,8 +130,6 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ILibrariesService, LibrariesService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
-
-// BooksService is registered with HttpClient below
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
@@ -148,6 +143,7 @@ builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+builder.Services.AddScoped<IImportHistoryService, ImportHistoryService>();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -209,6 +205,5 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = Dat
 
 app.MapControllers();
 app.MapRazorPages();
-app.MapHub<ImportProgressHub>("/hubs/importProgress");
 
 app.Run();

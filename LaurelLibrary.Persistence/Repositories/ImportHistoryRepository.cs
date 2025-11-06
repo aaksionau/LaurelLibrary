@@ -196,4 +196,14 @@ public class ImportHistoryRepository : IImportHistoryRepository
             throw;
         }
     }
+
+    public async Task<List<ImportHistory>> GetActiveImportsAsync()
+    {
+        return await _dbContext
+            .ImportHistories.Where(ih =>
+                ih.Status == ImportStatus.Pending || ih.Status == ImportStatus.Processing
+            )
+            .OrderByDescending(ih => ih.CreatedAt)
+            .ToListAsync();
+    }
 }

@@ -328,7 +328,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
         // Initialize Bootstrap tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -355,45 +354,63 @@
             }
         });
 
-        // SignalR connection for real-time import progress
+        // Polling for real-time import progress
         const importHistoryIdElement = document.getElementById('importHistoryId');
         if (importHistoryIdElement) {
             const importHistoryId = importHistoryIdElement.value;
+            let pollInterval;
+            let isPolling = false;
             
-            // Build SignalR connection
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/hubs/importProgress")
-                .withAutomaticReconnect()
-                .build();
-
-            // Start the connection
-            connection.start().then(function () {
-                console.log('SignalR Connected.');
+            function startPolling() {
+                if (isPolling) return;
                 
-                // Join the import group
-                connection.invoke("JoinImportGroup", importHistoryId).catch(function (err) {
-                    console.error("Error joining import group: " + err.toString());
-                });
+                isPolling = true;
+                console.log('Starting import progress polling for ID:', importHistoryId);
                 
-            }).catch(function (err) {
-                console.error("SignalR connection error: " + err.toString());
-            });
-
-            // Listen for progress updates
-            connection.on("ImportProgress", function (importId, data) {
-                if (importId === importHistoryId) {
-                    updateProgress(data);
+                // Poll immediately
+                pollProgress();
+                
+                // Set up polling interval (poll every 2 seconds)
+                pollInterval = setInterval(pollProgress, 2000);
+            }
+            
+            function stopPolling() {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
                 }
-            });
-
-            // Listen for completion
-            connection.on("ImportCompleted", function (importId, data) {
-                if (importId === importHistoryId) {
+                isPolling = false;
+                console.log('Stopped import progress polling');
+            }
+            
+            async function pollProgress() {
+                try {
+                    const response = await fetch(`/api/ImportProgress/${importHistoryId}`);
+                    
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            console.warn('Import history not found');
+                            stopPolling();
+                            return;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
                     updateProgress(data);
-                    showCompletedState();
+                    
+                    // Stop polling if import is completed or failed
+                    if (data.status === 'Completed' || data.status === 'Failed') {
+                        showCompletedState();
+                        stopPolling();
+                    }
+                    
+                } catch (error) {
+                    console.error('Error polling import progress:', error);
+                    // Don't stop polling on error, just log it
                 }
-            });
-
+            }
+            
             function updateProgress(data) {
                 // Update progress bar
                 const progressPercentage = data.totalChunks > 0 
@@ -435,6 +452,14 @@
                 // Update title
                 document.getElementById('statusTitle').textContent = 'Import Completed';
             }
+            
+            // Start polling when page loads
+            startPolling();
+            
+            // Clean up when page unloads
+            window.addEventListener('beforeunload', function() {
+                stopPolling();
+            });
         }
     </script>
 }
