@@ -99,7 +99,7 @@ var azureApiKey =
     ?? throw new InvalidOperationException("AzureOpenAI:ApiKey not configured");
 
 var kernelBuilder = Kernel.CreateBuilder();
-kernelBuilder.AddAzureOpenAIChatCompletion("laurellibrarygpt4", azureEndpoint, azureApiKey);
+kernelBuilder.AddAzureOpenAIChatCompletion("mylibrariangpt4", azureEndpoint, azureApiKey);
 var kernel = kernelBuilder.Build();
 
 // Register the kernel and chat completion service

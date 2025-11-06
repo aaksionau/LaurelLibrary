@@ -79,7 +79,7 @@ var azureApiKey =
 var azureCredentials = new DefaultAzureCredential();
 
 var kernelBuilder = Kernel.CreateBuilder();
-kernelBuilder.AddAzureOpenAIChatCompletion("laurellibrarygpt4", azureEndpoint, azureApiKey);
+kernelBuilder.AddAzureOpenAIChatCompletion("mylibrariangpt4", azureEndpoint, azureApiKey);
 
 builder.Services.AddScoped(_ => kernelBuilder.Build());
 
