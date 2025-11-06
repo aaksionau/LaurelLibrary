@@ -1,4 +1,5 @@
 @page "{id:int}"
+@using LaurelLibrary.UI.Extensions
 @model LaurelLibrary.UI.Areas.Administration.Pages.Readers.DetailsModel
 
 @{
@@ -246,7 +247,7 @@ else
                             @if (!string.IsNullOrWhiteSpace(Model.Reader.BarcodeImageUrl))
                             {
                                 <div class="mb-3">
-                                    <img src="@Model.Reader.BarcodeImageUrl" alt="Reader Barcode for @Model.Reader.FullName"
+                                    <img src="@Html.GetBlobUrl(Model.Reader.BarcodeImageUrl)" alt="Reader Barcode for @Model.Reader.FullName"
                                         class="img-fluid border rounded p-3 bg-white" style="max-width: 100%;"
                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
                                     <div class="alert alert-warning mt-3" style="display: none;">
