@@ -244,7 +244,6 @@ public class BooksService : IBooksService
 
         await _booksRepository.AddBookAsync(entity);
         await DetermineAppropriateAgeAsync(entity);
-
         // Log audit action
         await _auditLogService.LogActionAsync(
             "Add",
@@ -321,7 +320,7 @@ public class BooksService : IBooksService
             );
             return;
         }
-
+        Thread.Sleep(1000); // slight delay to ensure book creation transaction is committed
         var createdBook = new AgeClassificationBookDto()
         {
             BookId = entity.BookId,
