@@ -37,4 +37,12 @@ public interface IBlobStorageService
     /// <param name="blobPath">The path of the blob to delete (can be full URL for backward compatibility or just container/blobname)</param>
     /// <returns>True if deletion was successful, false otherwise</returns>
     Task<bool> DeleteFileAsync(string blobPath);
+
+    /// <summary>
+    /// Deletes all files in a folder (by prefix) from Azure Blob Storage
+    /// </summary>
+    /// <param name="containerName">The container name</param>
+    /// <param name="folderPrefix">The folder prefix (e.g., "book-images/library-alias/")</param>
+    /// <returns>The number of files deleted</returns>
+    Task<int> DeleteFolderAsync(string containerName, string folderPrefix);
 }

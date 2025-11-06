@@ -139,7 +139,13 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Libraries
 
         public async Task<IActionResult> OnPostDeleteAsync(Guid libraryId)
         {
-            await this.librariesRepository.RemoveAsync(libraryId);
+            var success = await this.librariesService.DeleteLibraryAsync(libraryId);
+            if (!success)
+            {
+                // Add error handling - you might want to set an error message
+                // For now, we'll still redirect but you could add TempData error message
+                TempData["ErrorMessage"] = "Failed to delete the library. Please try again.";
+            }
             return RedirectToPage("./List");
         }
     }

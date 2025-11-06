@@ -15,6 +15,7 @@ public class LibrariesService : ILibrariesService
     private readonly IAuthenticationService _authenticationService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IBlobStorageService _blobStorageService;
     private readonly ILogger<LibrariesService> _logger;
 
     public LibrariesService(
@@ -23,6 +24,7 @@ public class LibrariesService : ILibrariesService
         IAuthenticationService authenticationService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
+        IBlobStorageService blobStorageService,
         ILogger<LibrariesService> logger
     )
     {
@@ -31,6 +33,7 @@ public class LibrariesService : ILibrariesService
         _authenticationService = authenticationService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
+        _blobStorageService = blobStorageService;
         _logger = logger;
     }
 
@@ -329,6 +332,67 @@ public class LibrariesService : ILibrariesService
         {
             _logger.LogError(ex, "Error creating library for user {UserId}", userId);
             throw;
+        }
+    }
+
+    public async Task<bool> DeleteLibraryAsync(Guid libraryId)
+    {
+        try
+        {
+            // Get library details before deletion for blob cleanup
+            var library = await _librariesRepository.GetByIdAsync(libraryId);
+            if (library == null)
+            {
+                _logger.LogWarning("Library with ID {LibraryId} not found", libraryId);
+                return false;
+            }
+
+            var libraryAlias = library.Alias;
+
+            // Delete the library from the database first
+            await _librariesRepository.RemoveAsync(libraryId);
+
+            // Clean up blob storage folder if library has an alias
+            if (!string.IsNullOrWhiteSpace(libraryAlias))
+            {
+                try
+                {
+                    var deletedFilesCount = await _blobStorageService.DeleteFolderAsync(
+                        "book-images",
+                        $"{libraryAlias}"
+                    );
+
+                    _logger.LogInformation(
+                        "Deleted {DeletedFilesCount} files from blob storage for library '{LibraryAlias}' (ID: {LibraryId})",
+                        deletedFilesCount,
+                        libraryAlias,
+                        libraryId
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Failed to clean up blob storage for library '{LibraryAlias}' (ID: {LibraryId}). Library was deleted from database.",
+                        libraryAlias,
+                        libraryId
+                    );
+                    // Don't return false here - the library was successfully deleted from database
+                }
+            }
+
+            _logger.LogInformation(
+                "Successfully deleted library '{LibraryName}' (ID: {LibraryId})",
+                library.Name,
+                libraryId
+            );
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting library {LibraryId}", libraryId);
+            return false;
         }
     }
 }

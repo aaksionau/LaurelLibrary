@@ -10,4 +10,5 @@ public interface ILibrariesService
     Task<bool> RemoveAdministratorAsync(Guid libraryId, string userId);
     Task<List<LibraryDto>> GetLibrariesForUserAsync(string userId);
     Task<Library> CreateLibraryAsync(LibraryDto libraryDto, string userId);
+    Task<bool> DeleteLibraryAsync(Guid libraryId);
 }

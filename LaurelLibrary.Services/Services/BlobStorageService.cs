@@ -194,4 +194,75 @@ public class BlobStorageService : IBlobStorageService
             return false;
         }
     }
+
+    public async Task<int> DeleteFolderAsync(string containerName, string folderPrefix)
+    {
+        if (string.IsNullOrWhiteSpace(containerName))
+        {
+            _logger.LogWarning("Attempted to delete folder with null or empty container name");
+            return 0;
+        }
+
+        if (string.IsNullOrWhiteSpace(folderPrefix))
+        {
+            _logger.LogWarning("Attempted to delete folder with null or empty folder prefix");
+            return 0;
+        }
+
+        try
+        {
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Check if container exists
+            if (!await containerClient.ExistsAsync())
+            {
+                _logger.LogWarning("Container {ContainerName} does not exist", containerName);
+                return 0;
+            }
+
+            var deletedCount = 0;
+
+            // Ensure the prefix ends with a slash for proper folder matching
+            var normalizedPrefix = folderPrefix.TrimEnd('/') + "/";
+
+            // List all blobs with the specified prefix
+            await foreach (var blobItem in containerClient.GetBlobsAsync(prefix: normalizedPrefix))
+            {
+                try
+                {
+                    var blobClient = containerClient.GetBlobClient(blobItem.Name);
+                    var response = await blobClient.DeleteIfExistsAsync();
+
+                    if (response.Value)
+                    {
+                        deletedCount++;
+                        _logger.LogDebug("Deleted blob: {BlobName}", blobItem.Name);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to delete blob: {BlobName}", blobItem.Name);
+                }
+            }
+
+            _logger.LogInformation(
+                "Successfully deleted {DeletedCount} files from folder {FolderPrefix} in container {ContainerName}",
+                deletedCount,
+                folderPrefix,
+                containerName
+            );
+
+            return deletedCount;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to delete folder {FolderPrefix} from container {ContainerName}",
+                folderPrefix,
+                containerName
+            );
+            return 0;
+        }
+    }
 }
