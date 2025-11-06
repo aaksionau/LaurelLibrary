@@ -9,7 +9,7 @@
         <div class="col-lg-8">
             <div class="text-center mb-5">
                 <h1 class="display-4 mb-3" style="color: var(--color-primary);">
-                    <i class="fas fa-rocket me-3"></i>Welcome to Laurel Library!
+                    <i class="fas fa-rocket me-3"></i>Welcome to MyLibrarian!
                 </h1>
                 <p class="lead" style="color: var(--color-text-secondary);">Let's get your library system set up.
                     Complete these 4 simple steps to get
@@ -105,7 +105,8 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text" style="color: var(--color-text-secondary);">Set up a kiosk location where readers can check out and return books.
+                            <p class="card-text" style="color: var(--color-text-secondary);">Set up a kiosk location
+                                where readers can check out and return books.
                             </p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasKiosk)
@@ -159,7 +160,8 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader who will be able to borrow books from your
+                            <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader
+                                who will be able to borrow books from your
                                 library.</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasReader)
@@ -212,7 +214,8 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to the library collection so readers can start
+                            <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to the
+                                library collection so readers can start
                                 borrowing.</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 @if (Model.OnboardingStatus.HasBook)
@@ -249,7 +252,8 @@
             <!-- Completion Message -->
             @if (Model.OnboardingStatus.IsCompleted)
             {
-                <div class="alert" role="alert" style="background-color: rgba(36, 92, 79, 0.1); border-color: var(--color-primary); color: var(--color-primary); text-align: center;">
+                <div class="alert" role="alert"
+                    style="background-color: rgba(36, 92, 79, 0.1); border-color: var(--color-primary); color: var(--color-primary); text-align: center;">
                     <h4 class="alert-heading">
                         <i class="fas fa-trophy me-2"></i>Congratulations!
                     </h4>
@@ -269,14 +273,16 @@
                             <h5 class="card-title" style="color: var(--color-text-primary);">Next Step</h5>
                             @if (!Model.OnboardingStatus.HasLibrary)
                             {
-                                <p class="card-text" style="color: var(--color-text-secondary);">Start by creating your library to unlock the other features.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Start by creating your library
+                                    to unlock the other features.</p>
                                 <a href="~/Administration/Libraries/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-plus me-2"></i>Create Your Library
                                 </a>
                             }
                             else if (!Model.OnboardingStatus.HasKiosk)
                             {
-                                <p class="card-text" style="color: var(--color-text-secondary);">Add a kiosk location where readers can check out books.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Add a kiosk location where
+                                    readers can check out books.</p>
                                 <a href="~/Administration/Kiosks/Update?libraryId=@Model.OnboardingStatus.LibraryId"
                                     class="btn btn-primary btn-lg">
                                     <i class="fas fa-plus me-2"></i>Add Your First Kiosk
@@ -284,14 +290,16 @@
                             }
                             else if (!Model.OnboardingStatus.HasReader)
                             {
-                                <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader to start lending books.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Register your first reader to
+                                    start lending books.</p>
                                 <a href="~/Administration/Readers/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-user-plus me-2"></i>Add Your First Reader
                                 </a>
                             }
                             else if (!Model.OnboardingStatus.HasBook)
                             {
-                                <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to complete the setup.</p>
+                                <p class="card-text" style="color: var(--color-text-secondary);">Add your first book to complete
+                                    the setup.</p>
                                 <a href="~/Administration/Books/Update" class="btn btn-primary btn-lg">
                                     <i class="fas fa-book-open me-2"></i>Add Your First Book
                                 </a>
@@ -305,7 +313,8 @@
             @if (!Model.OnboardingStatus.IsCompleted)
             {
                 <div class="text-center mt-4">
-                    <a href="~/Administration/Home/Dashboard?skip=true" class="btn btn-link" style="color: var(--color-text-secondary);">
+                    <a href="~/Administration/Home/Dashboard?skip=true" class="btn btn-link"
+                        style="color: var(--color-text-secondary);">
                         <i class="fas fa-skip-forward me-1"></i>Skip for now and go to dashboard
                     </a>
                 </div>
