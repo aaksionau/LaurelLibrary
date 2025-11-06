@@ -241,57 +241,48 @@ resource "azurerm_container_app" "web" {
   }
 
   secret {
-    name                = "connectionstrings-defaultconnection"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.connection_string.id
+    name  = "connectionstrings-defaultconnection"
+    value = "Server=tcp:${azurerm_mssql_server.main.fully_qualified_domain_name},1433;Initial Catalog=${azurerm_mssql_database.main.name};Persist Security Info=False;User ID=${var.sql_admin_username};Password=${var.sql_admin_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   }
 
   secret {
-    name                = "microsoft-client-id"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.microsoft_client_id.id
+    name  = "microsoft-client-id"
+    value = var.microsoft_client_id
   }
 
   secret {
-    name                = "microsoft-client-secret"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.microsoft_client_secret.id
+    name  = "microsoft-client-secret"
+    value = var.microsoft_client_secret
   }
 
   secret {
-    name                = "azureopenaiendpoint"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.openai_endpoint.id
+    name  = "azureopenaiendpoint"
+    value = azurerm_cognitive_account.openai.endpoint
   }
 
   secret {
-    name                = "azureopenaiapikey"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.openai_apikey.id
+    name  = "azureopenaiapikey"
+    value = azurerm_cognitive_account.openai.primary_access_key
   }
 
   secret {
-    name                = "isbndbapikey"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.isbndb_apikey.id
+    name  = "isbndbapikey"
+    value = var.isbndb_apikey
   }
 
   secret {
-    name                = "stripepublishablekey"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.stripe_publishable_key.id
+    name  = "stripepublishablekey"
+    value = var.stripe_publishable_key
   }
 
   secret {
-    name                = "stripesecretkey"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.stripe_secret_key.id
+    name  = "stripesecretkey"
+    value = var.stripe_secret_key
   }
 
   secret {
-    name                = "stripewebhooksecret"
-    identity            = "System"
-    key_vault_secret_id = azurerm_key_vault_secret.stripe_webhook_secret.id
+    name  = "stripewebhooksecret"
+    value = var.stripe_webhook_secret
   }
 
   template {
