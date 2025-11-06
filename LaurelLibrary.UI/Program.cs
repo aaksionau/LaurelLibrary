@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.EmailSenderServices.Services;
@@ -9,6 +10,7 @@ using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
 using LaurelLibrary.UI.Hubs;
 using LaurelLibrary.UI.Middleware;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +50,33 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 // Configure antiforgery to handle JSON requests
+// Configure Data Protection to persist keys in Azure Blob Storage
+var azureStorageConnectionString =
+    builder.Configuration.GetConnectionString("AzureStorage")
+    ?? throw new InvalidOperationException("Connection string 'AzureStorage' not found.");
+
+var blobServiceClient = new BlobServiceClient(azureStorageConnectionString);
+var containerClient = blobServiceClient.GetBlobContainerClient("dataprotection");
+
+// Ensure the container exists
+await containerClient.CreateIfNotExistsAsync();
+
+var blobClient = containerClient.GetBlobClient("keys.xml");
+
+builder
+    .Services.AddDataProtection()
+    .PersistKeysToAzureBlobStorage(blobClient)
+    .SetApplicationName("LaurelLibrary")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(90));
+
+// Configure antiforgery with data protection improvements
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "RequestVerificationToken";
+    options.Cookie.Name = "__RequestVerificationToken";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
 builder.Services.AddSignalR();
@@ -62,6 +88,9 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.Name = ".LaurelLibrary.Session";
 });
 
 // Configure Semantic Kernel for AI services

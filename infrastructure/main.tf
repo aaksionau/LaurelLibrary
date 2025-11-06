@@ -444,6 +444,11 @@ resource "azurerm_container_app" "functions" {
       }
 
       env {
+        name  = "ConnectionStrings__AzureStorage"
+        value = azurerm_storage_account.main.primary_connection_string
+      }
+
+      env {
         name  = "FUNCTIONS_WORKER_RUNTIME"
         value = "dotnet-isolated"
       }
@@ -461,6 +466,26 @@ resource "azurerm_container_app" "functions" {
       env {
         name  = "ISBNdb__BaseUrl"
         value = "https://api2.isbndb.com/"
+      }
+
+      env {
+        name        = "ConnectionStrings__DefaultConnection"
+        secret_name = "connectionstrings-defaultconnection"
+      }
+
+      env {
+        name        = "ISBNdb__ApiKey"
+        secret_name = "isbndbapikey"
+      }
+
+      env {
+        name        = "AzureOpenAI__Endpoint"
+        secret_name = "azureopenaiendpoint"
+      }
+
+      env {
+        name        = "AzureOpenAI__ApiKey"
+        secret_name = "azureopenaiapikey"
       }
     }
   }
