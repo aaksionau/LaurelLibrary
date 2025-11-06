@@ -14,13 +14,13 @@
         var q = new Dictionary<string, string?>(query, StringComparer.OrdinalIgnoreCase);
         q["pageNumber"] = pageNumber.ToString();
         q["pageSize"] = pageSize.ToString();
-        
+
         // Add tab parameter if specified
         if (!string.IsNullOrEmpty(Model.Tab))
         {
             q["tab"] = Model.Tab;
         }
-        
+
         var path = Url.Page(Model.Page, new { area = Model.Area });
         return QueryHelpers.AddQueryString(path ?? string.Empty, q);
     }
@@ -81,7 +81,6 @@
         }
         <small class="text-muted">Showing @start–@end of @Model.TotalCount</small>
     </div>
-
     <div>
         <nav aria-label="Page navigation">
             <ul class="pagination mb-0">
@@ -92,7 +91,8 @@
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                        <a class="page-link" href="@BuildPageLink(i, Model.PageSize)">@i</a>
+                        <a class="page-link" href="@BuildPageLink(i, Model.PageSize)"
+                            style="@(i == Model.PageNumber ? "color: white !important;" : "")">@i</a>
                     </li>
                 }
                 <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
