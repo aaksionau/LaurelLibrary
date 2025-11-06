@@ -5,43 +5,9 @@
     ViewData["Title"] = "Libraries";
 }
 
-<style>
-    .library-card {
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: 1px solid #dee2e6;
-        position: relative;
-    }
-
-    .library-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(36, 92, 79, 0.15);
-        border-color: var(--color-primary);
-    }
-
-    .library-stats {
-        background-color: var(--color-bg-light);
-        border-radius: 0.375rem;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: var(--color-primary);
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: var(--color-text-secondary);
-        margin-top: 0.25rem;
-    }
-</style>
+@section Head {
+    <link rel="stylesheet" href="~/css/library-list.css" asp-append-version="true" />
+}
 
 <div class="card">
     <div class="card-header">
@@ -55,61 +21,98 @@
             <div class="row">
                 @foreach (var library in Model.Libraries)
                 {
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card library-card h-100">
+                    <div class="col-md-6 col-xl-4 mb-4">
+                        <div class="card corporate-library-card h-100">
                             <a asp-area="Administration" asp-page="/Libraries/Details" asp-route-id="@library.LibraryId"
                                 class="stretched-link text-decoration-none"></a>
-                            <div class="card-header" style="background-color: var(--color-bg-light); border-bottom: 1px solid var(--color-primary-light); color: var(--color-text-primary);">
-                                <h5 class="card-title mb-0">@library.Name</h5>
-                                @if (!string.IsNullOrWhiteSpace(library.Alias))
-                                {
-                                    <small style="color: var(--color-text-secondary);">@library.Alias</small>
-                                }
+                            
+                            <!-- Status Indicator -->
+                            <div class="corporate-status-bar"></div>
+                            
+                            <!-- Card Header -->
+                            <div class="corporate-header">
+                                <div class="corporate-library-info">
+                                    <h5 class="corporate-title">@library.Name</h5>
+                                    @if (!string.IsNullOrWhiteSpace(library.Alias))
+                                    {
+                                        <span class="corporate-alias">(@library.Alias)</span>
+                                    }
+                                </div>
+                                <div class="corporate-menu">
+                                    <a class="corporate-menu-btn" asp-area="Administration" asp-page="/Libraries/Update"
+                                        asp-route-libraryId="@library.LibraryId" title="Edit Library">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="card-body">
+                            
+                            <!-- Card Body -->
+                            <div class="corporate-body">
                                 @if (!string.IsNullOrWhiteSpace(library.Description))
                                 {
-                                    <p class="card-text">
-                                        @(library.Description.Length > 100 ? library.Description.Substring(0, 100) + "..." : library.Description)
-                                    </p>
+                                    <div class="corporate-description">
+                                        <p>@(library.Description.Length > 120 ? library.Description.Substring(0, 120) + "..." : library.Description)</p>
+                                    </div>
                                 }
                                 
                                 @if (!string.IsNullOrWhiteSpace(library.Address))
                                 {
-                                    <p class="card-text">
-                                        <i class="bi bi-geo-alt" style="color: var(--color-secondary);"></i>
-                                        <small class="text-muted">@library.Address</small>
-                                    </p>
+                                    <div class="corporate-meta-item">
+                                        <div class="corporate-meta-label">
+                                            <i class="bi bi-geo-alt"></i>
+                                            Location
+                                        </div>
+                                        <div class="corporate-meta-value">@library.Address</div>
+                                    </div>
                                 }
-
-                                <div class="library-stats">
-                                    <div class="row text-center">
-                                        <div class="col-4 stat-item">
-                                            <div class="stat-number">@library.BooksCount</div>
-                                            <div class="stat-label">Books</div>
+                                
+                                <div class="corporate-meta-item">
+                                    <div class="corporate-meta-label">
+                                        <i class="bi bi-calendar3"></i>
+                                        Established
+                                    </div>
+                                    <div class="corporate-meta-value">@library.CreatedAt.ToString("MMMM dd, yyyy")</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Statistics Section -->
+                            <div class="corporate-stats-section">
+                                <h6 class="corporate-stats-title">Library Statistics</h6>
+                                <div class="corporate-stats-grid">
+                                    <div class="corporate-stat-item">
+                                        <div class="corporate-stat-icon books">
+                                            <i class="bi bi-journal-text"></i>
                                         </div>
-                                        <div class="col-4 stat-item">
-                                            <div class="stat-number">@library.StudentsCount</div>
-                                            <div class="stat-label">Students</div>
+                                        <div class="corporate-stat-details">
+                                            <span class="corporate-stat-number">@library.BooksCount</span>
+                                            <span class="corporate-stat-label">Total Books</span>
                                         </div>
-                                        <div class="col-4 stat-item">
-                                            <div class="stat-number">@library.AdministratorsCount</div>
-                                            <div class="stat-label">Admins</div>
+                                    </div>
+                                    <div class="corporate-stat-item">
+                                        <div class="corporate-stat-icon students">
+                                            <i class="bi bi-mortarboard"></i>
+                                        </div>
+                                        <div class="corporate-stat-details">
+                                            <span class="corporate-stat-number">@library.StudentsCount</span>
+                                            <span class="corporate-stat-label">Active Students</span>
+                                        </div>
+                                    </div>
+                                    <div class="corporate-stat-item">
+                                        <div class="corporate-stat-icon admins">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                        <div class="corporate-stat-details">
+                                            <span class="corporate-stat-number">@library.AdministratorsCount</span>
+                                            <span class="corporate-stat-label">Administrators</span>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="d-flex justify-content-between align-items-center text-muted">
-                                    <small>
-                                        <i class="bi bi-calendar3" style="color: var(--color-accent);"></i>
-                                        Created: @library.CreatedAt.ToString("MMM dd, yyyy")
-                                    </small>
-                                    <a class="btn btn-outline-secondary btn-sm" asp-area="Administration" asp-page="/Libraries/Update"
-                                        asp-route-libraryId="@library.LibraryId" title="Edit Library"
-                                        style="position: relative; z-index: 10; border-color: var(--color-primary); color: var(--color-primary);">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                </div>
+                            </div>
+                            
+                            <!-- Card Footer -->
+                            <div class="corporate-footer">
+                                <span class="corporate-footer-text">Manage Library</span>
+                                <i class="bi bi-arrow-right"></i>
                             </div>
                         </div>
                     </div>
@@ -118,13 +121,12 @@
         }
         else
         {
-            <div class="text-center py-5">
-                <i class="bi bi-building display-1" style="color: var(--color-text-secondary);"></i>
-                <h4 class="mt-3" style="color: var(--color-text-secondary);">No libraries found</h4>
-                <p style="color: var(--color-text-secondary);">Get started by adding your first library.</p>
-                <a class="btn" asp-area="Administration" asp-page="/Libraries/Update"
-                   style="background-color: var(--color-primary); border-color: var(--color-primary); color: white;">
-                    <i class="bi bi-plus-circle"></i> Add Library
+            <div class="empty-state">
+                <i class="bi bi-building empty-state-icon"></i>
+                <h4 class="empty-state-title">No libraries found</h4>
+                <p class="empty-state-description">Get started by adding your first library to begin managing your collection.</p>
+                <a class="btn empty-state-btn" asp-area="Administration" asp-page="/Libraries/Update">
+                    <i class="bi bi-plus-circle me-2"></i>Add Your First Library
                 </a>
             </div>
         }

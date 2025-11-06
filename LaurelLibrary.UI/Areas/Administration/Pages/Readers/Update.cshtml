@@ -3,114 +3,276 @@
 
 @{
     ViewData["Title"] = Model.PageTitle;
+    var isEditMode = Model.Reader.ReaderId > 0;
 }
 
-<form method="post">
-    <div class="card">
-        <div class="card-header">
-            <h3>@Model.PageTitle</h3>
-        </div>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8 col-xl-9">
+            <form method="post">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-primary); color: white;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-gear me-2"></i>
+                            <h4 class="mb-0">@Model.PageTitle</h4>
+                        </div>
+                    </div>
 
-        <div class="card-body">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-            <input asp-for="Reader.ReaderId" hidden />
-            <div class="mb-3">
-                <label class="form-label" asp-for="Reader.FirstName"></label>
-                <input class="form-control" asp-for="Reader.FirstName"
-                    placeholder="@Html.DisplayNameFor(m => m.Reader.FirstName)" />
-                <span asp-validation-for="Reader.FirstName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Reader.LastName"></label>
-                <input class="form-control" asp-for="Reader.LastName"
-                    placeholder="@Html.DisplayNameFor(m => m.Reader.LastName)" />
-                <span asp-validation-for="Reader.LastName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Reader.DateOfBirth">Date of Birth</label>
-                <input type="date" class="form-control" asp-for="Reader.DateOfBirth" />
-                <span asp-validation-for="Reader.DateOfBirth" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Reader.Email">Email Address</label>
-                <input type="email" class="form-control" asp-for="Reader.Email" placeholder="reader@example.com" />
-                <span asp-validation-for="Reader.Email" class="text-danger"></span>
-                <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>Required for reader login verification
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Reader.Address">Address</label>
-                <textarea class="form-control" asp-for="Reader.Address" rows="3"
-                    placeholder="Enter full address"></textarea>
-                <span asp-validation-for="Reader.Address" class="text-danger"></span>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="Reader.City">City</label>
-                    <input class="form-control" asp-for="Reader.City" placeholder="Enter city" />
-                    <span asp-validation-for="Reader.City" class="text-danger"></span>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label" asp-for="Reader.State">State</label>
-                    <input class="form-control" asp-for="Reader.State" placeholder="Enter state" />
-                    <span asp-validation-for="Reader.State" class="text-danger"></span>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label class="form-label" asp-for="Reader.Zip">Zip Code</label>
-                    <input class="form-control" asp-for="Reader.Zip" placeholder="Enter zip code" />
-                    <span asp-validation-for="Reader.Zip" class="text-danger"></span>
-                </div>
-            </div>
-            @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
-            {
-                <div class="mb-3">
-                    <label class="form-label" asp-for="Reader.Ean">EAN Barcode</label>
-                    <input type="text" class="form-control" asp-for="Reader.Ean" disabled readonly />
-                    <div class="form-text">
-                        <i class="bi bi-lock-fill me-1"></i>EAN is auto-generated and cannot be modified
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input asp-for="Reader.ReaderId" hidden />
+
+                        <!-- Personal Information Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-person-circle me-2"></i>Personal Information
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.FirstName" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-person me-1" style="color: var(--color-secondary);"></i>First Name <span class="text-danger">*</span>
+                                </label>
+                                <input class="form-control" asp-for="Reader.FirstName" placeholder="Enter first name" />
+                                <span asp-validation-for="Reader.FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.LastName" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-person me-1" style="color: var(--color-secondary);"></i>Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input class="form-control" asp-for="Reader.LastName" placeholder="Enter last name" />
+                                <span asp-validation-for="Reader.LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.DateOfBirth" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-calendar-event me-1" style="color: var(--color-secondary);"></i>Date of Birth
+                                </label>
+                                <input type="date" class="form-control" asp-for="Reader.DateOfBirth" />
+                                <span asp-validation-for="Reader.DateOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.Email" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-envelope me-1" style="color: var(--color-secondary);"></i>Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" asp-for="Reader.Email" 
+                                    placeholder="reader@example.com" />
+                                <span asp-validation-for="Reader.Email" class="text-danger"></span>
+                                <div class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Required for reader login verification
+                                </div>
+                            </div>
+                        </div>                        <!-- Address Information Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-geo-alt me-2"></i>Address Information
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.Address" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-house me-1" style="color: var(--color-secondary);"></i>Street Address
+                                </label>
+                                <textarea class="form-control" asp-for="Reader.Address" rows="2"
+                                    placeholder="Enter full street address"></textarea>
+                                <span asp-validation-for="Reader.Address" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.City" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-building me-1" style="color: var(--color-secondary);"></i>City
+                                </label>
+                                <input class="form-control" asp-for="Reader.City" placeholder="Enter city" />
+                                <span asp-validation-for="Reader.City" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.State" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-map me-1" style="color: var(--color-secondary);"></i>State
+                                </label>
+                                <input class="form-control" asp-for="Reader.State" placeholder="Enter state" />
+                                <span asp-validation-for="Reader.State" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.Zip" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-mailbox me-1" style="color: var(--color-secondary);"></i>Zip Code
+                                </label>
+                                <input class="form-control" asp-for="Reader.Zip" placeholder="Enter zip code" />
+                                <span asp-validation-for="Reader.Zip" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
+                        {
+                            <!-- System Information Section -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                        <i class="bi bi-gear me-2"></i>System Information
+                                    </h5>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold" asp-for="Reader.Ean" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-upc-scan me-1" style="color: var(--color-secondary);"></i>EAN Barcode
+                                    </label>
+                                    <input type="text" class="form-control" asp-for="Reader.Ean" disabled readonly />
+                                    <div class="form-text" style="color: var(--color-text-secondary);">
+                                        <i class="bi bi-lock-fill me-1"></i>Auto-generated and cannot be modified
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="card-footer" style="background-color: var(--color-bg-light);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                @if (isEditMode)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#removeModal">
+                                        <i class="bi bi-trash me-1"></i>Delete Reader
+                                    </button>
+                                }
+                            </div>
+                            <div>
+                                <a class="btn btn-secondary me-2" asp-page="/Readers/List">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                                <button type="submit" asp-page-handler="post" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Reader" : "Create Reader")
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            }
+            </form>
         </div>
-        <div class="card-footer">
-            @if (Model.Reader.ReaderId > 0)
-            {
-                <div class="float-start m-2">
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
-                        Remove
-                    </button>
-                </div>
-            }
-            <div class="float-end m-2">
-                <a type="button" class="btn btn-secondary ms-2" asp-page="/Readers/List">Cancel</a>
-                <button type="submit" asp-page-handler="post" class="btn btn-primary">Save</button>
-            </div>
-        </div>
-    </div>
-</form>
 
-@if (Model.Reader.ReaderId > 0)
+        @if (isEditMode)
+        {
+            <!-- Sidebar with Reader Information -->
+            <div class="col-lg-4 col-xl-3">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Reader Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                                style="width: 60px; height: 60px; background-color: var(--color-primary);">
+                                <i class="bi bi-person-fill text-white fs-3"></i>
+                            </div>
+                            <h6 class="mt-2 mb-0" style="color: var(--color-text-primary);">@Model.Reader.FirstName @Model.Reader.LastName</h6>
+                            <small style="color: var(--color-text-secondary);">Reader ID: @Model.Reader.ReaderId</small>
+                        </div>
+
+                        <hr style="border-color: var(--color-border);">
+
+                        <div class="mb-3">
+                            <small class="d-block" style="color: var(--color-text-secondary);">Email</small>
+                            <span class="fw-semibold" style="color: var(--color-text-primary);">@(Model.Reader.Email ?? "Not specified")</span>
+                        </div>
+
+                        @if (Model.Reader.DateOfBirth != DateOnly.MinValue)
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Age</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">
+                                    @{
+                                        var today = DateOnly.FromDateTime(DateTime.Now);
+                                        var age = today.Year - Model.Reader.DateOfBirth.Year;
+                                        if (today.DayOfYear < Model.Reader.DateOfBirth.DayOfYear)
+                                            age--;
+                                    }
+                                    @age years old
+                                </span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Reader.City))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Location</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Reader.City@(!string.IsNullOrWhiteSpace(Model.Reader.State) ?
+                                                                ", " + Model.Reader.State : "")</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Reader.Ean))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Library Card</small>
+                                <code class="small" style="background-color: var(--color-bg-light); color: var(--color-primary); border: 1px solid var(--color-border);">@Model.Reader.Ean</code>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-center" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <small style="color: var(--color-text-secondary);">
+                            <i class="bi bi-clock me-1"></i>Last updated: @DateTime.Now.ToString("MMM dd, yyyy")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isEditMode)
 {
+    <!-- Delete Confirmation Modal -->
     <form asp-page-handler="delete" asp-route-id="@Model.Reader.ReaderId">
-        <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+        <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Warning</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header" style="background-color: var(--color-danger); color: white;">
+                        <h5 class="modal-title" id="removeModalLabel">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>
-                            Are you sure you want to remove this reader?
-                        </p>
-                        <p class="text-muted">
-                            This action cannot be undone.
+                        <div class="text-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 60px; height: 60px; background-color: var(--color-danger);">
+                                <i class="bi bi-person-x text-white fs-3"></i>
+                            </div>
+                            <h6 class="mb-2" style="color: var(--color-text-primary);">Delete Reader: @Model.Reader.FirstName @Model.Reader.LastName</h6>
+                            <p class="mb-0" style="color: var(--color-text-secondary);">Reader ID: @Model.Reader.ReaderId</p>
+                        </div>
+
+                        <div class="alert" style="background-color: rgba(230, 182, 85, 0.1); border-color: var(--color-accent); color: #8a6a14;" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone. All associated data will be permanently
+                            deleted.
+                        </div>
+
+                        <p class="mb-0" style="color: var(--color-text-primary);">
+                            Are you sure you want to permanently delete this reader from the system?
                         </p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button class="btn btn-danger" type="submit">Remove</button>
+                    <div class="modal-footer" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </button>
+                        <button class="btn btn-danger" type="submit">
+                            <i class="bi bi-trash me-1"></i>Delete Reader
+                        </button>
                     </div>
                 </div>
             </div>

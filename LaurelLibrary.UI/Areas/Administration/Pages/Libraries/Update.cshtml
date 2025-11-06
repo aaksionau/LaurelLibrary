@@ -1,91 +1,271 @@
 ﻿@page "{libraryId:Guid?}"
 @model LaurelLibrary.UI.Areas.Administration.Pages.Libraries.UpdateModel
 
-<form method="post" enctype="multipart/form-data">
-    <div class="card">
-        <div class="card-header">
-            <h3>@Model.PageTitle</h3>
-        </div>
+@{
+    ViewData["Title"] = Model.PageTitle;
+    var isEditMode = !string.IsNullOrEmpty(Model.Library.LibraryId);
+}
 
-        <div class="card-body">
-            <input asp-for="Library.LibraryId" hidden />
-            <div class="mb-3">
-                <label class="form-label" asp-for="Library.Name"></label>
-                <input class="form-control" asp-for="Library.Name"
-                    placeholder="@Html.DisplayNameFor(m => m.Library.Name)" />
-                <span asp-validation-for="Library.Name" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Library.Alias"></label>
-                <input class="form-control" asp-for="Library.Alias"
-                    placeholder="@Html.DisplayNameFor(m => m.Library.Alias)" />
-                <span asp-validation-for="Library.Alias" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Library.Address"></label>
-                <input class="form-control" asp-for="Library.Address"
-                    placeholder="@Html.DisplayNameFor(m => m.Library.Address)" />
-                <span asp-validation-for="Library.Address" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Logo</label>
-                <input type="file" class="form-control" name="LogoFile" accept="image/*" />
-                <small class="form-text text-muted">Upload a logo image for the library (JPG, PNG, GIF)</small>
-                @if (!string.IsNullOrWhiteSpace(Model.Library?.Logo))
-                {
-                    <div class="mt-2">
-                        <small class="text-muted">Current logo:</small>
-                        <img src="@Model.Library.Logo" alt="Current Logo" class="d-block mt-1" style="max-height: 100px; max-width: 200px; object-fit: contain;" />
-                        <input asp-for="Library.Logo" type="hidden" />
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8 col-xl-9">
+            <form method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Library.LibraryId" />
+                
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-primary); color: white;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-building me-2"></i>
+                            <h4 class="mb-0">@(isEditMode ? "Update Library" : "Create Library")</h4>
+                        </div>
                     </div>
-                }
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Library.Description"></label>
-                <textarea class="form-control" asp-for="Library.Description" rows="3"
-                    placeholder="@Html.DisplayNameFor(m => m.Library.Description)"></textarea>
-                <span asp-validation-for="Library.Description" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label class="form-label" asp-for="Library.CheckoutDurationDays"></label>
-                <input type="number" class="form-control" asp-for="Library.CheckoutDurationDays" min="1" max="365"
-                    placeholder="@Html.DisplayNameFor(m => m.Library.CheckoutDurationDays)" />
-                <span asp-validation-for="Library.CheckoutDurationDays" class="text-danger"></span>
-                <small class="form-text text-muted">Number of days books can be checked out (1-365 days)</small>
-            </div>
-        </div>
-        <div class="card-footer">
-            <div class="float-start m-2">
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeModal">
-                    Remove
-                </button>
-            </div>
-            <div class="float-end m-2">
-                <a type="button" class="btn btn-secondary ms-2" asp-page="/Libraries/List">Cancel</a>
-                <button type="submit" asp-page-handler="post" class="btn btn-primary">Save</button>
-            </div>
-        </div>
-    </div>
-</form>
 
-<form asp-page-handler="delete">
-    <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Warning</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Library Information Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 col-md-3 mb-3 text-center">
+                                @if (!string.IsNullOrWhiteSpace(Model.Library?.Logo))
+                                {
+                                    <img src="@Model.Library.Logo" alt="Library Logo" class="img-fluid img-thumbnail shadow-sm" style="max-height:200px; width:auto; display:block; margin:0 auto;" />
+                                    <input asp-for="Library.Logo" type="hidden" />
+                                }
+                                else
+                                {
+                                    <div class="rounded d-inline-flex align-items-center justify-content-center mb-3"
+                                        style="width: 120px; height: 120px; background-color: var(--color-primary);">
+                                        <i class="bi bi-building text-white fs-1"></i>
+                                    </div>
+                                }
+                                <div class="mt-2">
+                                    <label class="form-label fw-bold" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-image me-1" style="color: var(--color-secondary);"></i>Upload Logo
+                                    </label>
+                                    <input type="file" class="form-control" name="LogoFile" accept="image/*" />
+                                    <small class="form-text" style="color: var(--color-text-secondary);">
+                                        <i class="bi bi-info-circle me-1"></i>JPG, PNG, GIF (max 2MB)
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-9">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Library.Name" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-building me-1" style="color: var(--color-secondary);"></i>Library Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input class="form-control" asp-for="Library.Name" placeholder="Enter library name" />
+                                    <span asp-validation-for="Library.Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Library.Alias" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-tag me-1" style="color: var(--color-secondary);"></i>Library Alias
+                                    </label>
+                                    <input class="form-control" asp-for="Library.Alias" placeholder="Enter short alias or code" />
+                                    <span asp-validation-for="Library.Alias" class="text-danger"></span>
+                                    <small class="form-text" style="color: var(--color-text-secondary);">
+                                        <i class="bi bi-info-circle me-1"></i>Short identifier for the library (e.g., "MAIN", "BRANCH1")
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Library.Description" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-file-text me-1" style="color: var(--color-secondary);"></i>Description
+                                    </label>
+                                    <textarea class="form-control" asp-for="Library.Description" rows="4" placeholder="Enter library description"></textarea>
+                                    <span asp-validation-for="Library.Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location & Settings Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-geo-alt me-2"></i>Location & Settings
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label fw-bold" asp-for="Library.Address" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-geo-alt me-1" style="color: var(--color-secondary);"></i>Address
+                                </label>
+                                <input class="form-control" asp-for="Library.Address" placeholder="Enter full address" />
+                                <span asp-validation-for="Library.Address" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Library.CheckoutDurationDays" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-calendar-check me-1" style="color: var(--color-secondary);"></i>Checkout Duration
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" asp-for="Library.CheckoutDurationDays" min="1" max="365" placeholder="14" />
+                                    <span class="input-group-text" style="background-color: var(--color-bg-light); border-color: var(--color-border);">days</span>
+                                </div>
+                                <span asp-validation-for="Library.CheckoutDurationDays" class="text-danger"></span>
+                                <small class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>How long patrons can keep books (1-365 days)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card-footer" style="background-color: var(--color-bg-light);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                @if (isEditMode)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#removeModal">
+                                        <i class="bi bi-trash me-1"></i>Delete Library
+                                    </button>
+                                }
+                            </div>
+                            <div>
+                                <a class="btn btn-secondary me-2" asp-page="./List">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                                <button type="submit" asp-page-handler="post" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Library" : "Create Library")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p>
-                        Removing library will remove all books that belongs to this library.
-                    </p>
+            </form>
+        </div>
+
+        @if (isEditMode)
+        {
+            <!-- Sidebar with Library Information -->
+            <div class="col-lg-4 col-xl-3">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Library Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            @if (!string.IsNullOrEmpty(Model.Library.Logo))
+                            {
+                                <img src="@Model.Library.Logo" alt="Library Logo" class="img-fluid rounded shadow-sm" style="max-height: 80px; width: auto;" />
+                            }
+                            else
+                            {
+                                <div class="rounded d-inline-flex align-items-center justify-content-center"
+                                    style="width: 60px; height: 60px; background-color: var(--color-primary);">
+                                    <i class="bi bi-building text-white fs-4"></i>
+                                </div>
+                            }
+                            <h6 class="mt-2 mb-0" style="color: var(--color-text-primary);">@Model.Library.Name</h6>
+                            <small style="color: var(--color-text-secondary);">Library ID: @Model.Library.LibraryId</small>
+                        </div>
+
+                        <hr style="border-color: var(--color-border);">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Library.Alias))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Alias</small>
+                                <code class="small" style="background-color: var(--color-bg-light); color: var(--color-primary); border: 1px solid var(--color-border);">@Model.Library.Alias</code>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Library.Address))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Address</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Library.Address</span>
+                            </div>
+                        }
+
+                        @if (Model.Library.CheckoutDurationDays > 0)
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Checkout Duration</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Library.CheckoutDurationDays days</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Library.Description))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Description</small>
+                                <p class="small mb-0" style="color: var(--color-text-primary);">@Model.Library.Description</p>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-center" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <small style="color: var(--color-text-secondary);">
+                            <i class="bi bi-clock me-1"></i>Last updated: @DateTime.Now.ToString("MMM dd, yyyy")
+                        </small>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button class="btn btn-danger" type="submit">Remove</button>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isEditMode)
+{
+    <!-- Delete Confirmation Modal -->
+    <form asp-page-handler="delete" asp-route-id="@Model.Library.LibraryId">
+        <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: var(--color-danger); color: white;">
+                        <h5 class="modal-title" id="removeModalLabel">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 60px; height: 60px; background-color: var(--color-danger);">
+                                <i class="bi bi-building-x text-white fs-3"></i>
+                            </div>
+                            <h6 class="mb-2" style="color: var(--color-text-primary);">Delete Library: @Model.Library.Name</h6>
+                            <p class="mb-0" style="color: var(--color-text-secondary);">Library ID: @Model.Library.LibraryId</p>
+                        </div>
+
+                        <div class="alert" style="background-color: rgba(230, 182, 85, 0.1); border-color: var(--color-accent); color: #8a6a14;" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone. Deleting this library will also remove all books that belong to it.
+                        </div>
+
+                        <p class="mb-0" style="color: var(--color-text-primary);">
+                            Are you sure you want to permanently delete this library and all its associated books from the system?
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </button>
+                        <button class="btn btn-danger" type="submit">
+                            <i class="bi bi-trash me-1"></i>Delete Library
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

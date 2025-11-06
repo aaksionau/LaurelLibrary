@@ -1,25 +1,320 @@
 ﻿@page "{bookId:guid?}"
 @model LaurelLibrary.UI.Areas.Administration.Pages.Books.UpdateModel
+@using LaurelLibrary.UI.Extensions
 
-<div class="container-fluid">
-    <form method="post" class="w-100">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Book.BookId" />
-        <div class="card mt-3 w-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3>Create / Update Book</h3>
-                <a asp-page="./List" class="btn btn-outline-primary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to List
-                </a>
+@{
+    ViewData["Title"] = Model.PageTitle;
+    var isEditMode = Model.Book.BookId != Guid.Empty;
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8 col-xl-9">
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Book.BookId" />
+                
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-primary); color: white;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-book me-2"></i>
+                            <h4 class="mb-0">@(isEditMode ? "Update Book" : "Create Book")</h4>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Book Image and Basic Information Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-info-circle me-2"></i>Basic Information
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 col-md-3 mb-3 text-center">
+                                @Html.BookImage(Model?.Book?.Image, "Book cover", "img-fluid img-thumbnail shadow-sm", "max-height:300px; width:auto; display:block; margin:0 auto;")
+                                <div class="mt-2">
+                                    <label class="form-label fw-bold" asp-for="Book.Image" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-image me-1" style="color: var(--color-secondary);"></i>Cover Image URL
+                                    </label>
+                                    <input class="form-control" asp-for="Book.Image" placeholder="Enter image URL" />
+                                    <span asp-validation-for="Book.Image" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-9">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Book.Title" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-bookmark me-1" style="color: var(--color-secondary);"></i>Title <span class="text-danger">*</span>
+                                    </label>
+                                    <input id="bookTitleInput" class="form-control" asp-for="Book.Title" placeholder="Enter book title" />
+                                    <span asp-validation-for="Book.Title" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Book.Publisher" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-building me-1" style="color: var(--color-secondary);"></i>Publisher
+                                    </label>
+                                    <input class="form-control" asp-for="Book.Publisher" placeholder="Enter publisher name" />
+                                    <span asp-validation-for="Book.Publisher" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold" asp-for="Book.Synopsis" style="color: var(--color-text-primary);">
+                                        <i class="bi bi-file-text me-1" style="color: var(--color-secondary);"></i>Synopsis
+                                    </label>
+                                    <textarea class="form-control" asp-for="Book.Synopsis" rows="6" placeholder="Enter book synopsis"></textarea>
+                                    <span asp-validation-for="Book.Synopsis" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publication Details Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-calendar-event me-2"></i>Publication Details
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Language" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-translate me-1" style="color: var(--color-secondary);"></i>Language
+                                </label>
+                                <input class="form-control" asp-for="Book.Language" placeholder="e.g. English" />
+                                <span asp-validation-for="Book.Language" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Edition" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-layers me-1" style="color: var(--color-secondary);"></i>Edition
+                                </label>
+                                <input class="form-control" asp-for="Book.Edition" placeholder="e.g. 1st Edition" />
+                                <span asp-validation-for="Book.Edition" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Binding" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-journals me-1" style="color: var(--color-secondary);"></i>Binding
+                                </label>
+                                <input class="form-control" asp-for="Book.Binding" placeholder="e.g. Hardcover, Paperback" />
+                                <span asp-validation-for="Book.Binding" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Pages" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-file-earmark-text me-1" style="color: var(--color-secondary);"></i>Pages
+                                </label>
+                                <input type="number" class="form-control" asp-for="Book.Pages" placeholder="Number of pages" />
+                                <span asp-validation-for="Book.Pages" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.DatePublished" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-calendar-check me-1" style="color: var(--color-secondary);"></i>Publication Date
+                                </label>
+                                <input type="date" class="form-control" asp-for="Book.DatePublished" />
+                                <span asp-validation-for="Book.DatePublished" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Isbn" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-upc-scan me-1" style="color: var(--color-secondary);"></i>ISBN
+                                </label>
+                                <input class="form-control" asp-for="Book.Isbn" placeholder="Enter ISBN" />
+                                <span asp-validation-for="Book.Isbn" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Authors and Categories Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-people me-2"></i>Authors & Categories
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Authors" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-person-lines-fill me-1" style="color: var(--color-secondary);"></i>Authors
+                                </label>
+                                <input class="form-control" asp-for="Book.Authors" placeholder="e.g. Jane Doe, John Smith" />
+                                <div class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Separate multiple authors with commas
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Book.Categories" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-tags me-1" style="color: var(--color-secondary);"></i>Categories
+                                </label>
+                                <input class="form-control" asp-for="Book.Categories" placeholder="e.g. Fiction, Mystery" />
+                                <div class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Separate multiple categories with commas
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card-footer" style="background-color: var(--color-bg-light);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                @if (isEditMode)
+                                {
+                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                        data-bs-target="#removeModal">
+                                        <i class="bi bi-trash me-1"></i>Delete Book
+                                    </button>
+                                }
+                            </div>
+                            <div>
+                                <a class="btn btn-secondary me-2" asp-page="./List">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancel
+                                </a>
+                                <button id="saveBtn" type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Book" : "Create Book")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        @if (isEditMode)
+        {
+            <!-- Sidebar with Book Information -->
+            <div class="col-lg-4 col-xl-3">
+                <div class="card shadow-sm">
+                    <div class="card-header" style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                        <h5 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Book Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            @if (!string.IsNullOrEmpty(Model.Book.Image))
+                            {
+                                @Html.BookImage(Model.Book.Image, "Book cover", "img-fluid rounded shadow-sm", "max-height: 120px; width: auto;")
+                            }
+                            else
+                            {
+                                <div class="rounded d-inline-flex align-items-center justify-content-center"
+                                    style="width: 80px; height: 120px; background-color: var(--color-primary);">
+                                    <i class="bi bi-book text-white fs-3"></i>
+                                </div>
+                            }
+                            <h6 class="mt-2 mb-0" style="color: var(--color-text-primary);">@Model.Book.Title</h6>
+                            <small style="color: var(--color-text-secondary);">Book ID: @Model.Book.BookId</small>
+                        </div>
+
+                        <hr style="border-color: var(--color-border);">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Book.Authors))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Authors</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Book.Authors</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Book.Publisher))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Publisher</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Book.Publisher</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Book.Categories))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Categories</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Book.Categories</span>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Book.Isbn))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">ISBN</small>
+                                <code class="small" style="background-color: var(--color-bg-light); color: var(--color-primary); border: 1px solid var(--color-border);">@Model.Book.Isbn</code>
+                            </div>
+                        }
+
+                        @if (Model.Book.Pages > 0)
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Pages</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Book.Pages pages</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer text-center" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <small style="color: var(--color-text-secondary);">
+                            <i class="bi bi-clock me-1"></i>Last updated: @DateTime.Now.ToString("MMM dd, yyyy")
+                        </small>
+                    </div>
+                </div>
             </div>
+        }
+    </div>
+</div>
 
-            <div class="card-body">
-                <partial name="_BookFormContent" model="Model.Book" />
-                <div class="mb-3 text-end">
-                    <button id="saveBtn" type="submit" class="btn btn-success">Save</button>
-                    <a asp-page="./List" class="btn btn-secondary ms-2">Cancel</a>
+@if (isEditMode)
+{
+    <!-- Delete Confirmation Modal -->
+    <form asp-page-handler="delete" asp-route-id="@Model.Book.BookId">
+        <div class="modal fade" id="removeModal" tabindex="-1" aria-labelledby="removeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: var(--color-danger); color: white;">
+                        <h5 class="modal-title" id="removeModalLabel">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Confirm Deletion
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                                style="width: 60px; height: 60px; background-color: var(--color-danger);">
+                                <i class="bi bi-book-x text-white fs-3"></i>
+                            </div>
+                            <h6 class="mb-2" style="color: var(--color-text-primary);">Delete Book: @Model.Book.Title</h6>
+                            <p class="mb-0" style="color: var(--color-text-secondary);">Book ID: @Model.Book.BookId</p>
+                        </div>
+
+                        <div class="alert" style="background-color: rgba(230, 182, 85, 0.1); border-color: var(--color-accent); color: #8a6a14;" role="alert">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone. All associated data will be permanently
+                            deleted.
+                        </div>
+
+                        <p class="mb-0" style="color: var(--color-text-primary);">
+                            Are you sure you want to permanently delete this book from the system?
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cancel
+                        </button>
+                        <button class="btn btn-danger" type="submit">
+                            <i class="bi bi-trash me-1"></i>Delete Book
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </form>
-</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
