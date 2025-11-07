@@ -73,8 +73,8 @@ public class SubscriptionPlan
                 "Export your data (*)",
                 "Standard support",
             },
-            StripeMonthlyPriceId = "price_1SPatMDrPbflF5o5j3JGwPDU",
-            StripeYearlyPriceId = "price_1SPauVDrPbflF5o50fgYHZWK",
+            StripeMonthlyPriceId = "price_1SPa5WDxTQGURsyvnvriJsEz",
+            StripeYearlyPriceId = "price_1SPa5WDxTQGURsyvWUUsd8MB",
         },
         new SubscriptionPlan
         {
@@ -106,8 +106,8 @@ public class SubscriptionPlan
                 "Advanced analytics (*)",
                 "Custom integrations",
             },
-            StripeMonthlyPriceId = "price_1SPawWDrPbflF5o5zvW6nr0e",
-            StripeYearlyPriceId = "price_1SPaxfDrPbflF5o5UsvTdd9R",
+            StripeMonthlyPriceId = "price_1SPa6aDxTQGURsyvF9WPDl3c",
+            StripeYearlyPriceId = "price_1SPa7ODxTQGURsyvhuMdWdds",
         },
     };
 
