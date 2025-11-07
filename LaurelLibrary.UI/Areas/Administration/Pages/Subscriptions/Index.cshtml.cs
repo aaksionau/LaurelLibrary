@@ -174,6 +174,20 @@ public class IndexModel : PageModel
                     "Creating free subscription for library {LibraryId}",
                     libraryId.Value
                 );
+                var existingSubscription = await _subscriptionService.GetLibrarySubscriptionAsync(
+                    libraryId.Value
+                );
+
+                if (
+                    existingSubscription != null
+                    && existingSubscription.Tier != SubscriptionTier.BookwormBasic
+                )
+                {
+                    await _subscriptionService.CancelSubscriptionAsync(
+                        existingSubscription.SubscriptionId
+                    );
+                }
+
                 var subscription = await _subscriptionService.CreateFreeSubscriptionAsync(
                     libraryId.Value
                 );
@@ -181,6 +195,7 @@ public class IndexModel : PageModel
                     "Free subscription created successfully: {SubscriptionId}",
                     subscription?.SubscriptionId
                 );
+
                 return new JsonResult(new { success = true, redirectUrl = Url.Page("Index") });
             }
 
