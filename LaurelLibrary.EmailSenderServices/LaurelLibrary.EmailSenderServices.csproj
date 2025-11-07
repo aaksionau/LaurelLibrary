@@ -6,9 +6,9 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <!-- NuGet Package Metadata -->
     <PackageId>LaurelLibrary.EmailSenderServices</PackageId>
-    <Authors>Laurel Library</Authors>
-    <Company>Laurel Library</Company>
-    <Description>Email sender services library for Laurel Library applications providing Azure Queue Mail Service and Email Template Service functionality.</Description>
+    <Authors>Aliaksei Aksionau</Authors>
+    <Company>MyLibrarian</Company>
+    <Description>Email sender services library for MyLibrarian applications providing Azure Queue Mail Service and Email Template Service functionality.</Description>
     <PackageTags>email;azure;queue;templates;library</PackageTags>
     <PackageProjectUrl>https://dev.azure.com/a2ksionau/LaurelLibrary</PackageProjectUrl>
     <RepositoryUrl>https://dev.azure.com/a2ksionau/LaurelLibrary</RepositoryUrl>

@@ -1,4 +1,4 @@
-# Laurel Library Subscription Setup Guide
+# MyLibrarian Subscription Setup Guide
 
 This guide will help you set up the subscription-based payment system with Stripe integration.
 

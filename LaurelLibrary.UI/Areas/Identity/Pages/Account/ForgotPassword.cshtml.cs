@@ -85,7 +85,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Your Laurel Library Password",
+                    "Reset Your MyLibrarian Password",
                     emailBody
                 );
 

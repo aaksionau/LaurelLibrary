@@ -187,7 +187,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
 
                     await _emailSender.SendEmailAsync(
                         Input.Email,
-                        "Welcome to Laurel Library - Confirm Your Email",
+                        "Welcome to MyLibrarian - Confirm Your Email",
                         emailBody
                     );
 

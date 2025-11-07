@@ -92,13 +92,13 @@ else
             <div class="mb-5">
                 <i class="bi bi-book-fill" style="font-size: 6rem; color: #245C4F;"></i>
             </div>
-            <h1 class="display-3 mb-4 fw-bold" style="color: #2E2B28;">Laurel Library</h1>
+            <h1 class="display-3 mb-4 fw-bold" style="color: #2E2B28;">MyLibrarian</h1>
             <p class="lead text-muted mb-5 fs-4">Modern Library Management System</p>
 
             <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px; border-radius: 12px;">
                 <div class="card-body p-5">
                     <p class="text-muted mb-4 fs-5">
-                        Welcome to Laurel Library - a comprehensive solution for managing library operations,
+                        Welcome to MyLibrarian - a comprehensive solution for managing library operations,
                         book checkouts, returns, and member management.
                     </p>
                     <hr class="my-4">
@@ -146,6 +146,6 @@ else
         initializeKioskPage({
             showCheckoutSuccess: @Json.Serialize(Model.ShowCheckoutSuccess && !string.IsNullOrEmpty(Model.Message)),
             showReturnSuccess: @Json.Serialize(Model.ShowReturnSuccess && !string.IsNullOrEmpty(Model.Message))
-                                    });
+                                        });
     </script>
 }

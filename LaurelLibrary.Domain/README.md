@@ -2,7 +2,7 @@
 
 [![GitHub Packages](https://img.shields.io/badge/GitHub%20Packages-aaksionau.LaurelLibrary.Domain-blue)](https://github.com/aaksionau/LaurelLibrary.Domain/packages)
 
-The domain layer for the Laurel Library Management System, containing core business entities, enums, and domain logic.
+The domain layer for the MyLibrarian Management System, containing core business entities, enums, and domain logic.
 
 ## Overview
 
@@ -172,4 +172,4 @@ This domain layer is part of a larger library management system. Related project
 
 ---
 
-*This project is part of the Laurel Library Management System ecosystem.*
+*This project is part of the MyLibrarian Management System ecosystem.*
