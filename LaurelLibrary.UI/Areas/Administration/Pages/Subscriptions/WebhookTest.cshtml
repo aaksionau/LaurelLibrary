@@ -1,0 +1,54 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Subscriptions.WebhookTestModel
+@{
+    ViewData["Title"] = "Webhook Test";
+}
+
+<div class="container">
+    <h2>Stripe Webhook Test</h2>
+
+    <div class="card">
+        <div class="card-body">
+            <h5>Test Session Verification</h5>
+            <form method="post">
+                <div class="mb-3">
+                    <label for="sessionId" class="form-label">Stripe Session ID</label>
+                    <input type="text" class="form-control" id="sessionId" name="sessionId" placeholder="cs_test_..."
+                        required>
+                    <div class="form-text">Enter the session ID from your successful Stripe payment</div>
+                </div>
+                <button type="submit" asp-page-handler="VerifySession" class="btn btn-primary">
+                    Verify Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.TestResult != null)
+    {
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5>Test Result</h5>
+                <pre>@Model.TestResult</pre>
+            </div>
+        </div>
+    }
+
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5>Webhook Configuration Check</h5>
+            <ul>
+                <li><strong>Required Events:</strong>
+                    <ul>
+                        <li>checkout.session.completed</li>
+                        <li>invoice.payment_succeeded</li>
+                        <li>invoice.payment_failed</li>
+                        <li>customer.subscription.updated</li>
+                        <li>customer.subscription.deleted</li>
+                    </ul>
+                </li>
+            </ul>
+            <p class="text-muted">Make sure these events are configured in your Stripe webhook settings.</p>
+        </div>
+    </div>
+</div>

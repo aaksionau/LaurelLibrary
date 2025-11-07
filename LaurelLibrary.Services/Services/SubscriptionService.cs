@@ -344,6 +344,107 @@ public class SubscriptionService : ISubscriptionService
         return MapToDto(subscription);
     }
 
+    public async Task<SubscriptionDto?> VerifyAndProcessCheckoutSessionAsync(
+        string sessionId,
+        Guid libraryId
+    )
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Verifying checkout session {SessionId} for library {LibraryId}",
+                sessionId,
+                libraryId
+            );
+
+            // First check if subscription already exists
+            var existingSubscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
+            if (
+                existingSubscription != null
+                && existingSubscription.Tier != SubscriptionTier.BookwormBasic
+            )
+            {
+                _logger.LogInformation(
+                    "Subscription already exists for library {LibraryId}",
+                    libraryId
+                );
+                return MapToDto(existingSubscription);
+            }
+
+            // Get session from Stripe
+            var sessionService = new SessionService();
+            var session = await sessionService.GetAsync(sessionId);
+
+            if (session == null)
+            {
+                _logger.LogWarning("Checkout session {SessionId} not found", sessionId);
+                return null;
+            }
+
+            if (session.PaymentStatus != "paid")
+            {
+                _logger.LogWarning(
+                    "Checkout session {SessionId} payment status is {PaymentStatus}",
+                    sessionId,
+                    session.PaymentStatus
+                );
+                return null;
+            }
+
+            // Verify session metadata matches the library
+            if (
+                session.Metadata?.ContainsKey("LibraryId") != true
+                || !Guid.TryParse(session.Metadata["LibraryId"], out var sessionLibraryId)
+                || sessionLibraryId != libraryId
+            )
+            {
+                _logger.LogWarning("Checkout session {SessionId} library mismatch", sessionId);
+                return null;
+            }
+
+            // If webhook hasn't processed yet, process manually
+            var tier = Enum.Parse<SubscriptionTier>(session.Metadata["Tier"]);
+            var billingInterval = session.Metadata["BillingInterval"];
+
+            var plan = SubscriptionPlan.GetPlan(tier);
+            var amount = billingInterval == "year" ? plan.YearlyPrice : plan.MonthlyPrice;
+
+            var subscription = new Domain.Entities.Subscription
+            {
+                LibraryId = libraryId,
+                Tier = tier,
+                Status = SubscriptionStatus.Active,
+                StartDate = DateTime.UtcNow,
+                NextBillingDate = DateTime.UtcNow.AddMonths(billingInterval == "year" ? 12 : 1),
+                Amount = amount,
+                Currency = "USD",
+                BillingInterval = billingInterval,
+                StripeSubscriptionId = session.SubscriptionId,
+                StripeCustomerId = session.CustomerId,
+            };
+
+            await _subscriptionRepository.CreateAsync(subscription);
+            _logger.LogInformation(
+                "Created subscription {SubscriptionId} for library {LibraryId} from checkout session {SessionId}",
+                subscription.SubscriptionId,
+                libraryId,
+                sessionId
+            );
+
+            return MapToDto(subscription);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error verifying and processing checkout session {SessionId} for library {LibraryId}",
+                sessionId,
+                libraryId
+            );
+            return null;
+        }
+    }
+
     private async Task HandleCheckoutSessionCompleted(Event stripeEvent)
     {
         var session = stripeEvent.Data.Object as Session;

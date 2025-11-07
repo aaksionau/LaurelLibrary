@@ -23,6 +23,7 @@ public interface ISubscriptionService
     Task<bool> IsAgeClassificationEnabledAsync(Guid libraryId);
     Task ProcessStripeWebhookAsync(string payload, string signature);
     Task<SubscriptionDto> CreateFreeSubscriptionAsync(Guid libraryId);
+    Task<SubscriptionDto?> VerifyAndProcessCheckoutSessionAsync(string sessionId, Guid libraryId);
 }
 
 public interface IStripeService
