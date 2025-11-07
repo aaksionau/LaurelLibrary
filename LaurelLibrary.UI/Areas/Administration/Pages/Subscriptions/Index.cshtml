@@ -85,10 +85,13 @@
                                         <span style="color: var(--color-text-secondary);">/
                                         @Model.CurrentSubscription.BillingInterval</span>
                                     </p>
-                                    <p class="mb-1">
-                                        <strong style="color: var(--color-text-primary);">Next Billing:</strong>
-                                        <span style="color: var(--color-text-secondary);">@Model.CurrentSubscription.NextBillingDate.ToString("MMMM dd, yyyy")</span>
-                                    </p>
+                                    @if (Model.CurrentSubscription.Status == SubscriptionStatus.Active)
+                                    {
+                                        <p class="mb-1">
+                                            <strong style="color: var(--color-text-primary);">Next Billing:</strong>
+                                            <span style="color: var(--color-text-secondary);">@Model.CurrentSubscription.NextBillingDate.ToString("MMMM dd, yyyy")</span>
+                                        </p>
+                                    }
                                 }
                             </div>
                             <div class="col-md-6">
