@@ -325,6 +325,16 @@ public class SubscriptionService : ISubscriptionService
         var existingSubscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
         if (existingSubscription != null)
         {
+            existingSubscription.Status = SubscriptionStatus.Active;
+            existingSubscription.Tier = SubscriptionTier.BookwormBasic;
+            existingSubscription.StartDate = DateTime.UtcNow;
+            existingSubscription.NextBillingDate = DateTime.UtcNow.AddYears(100);
+            existingSubscription.Amount = 0;
+            existingSubscription.Currency = "USD";
+            existingSubscription.BillingInterval = "month";
+
+            await _subscriptionRepository.UpdateAsync(existingSubscription);
+
             return MapToDto(existingSubscription);
         }
 
