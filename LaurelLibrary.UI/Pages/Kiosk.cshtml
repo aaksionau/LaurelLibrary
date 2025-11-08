@@ -42,39 +42,57 @@
             }
 
             <!-- Action Buttons Section -->
-            <div class="col-md-10 col-lg-8">
-                <div class="row g-5">
+            <div class="col-md-10 col-lg-10">
+                <div class="row g-4">
                     <!-- Return Books Card -->
-                    <div class="col-md-6">
+                    <div class="col-lg-4 col-md-6">
                         <div class="card shadow-lg border-0 h-100" style="border-radius: 12px; overflow: hidden;">
                             <div class="card-body p-0">
                                 <a asp-page="/Return" asp-route-libraryId="@Model.LibraryId"
                                     asp-route-kioskId="@Model.KioskId"
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
-                                    class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
-                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #245C4F 0%, #1e4a3f 100%); color: white; border: none; min-height: 280px;">
-                                    <i class="bi bi-box-arrow-in-left mb-4" style="font-size: 4rem; color: white;"></i>
+                                    class="btn w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center text-decoration-none"
+                                    style="font-size: 1.3rem; background: linear-gradient(135deg, #245C4F 0%, #1e4a3f 100%); color: white; border: none; min-height: 240px;">
+                                    <i class="bi bi-box-arrow-in-left mb-3" style="font-size: 3.5rem; color: white;"></i>
                                     <span class="fw-bold mb-2" style="color: white;">Return Books</span>
-                                    <small style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">Drop off your
-                                        borrowed
-                                        items</small>
+                                    <small style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.9);">Drop off your
+                                        borrowed items</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Books Card -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card shadow-lg border-0 h-100" style="border-radius: 12px; overflow: hidden;">
+                            <div class="card-body p-0">
+                                <a asp-page="/Search" asp-route-libraryId="@Model.LibraryId"
+                                    asp-route-kioskId="@Model.KioskId"
+                                    asp-route-browserFingerprint="@Model.BrowserFingerprint"
+                                    class="btn w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center text-decoration-none"
+                                    style="font-size: 1.3rem; background: linear-gradient(135deg, #D8A48F 0%, #d19277 100%); color: white; border: none; min-height: 240px;">
+                                    <i class="bi bi-search mb-3" style="font-size: 3.5rem; color: white;"></i>
+                                    <span class="fw-bold mb-2" style="color: white;">Search Books</span>
+                                    <small style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.9);">Find books in our
+                                        catalog</small>
                                 </a>
                             </div>
                         </div>
                     </div>
 
                     <!-- Checkout Books Card -->
-                    <div class="col-md-6">
+                    <div class="col-lg-4 col-md-6">
                         <div class="card shadow-lg border-0 h-100" style="border-radius: 12px; overflow: hidden;">
                             <div class="card-body p-0">
                                 <a asp-page="/Checkout" asp-route-libraryId="@Model.LibraryId"
                                     asp-route-kioskId="@Model.KioskId"
                                     asp-route-browserFingerprint="@Model.BrowserFingerprint"
-                                    class="btn w-100 h-100 py-5 d-flex flex-column align-items-center justify-content-center text-decoration-none"
-                                    style="font-size: 1.5rem; background: linear-gradient(135deg, #E6B655 0%, #e2b143 100%); color: white; border: none; min-height: 280px;">
-                                    <i class="bi bi-box-arrow-right mb-4" style="font-size: 4rem; color: white;"></i>
+                                    class="btn w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center text-decoration-none"
+                                    style="font-size: 1.3rem; background: linear-gradient(135deg, #E6B655 0%, #e2b143 100%); color: white; border: none; min-height: 240px;">
+                                    <i class="bi bi-box-arrow-right mb-3" style="font-size: 3.5rem; color: white;"></i>
                                     <span class="fw-bold mb-2" style="color: white;">Checkout Books</span>
-                                    <small style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.9);">Borrow items from the
+                                    <small style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.9);">Borrow items from
+                                        the
                                         library</small>
                                 </a>
                             </div>
@@ -146,6 +164,6 @@ else
         initializeKioskPage({
             showCheckoutSuccess: @Json.Serialize(Model.ShowCheckoutSuccess && !string.IsNullOrEmpty(Model.Message)),
             showReturnSuccess: @Json.Serialize(Model.ShowReturnSuccess && !string.IsNullOrEmpty(Model.Message))
-                                        });
+                                            });
     </script>
 }

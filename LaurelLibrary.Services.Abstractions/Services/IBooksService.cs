@@ -29,7 +29,8 @@ public interface IBooksService
         int pageSize = 10,
         int? authorId = null,
         int? categoryId = null,
-        string? searchTitle = null
+        string? searchTitle = null,
+        string? searchAuthor = null
     );
 
     /// <summary>

@@ -158,7 +158,8 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     pageSize ?? 10,
                     SelectedAuthorId,
                     SelectedCategoryId,
-                    SearchTerm
+                    SearchTerm,
+                    null // searchAuthor
                 );
             }
             else
@@ -170,7 +171,8 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     pageSize ?? 10,
                     SelectedAuthorId,
                     SelectedCategoryId,
-                    SearchTerm
+                    SearchTerm,
+                    null // searchAuthor
                 );
             }
 

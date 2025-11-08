@@ -511,7 +511,8 @@ public class BooksService : IBooksService
         int pageSize = 10,
         int? authorId = null,
         int? categoryId = null,
-        string? searchTitle = null
+        string? searchTitle = null,
+        string? searchAuthor = null
     )
     {
         return await _booksRepository.GetAllBooksAsync(
@@ -520,7 +521,8 @@ public class BooksService : IBooksService
             pageSize,
             authorId,
             categoryId,
-            searchTitle
+            searchTitle,
+            searchAuthor
         );
     }
 

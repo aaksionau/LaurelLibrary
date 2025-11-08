@@ -87,7 +87,8 @@ public class BooksRepository : IBooksRepository
         int pageSize = 10,
         int? authorId = null,
         int? categoryId = null,
-        string? searchTitle = null
+        string? searchTitle = null,
+        string? searchAuthor = null
     )
     {
         var query = _dbContext
@@ -106,10 +107,40 @@ public class BooksRepository : IBooksRepository
             query = query.Where(b => b.Categories.Any(c => c.CategoryId == categoryId.Value));
         }
 
-        if (!string.IsNullOrWhiteSpace(searchTitle))
+        if (!string.IsNullOrWhiteSpace(searchTitle) || !string.IsNullOrWhiteSpace(searchAuthor))
         {
-            var pattern = "%" + searchTitle.Trim() + "%";
-            query = query.Where(b => EF.Functions.Like(b.Title, pattern));
+            // If both are the same value (simple search), search title OR author
+            if (
+                !string.IsNullOrWhiteSpace(searchTitle)
+                && !string.IsNullOrWhiteSpace(searchAuthor)
+                && searchTitle
+                    .Trim()
+                    .Equals(searchAuthor.Trim(), StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                var pattern = "%" + searchTitle.Trim() + "%";
+                query = query.Where(b =>
+                    EF.Functions.Like(b.Title, pattern)
+                    || b.Authors.Any(a => EF.Functions.Like(a.FullName, pattern))
+                );
+            }
+            else
+            {
+                // Separate title and author filters (admin search)
+                if (!string.IsNullOrWhiteSpace(searchTitle))
+                {
+                    var titlePattern = "%" + searchTitle.Trim() + "%";
+                    query = query.Where(b => EF.Functions.Like(b.Title, titlePattern));
+                }
+
+                if (!string.IsNullOrWhiteSpace(searchAuthor))
+                {
+                    var authorPattern = "%" + searchAuthor.Trim() + "%";
+                    query = query.Where(b =>
+                        b.Authors.Any(a => EF.Functions.Like(a.FullName, authorPattern))
+                    );
+                }
+            }
         }
 
         var total = await query.CountAsync();

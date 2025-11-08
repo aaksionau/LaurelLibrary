@@ -1,0 +1,530 @@
+@page
+@model SearchModel
+@using LaurelLibrary.UI.Extensions
+@{
+    ViewData["Title"] = "Search Books";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/checkout.css" />
+    <link rel="stylesheet" href="~/css/search.css" asp-append-version="true" />
+}
+
+@if (Model.Library != null)
+{
+    <div class="container py-3" style="min-height: 80vh;">
+        <!-- Compact Header Section -->
+        <div class="row mb-3">
+            <div class="col-12">
+                @if (!string.IsNullOrEmpty(Model.Library.Logo))
+                {
+                    <div class="text-center mb-2">
+                        <img src="@Model.Library.Logo" alt="@Model.Library.Name Logo" class="img-fluid"
+                            style="max-height: 60px; object-fit: contain;" />
+                    </div>
+                }
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <a asp-page="/Kiosk" 
+                           asp-route-libraryId="@Model.LibraryId"
+                           asp-route-kioskId="@Model.KioskId"
+                           asp-route-browserFingerprint="@Model.BrowserFingerprint"
+                           class="btn btn-secondary btn-lg">
+                            <i class="bi bi-house-door-fill"></i> Kiosk
+                        </a>
+                        <h2 class="mb-0 fw-bold" style="color: #2E2B28;">Search Books in @Model.Library.Name</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compact Search Section -->
+        <div class="row justify-content-center mb-3">
+            <div class="col-12">
+                <div class="search-container py-3">
+                    <form method="get">
+                        <input type="hidden" name="libraryId" value="@Model.LibraryId" />
+                        <input type="hidden" name="kioskId" value="@Model.KioskId" />
+                        <input type="hidden" name="browserFingerprint" value="@Model.BrowserFingerprint" />
+                        <input type="hidden" name="pageNumber" value="1" />
+                        <input type="hidden" name="useSemanticSearch" value="@Model.UseSemanticSearch.ToString().ToLower()" />
+
+                        <!-- Search Type Toggle -->
+                        <div class="row mb-3">
+                            <div class="col-12 text-center">
+                                <div class="mb-2">
+                                    <small class="text-muted fw-bold">SEARCH MODE</small>
+                                </div>
+                                <div class="btn-group" role="group" aria-label="Search type">
+                                    <button type="button" 
+                                            class="search-toggle @(!Model.UseSemanticSearch ? "active" : "")"
+                                            onclick="toggleSearchType(false)"
+                                            aria-pressed="@(!Model.UseSemanticSearch ? "true" : "false")">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-search fs-5 me-3"></i>
+                                            <div class="d-flex flex-column align-items-start">
+                                                <span class="fw-bold">Simple Search</span>
+                                                <small style="font-size: 0.75rem; opacity: 0.8;">Title & Author</small>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <button type="button" 
+                                            class="search-toggle @(Model.UseSemanticSearch ? "active" : "")"
+                                            onclick="toggleSearchType(true)"
+                                            aria-pressed="@(Model.UseSemanticSearch ? "true" : "false")">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-magic fs-5 me-3"></i>
+                                            <div class="d-flex flex-column align-items-start">
+                                                <span class="fw-bold">Smart Search</span>
+                                                <small style="font-size: 0.75rem; opacity: 0.8;">Natural Language</small>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Wide Search Input -->
+                        <div class="row g-2 align-items-end">
+                            @if (Model.UseSemanticSearch)
+                            {
+                                <div class="col-xl-10 col-lg-9 col-md-8">
+                                    <input class="form-control form-control-lg" 
+                                           type="text" 
+                                           id="searchQuery" 
+                                           name="searchQuery" 
+                                           value="@Model.SearchQuery" 
+                                           placeholder="Ask in plain language: e.g., 'Children's books about animals', 'Fantasy novels for teenagers'" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-xl-10 col-lg-9 col-md-8">
+                                    <input class="form-control form-control-lg" 
+                                           type="text" 
+                                           id="searchQuery" 
+                                           name="searchQuery" 
+                                           value="@Model.SearchQuery" 
+                                           placeholder="Enter book title or author name" />
+                                </div>
+                            }
+                            <div class="col-xl-2 col-lg-3 col-md-4">
+                                <div class="row g-1">
+                                    <div class="col-12">
+                                        <div class="d-grid">
+                                            <button type="submit" class="btn btn-primary btn-input-height">
+                                                <i class="bi bi-search me-1"></i><span class="d-none d-md-inline">Search</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        @if (Model.UseSemanticSearch)
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <small class="text-muted">
+                                        <i class="bi bi-lightbulb me-1"></i>
+                                        Examples: "Books for 8 year olds", "Science fiction novels", "Cooking books"
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Enter a book title or author name to search
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        @if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+        {
+            <!-- Books List -->
+            @if (Model.Books.Any())
+            {
+                <!-- Results Summary -->
+                <div class="row justify-content-center mb-3">
+                    <div class="col-lg-10">
+                        <div class="results-summary">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6 class="text-dark mb-0">
+                                        <i class="bi bi-search me-2"></i>
+                                        Showing @((Model.PageNumber - 1) * Model.PageSize + 1) - @(Math.Min(Model.PageNumber * Model.PageSize, Model.TotalCount)) 
+                                        of <strong>@Model.TotalCount</strong> books
+                                    </h6>
+                                </div>
+                                @if (Model.TotalPages > 1)
+                                {
+                                    <div class="col-md-6 text-md-end">
+                                        <div class="d-flex align-items-center justify-content-md-end">
+                                            <small class="text-muted me-3">Page @Model.PageNumber of @Model.TotalPages</small>
+                                            @if (Model.TotalPages > 10)
+                                            {
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="pageJumpDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        Jump to page
+                                                    </button>
+                                                    <ul class="dropdown-menu" aria-labelledby="pageJumpDropdown">
+                                                        @for (int page = 1; page <= Model.TotalPages; page += 5)
+                                                        {
+                                                            <li>
+                                                                <a class="dropdown-item" href="@Url.Page("/Search", new {
+                                                                    libraryId = Model.LibraryId,
+                                                                    kioskId = Model.KioskId,
+                                                                    browserFingerprint = Model.BrowserFingerprint,
+                                                                    searchQuery = Model.SearchQuery,
+                                                                    useSemanticSearch = Model.UseSemanticSearch,
+                                                                    pageNumber = page
+                                                                })">
+                                                                    @{
+                                                                        var pageRange = page + 4 <= Model.TotalPages ? $"Page {page} - {Math.Min(page + 4, Model.TotalPages)}" : $"Page {page}";
+                                                                    }
+                                                                    @pageRange
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mb-4">
+                    <div class="col-lg-10">
+                        <div class="list-group">
+                            @foreach (var book in Model.Books)
+                            {
+                                <div class="list-group-item book-card border-0 shadow-sm mb-3 rounded">
+                                    <div class="row g-3">
+                                        <!-- Book Cover -->
+                                        <div class="col-auto">
+                                            @if (!string.IsNullOrEmpty(book.Image))
+                                            {
+                                                <img src="@Html.GetBlobUrl(book.Image)" alt="@book.Title Cover" 
+                                                     class="img-thumbnail" 
+                                                     style="width: 100px; height: 140px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light d-flex align-items-center justify-content-center img-thumbnail"
+                                                     style="width: 100px; height: 140px;">
+                                                    <i class="bi bi-book text-muted" style="font-size: 2.5rem;"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        
+                                        <!-- Book Details -->
+                                        <div class="col">
+                                            <div class="row h-100">
+                                                <div class="col-12">
+                                                    <!-- Title and Author -->
+                                                    <h5 class="mb-2 fw-bold" style="color: #2E2B28;">@book.Title</h5>
+                                                    
+                                                    @if (!string.IsNullOrEmpty(book.Authors))
+                                                    {
+                                                        <p class="mb-2 text-muted">
+                                                            <i class="bi bi-person me-2"></i><strong>by</strong> @book.Authors
+                                                        </p>
+                                                    }
+                                                    
+                                                    <!-- Synopsis -->
+                                                    @if (!string.IsNullOrEmpty(book.Synopsis))
+                                                    {
+                                                        <p class="mb-3 text-muted" style="line-height: 1.5;">
+                                                            @(book.Synopsis.Length > 200 ? book.Synopsis.Substring(0, 200) + "..." : book.Synopsis)
+                                                        </p>
+                                                    }
+                                                    
+                                                    <!-- Categories and Details -->
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-8">
+                                                            @if (!string.IsNullOrEmpty(book.Categories))
+                                                            {
+                                                                <div class="mb-2">
+                                                                    <i class="bi bi-tags me-2 text-muted"></i>
+                                                                    @foreach (var category in book.Categories.Split(',').Take(3))
+                                                                    {
+                                                                        <span class="badge bg-primary me-1">@category.Trim()</span>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                            
+                                                            @if (!string.IsNullOrEmpty(book.AgeRange))
+                                                            {
+                                                                <div class="mb-2">
+                                                                    <i class="bi bi-people me-2 text-muted"></i>
+                                                                    <span class="badge bg-info">Age: @book.AgeRange</span>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        
+                                                        <!-- Availability -->
+                                                        <div class="col-md-4 text-md-end">
+                                                            @if (book.NumberOfCopies > 0)
+                                                            {
+                                                                <div class="alert alert-success py-2 px-3 mb-0 d-inline-block">
+                                                                    <i class="bi bi-check-circle me-2"></i>
+                                                                    <strong>@book.NumberOfCopies</strong> copies available
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="alert alert-warning py-2 px-3 mb-0 d-inline-block">
+                                                                    <i class="bi bi-exclamation-circle me-2"></i>
+                                                                    Currently unavailable
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="row">
+                        <div class="col-12 d-flex justify-content-center">
+                            <nav aria-label="Search results pagination">
+                                <ul class="pagination pagination-lg">
+                                    <!-- First Page -->
+                                    @if (Model.PageNumber > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Page("/Search", new {
+                                                libraryId = Model.LibraryId,
+                                                kioskId = Model.KioskId,
+                                                browserFingerprint = Model.BrowserFingerprint,
+                                                searchQuery = Model.SearchQuery,
+                                                useSemanticSearch = Model.UseSemanticSearch,
+                                                pageNumber = 1
+                                            })" title="First page">
+                                                <i class="bi bi-chevron-double-left"></i>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    <!-- Previous Page -->
+                                    @if (Model.PageNumber > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Page("/Search", new {
+                                                libraryId = Model.LibraryId,
+                                                kioskId = Model.KioskId,
+                                                browserFingerprint = Model.BrowserFingerprint,
+                                                searchQuery = Model.SearchQuery,
+                                                useSemanticSearch = Model.UseSemanticSearch,
+                                                pageNumber = Model.PageNumber - 1
+                                            })" title="Previous page">
+                                                <i class="bi bi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    }
+
+                                    <!-- Page Numbers -->
+                                    @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                                    {
+                                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                            <a class="page-link @(i == Model.PageNumber ? "fw-bold" : "")" href="@Url.Page("/Search", new {
+                                                libraryId = Model.LibraryId,
+                                                kioskId = Model.KioskId,
+                                                browserFingerprint = Model.BrowserFingerprint,
+                                                searchQuery = Model.SearchQuery,
+                                                useSemanticSearch = Model.UseSemanticSearch,
+                                                pageNumber = i
+                                            })">@i</a>
+                                        </li>
+                                    }
+
+                                    <!-- Next Page -->
+                                    @if (Model.PageNumber < Model.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Page("/Search", new {
+                                                libraryId = Model.LibraryId,
+                                                kioskId = Model.KioskId,
+                                                browserFingerprint = Model.BrowserFingerprint,
+                                                searchQuery = Model.SearchQuery,
+                                                useSemanticSearch = Model.UseSemanticSearch,
+                                                pageNumber = Model.PageNumber + 1
+                                            })" title="Next page">
+                                                Next <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    <!-- Last Page -->
+                                    @if (Model.PageNumber < Model.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Page("/Search", new {
+                                                libraryId = Model.LibraryId,
+                                                kioskId = Model.KioskId,
+                                                browserFingerprint = Model.BrowserFingerprint,
+                                                searchQuery = Model.SearchQuery,
+                                                useSemanticSearch = Model.UseSemanticSearch,
+                                                pageNumber = Model.TotalPages
+                                            })" title="Last page">
+                                                <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Additional pagination info for mobile/smaller screens -->
+                    <div class="row mt-3 d-md-none">
+                        <div class="col-12 text-center">
+                            <small class="text-muted">
+                                Page @Model.PageNumber of @Model.TotalPages • @Model.TotalCount total books
+                            </small>
+                        </div>
+                    </div>
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.SearchQuery))
+            {
+                <!-- No Results -->
+                <div class="row">
+                    <div class="col-12 text-center py-5">
+                        <i class="bi bi-search" style="font-size: 4rem; color: #6c757d;"></i>
+                        <h4 class="mt-3 text-muted">No books found</h4>
+                        <p class="text-muted">Try adjusting your search terms or use the other search mode.</p>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Welcome Message -->
+            <div class="row">
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-book" style="font-size: 4rem; color: #245C4F;"></i>
+                    <h4 class="mt-3" style="color: #2E2B28;">Ready to find your next great read?</h4>
+                    <p class="text-muted">Use the search box above to find books in our collection.</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <!-- No Library Error -->
+    <div class="container d-flex align-items-center justify-content-center py-5" style="min-height: 80vh;">
+        <div class="text-center">
+            <i class="bi bi-exclamation-triangle" style="font-size: 4rem; color: #dc3545;"></i>
+            <h3 class="mt-3">Library not found</h3>
+            <p class="text-muted">Unable to access the library catalog.</p>
+            <a asp-page="/Kiosk" class="btn btn-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Kiosk
+            </a>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function toggleSearchType(useSemanticSearch) {
+            // Add visual feedback before navigation
+            const buttons = document.querySelectorAll('.search-toggle');
+            buttons.forEach(btn => {
+                btn.style.opacity = '0.6';
+                btn.disabled = true;
+            });
+
+            // Show loading message
+            const modeLabel = document.querySelector('.search-mode-label');
+            if (modeLabel) {
+                modeLabel.textContent = 'Switching search mode...';
+            }
+
+            // Update the hidden field
+            document.querySelector('input[name="useSemanticSearch"]').value = useSemanticSearch.toString();
+            
+            // Update the form action to reflect the search type change
+            const form = document.querySelector('form');
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('useSemanticSearch', useSemanticSearch.toString());
+            currentUrl.searchParams.delete('searchQuery'); // Clear previous search
+            currentUrl.searchParams.set('pageNumber', '1'); // Reset to first page
+            
+            // Navigate to the new URL to update the form
+            window.location.href = currentUrl.toString();
+        }
+
+        // Auto-focus search input on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchQuery');
+            if (searchInput && !searchInput.value) {
+                searchInput.focus();
+            }
+
+            // Add pulse animation to active search toggle
+            const activeToggle = document.querySelector('.search-toggle.active');
+            if (activeToggle) {
+                activeToggle.style.animation = 'pulse 2s ease-in-out';
+                setTimeout(() => {
+                    activeToggle.style.animation = '';
+                }, 2000);
+            }
+
+            // Smooth scroll to top when pagination links are clicked
+            const paginationLinks = document.querySelectorAll('.pagination .page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Add a small delay to allow the page to load
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    }, 100);
+                });
+            });
+
+            // Add loading indicator for pagination clicks
+            const allPaginationLinks = document.querySelectorAll('.pagination .page-link, .dropdown-item');
+            allPaginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Show loading state
+                    const spinner = document.createElement('span');
+                    spinner.innerHTML = '<i class="bi bi-arrow-clockwise spin me-2"></i>Loading...';
+                    spinner.className = 'text-muted small';
+                    
+                    // Insert loading message
+                    const resultsContainer = document.querySelector('.list-group');
+                    if (resultsContainer) {
+                        resultsContainer.style.opacity = '0.6';
+                    }
+                });
+            });
+        });
+    </script>
+}

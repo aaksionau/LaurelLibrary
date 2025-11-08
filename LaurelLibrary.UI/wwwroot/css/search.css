@@ -1,0 +1,168 @@
+/* Search Page Styles */
+
+.search-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.book-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e9ecef !important;
+}
+
+.book-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+.search-toggle {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+    border-radius: 15px;
+    padding: 0.6rem 1rem;
+    margin: 0.2rem;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    position: relative;
+}
+
+.search-toggle.active {
+    background: linear-gradient(135deg, #245C4F 0%, #1e4a3f 100%);
+    color: white;
+    border-color: #245C4F;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(36, 92, 79, 0.3);
+}
+
+.search-toggle.active::after {
+    content: "✓";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #E6B655;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.search-toggle:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #495057;
+    transform: translateY(-1px);
+}
+
+.search-toggle.active:hover {
+    background: linear-gradient(135deg, #1e4a3f 0%, #245C4F 100%);
+    border-color: #1e4a3f;
+    color: #adb5bd;
+}
+
+.search-mode-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6c757d;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.search-toggle .bi {
+    font-size: 1.1rem;
+}
+
+.list-group-item {
+    border: none !important;
+}
+
+.book-title {
+    color: #2E2B28 !important;
+}
+
+.availability-badge {
+    font-size: 0.9rem;
+}
+
+.pagination-lg .page-link {
+    padding: 0.75rem 1.25rem;
+    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.pagination-lg .page-item.active .page-link {
+    background-color: #245C4F;
+    border-color: #245C4F;
+}
+
+.pagination-lg .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #245C4F;
+    color: #245C4F;
+}
+
+.results-summary {
+    background: rgba(36, 92, 79, 0.1);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.btn-group-horizontal {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.btn-group-horizontal .btn {
+    flex: 1;
+    min-width: 0;
+    /* Allow buttons to shrink */
+}
+
+.btn-input-height {
+    height: 50px;
+    /* Match form-control-lg height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animations */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1.05);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.pagination .page-link {
+    cursor: pointer;
+}
