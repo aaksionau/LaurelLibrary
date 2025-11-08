@@ -23,36 +23,10 @@ public class SubscriptionPlan
     {
         new SubscriptionPlan
         {
-            Tier = SubscriptionTier.BookwormBasic,
-            Name = "Bookworm Basic",
-            Description = "Perfect for small personal libraries or getting started",
-            MonthlyPrice = 0m,
-            YearlyPrice = 0m,
-            MaxBooks = 100,
-            MaxReaders = 10,
-            MaxLibraries = 1,
-            SemanticSearchEnabled = false,
-            AgeClassificationEnabled = false,
-            PrioritySupport = false,
-            Features = new[]
-            {
-                "Up to 100 books",
-                "Up to 10 readers",
-                "1 library",
-                "Mobile app checkout (*)",
-                "Export your data (*)",
-                "Barcode generation",
-                "Email notifications",
-                "Community support",
-            },
-            StripeMonthlyPriceId = "",
-            StripeYearlyPriceId = "",
-        },
-        new SubscriptionPlan
-        {
             Tier = SubscriptionTier.LibraryLover,
             Name = "Library Lover",
-            Description = "Ideal for personal libraries with advanced features",
+            Description =
+                "Ideal for personal libraries with advanced features (1 month free trial)",
             MonthlyPrice = 11.99m,
             YearlyPrice = 109.99m,
             MaxBooks = 1000,
@@ -72,6 +46,7 @@ public class SubscriptionPlan
                 "Barcode generation",
                 "Export your data (*)",
                 "Standard support",
+                "1 month free trial",
             },
             StripeMonthlyPriceId = "price_1SPa5WDxTQGURsyvnvriJsEz",
             StripeYearlyPriceId = "price_1SPa5WDxTQGURsyvWUUsd8MB",
@@ -80,7 +55,8 @@ public class SubscriptionPlan
         {
             Tier = SubscriptionTier.BibliothecaPro,
             Name = "Bibliotheca Pro",
-            Description = "Choice for small to medium libraries with premium features",
+            Description =
+                "Choice for small to medium libraries with premium features (1 month free trial)",
             MonthlyPrice = 14.99m,
             YearlyPrice = 149.99m,
             MaxBooks = -1, // Unlimited
@@ -105,6 +81,7 @@ public class SubscriptionPlan
                 "Priority support",
                 "Advanced analytics (*)",
                 "Custom integrations",
+                "1 month free trial",
             },
             StripeMonthlyPriceId = "price_1SPa6aDxTQGURsyvF9WPDl3c",
             StripeYearlyPriceId = "price_1SPa7ODxTQGURsyvhuMdWdds",

@@ -2,9 +2,8 @@ namespace LaurelLibrary.Domain.Enums;
 
 public enum SubscriptionTier
 {
-    BookwormBasic = 0, // Free tier
-    LibraryLover = 1, // Mid tier
-    BibliothecaPro = 2, // Premium tier
+    LibraryLover = 0, // Mid tier with free trial
+    BibliothecaPro = 1, // Premium tier with free trial
 }
 
 public enum SubscriptionStatus

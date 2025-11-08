@@ -13,4 +13,5 @@ public interface ISubscriptionRepository
     Task DeleteAsync(Guid subscriptionId);
     Task<List<Subscription>> GetExpiringSubscriptionsAsync(DateTime beforeDate);
     Task<List<Subscription>> GetSubscriptionsByStatusAsync(SubscriptionStatus status);
+    Task<List<Subscription>> GetExpiredTrialsAsync();
 }

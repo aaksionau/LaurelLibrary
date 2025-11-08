@@ -22,8 +22,16 @@ public interface ISubscriptionService
     Task<bool> IsSemanticSearchEnabledAsync(Guid libraryId);
     Task<bool> IsAgeClassificationEnabledAsync(Guid libraryId);
     Task ProcessStripeWebhookAsync(string payload, string signature);
-    Task<SubscriptionDto> CreateFreeSubscriptionAsync(Guid libraryId);
+    Task<SubscriptionDto> CreateTrialSubscriptionAsync(
+        Guid libraryId,
+        SubscriptionTier tier = SubscriptionTier.LibraryLover,
+        string billingInterval = "month"
+    );
     Task<SubscriptionDto?> VerifyAndProcessCheckoutSessionAsync(string sessionId, Guid libraryId);
+    Task<bool> IsTrialExpiredAsync(Guid libraryId);
+    Task<string> GetTrialStatusMessageAsync(Guid libraryId);
+    Task<bool> HasValidSubscriptionAsync(string userId);
+    Task ProcessExpiredTrialsAsync();
 }
 
 public interface IStripeService

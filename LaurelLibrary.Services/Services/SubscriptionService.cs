@@ -61,7 +61,7 @@ public class SubscriptionService : ISubscriptionService
     public async Task<List<SubscriptionPlanDto>> GetAvailablePlansAsync(Guid libraryId)
     {
         var currentSubscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
-        var currentTier = currentSubscription?.Tier ?? SubscriptionTier.BookwormBasic;
+        var currentTier = currentSubscription?.Tier ?? SubscriptionTier.LibraryLover;
 
         return SubscriptionPlan
             .Plans.Select(plan => new SubscriptionPlanDto
@@ -164,7 +164,7 @@ public class SubscriptionService : ISubscriptionService
     public async Task<SubscriptionUsageDto> GetSubscriptionUsageAsync(Guid libraryId)
     {
         var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
-        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.BookwormBasic);
+        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.LibraryLover);
 
         // Get current counts
         var currentBooks = await GetBookCountForLibraryAsync(libraryId);
@@ -210,7 +210,7 @@ public class SubscriptionService : ISubscriptionService
         // Get the subscription from the user's first library to determine their tier
         var firstLibraryId = userLibraries.First().LibraryId;
         var subscription = await _subscriptionRepository.GetByLibraryIdAsync(firstLibraryId);
-        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.BookwormBasic);
+        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.LibraryLover);
 
         // Check if unlimited libraries are allowed
         if (plan.MaxLibraries == -1)
@@ -225,14 +225,14 @@ public class SubscriptionService : ISubscriptionService
     public async Task<bool> IsSemanticSearchEnabledAsync(Guid libraryId)
     {
         var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
-        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.BookwormBasic);
+        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.LibraryLover);
         return plan.SemanticSearchEnabled;
     }
 
     public async Task<bool> IsAgeClassificationEnabledAsync(Guid libraryId)
     {
         var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
-        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.BookwormBasic);
+        var plan = SubscriptionPlan.GetPlan(subscription?.Tier ?? SubscriptionTier.LibraryLover);
         return plan.AgeClassificationEnabled;
     }
 
@@ -249,7 +249,7 @@ public class SubscriptionService : ISubscriptionService
             if (booksToImport > availableSlots)
             {
                 var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
-                var currentTier = subscription?.Tier ?? SubscriptionTier.BookwormBasic;
+                var currentTier = subscription?.Tier ?? SubscriptionTier.LibraryLover;
                 var subscriptionName = GetSubscriptionTierDisplayName(currentTier);
 
                 _logger.LogWarning(
@@ -320,18 +320,26 @@ public class SubscriptionService : ISubscriptionService
         }
     }
 
-    public async Task<SubscriptionDto> CreateFreeSubscriptionAsync(Guid libraryId)
+    public async Task<SubscriptionDto> CreateTrialSubscriptionAsync(
+        Guid libraryId,
+        SubscriptionTier tier = SubscriptionTier.LibraryLover,
+        string billingInterval = "month"
+    )
     {
+        var plan = SubscriptionPlan.GetPlan(tier);
+        var amount = billingInterval == "year" ? plan.YearlyPrice : plan.MonthlyPrice;
+
         var existingSubscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
         if (existingSubscription != null)
         {
-            existingSubscription.Status = SubscriptionStatus.Active;
-            existingSubscription.Tier = SubscriptionTier.BookwormBasic;
+            existingSubscription.Status = SubscriptionStatus.Trial;
+            existingSubscription.Tier = tier;
             existingSubscription.StartDate = DateTime.UtcNow;
-            existingSubscription.NextBillingDate = DateTime.UtcNow.AddYears(100);
-            existingSubscription.Amount = 0;
+            existingSubscription.TrialEndDate = DateTime.UtcNow.AddMonths(1); // 1 month free trial
+            existingSubscription.NextBillingDate = DateTime.UtcNow.AddMonths(1);
+            existingSubscription.Amount = amount; // Will be charged after trial
             existingSubscription.Currency = "USD";
-            existingSubscription.BillingInterval = "month";
+            existingSubscription.BillingInterval = billingInterval;
 
             await _subscriptionRepository.UpdateAsync(existingSubscription);
 
@@ -341,13 +349,14 @@ public class SubscriptionService : ISubscriptionService
         var subscription = new Domain.Entities.Subscription
         {
             LibraryId = libraryId,
-            Tier = SubscriptionTier.BookwormBasic,
-            Status = SubscriptionStatus.Active,
+            Tier = tier,
+            Status = SubscriptionStatus.Trial,
             StartDate = DateTime.UtcNow,
-            NextBillingDate = DateTime.UtcNow.AddYears(100), // Never bills
-            Amount = 0,
+            TrialEndDate = DateTime.UtcNow.AddMonths(1), // 1 month free trial
+            NextBillingDate = DateTime.UtcNow.AddMonths(1),
+            Amount = amount, // Will be charged after trial
             Currency = "USD",
-            BillingInterval = "month",
+            BillingInterval = billingInterval,
         };
 
         await _subscriptionRepository.CreateAsync(subscription);
@@ -371,7 +380,7 @@ public class SubscriptionService : ISubscriptionService
             var existingSubscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
             if (
                 existingSubscription != null
-                && existingSubscription.Tier != SubscriptionTier.BookwormBasic
+                && existingSubscription.Status == SubscriptionStatus.Active
             )
             {
                 _logger.LogInformation(
@@ -631,10 +640,135 @@ public class SubscriptionService : ISubscriptionService
     {
         return tier switch
         {
-            SubscriptionTier.BookwormBasic => "Bookworm Basic",
             SubscriptionTier.LibraryLover => "Library Lover",
             SubscriptionTier.BibliothecaPro => "Bibliotheca Pro",
             _ => "Unknown",
         };
+    }
+
+    public async Task<bool> IsTrialExpiredAsync(Guid libraryId)
+    {
+        var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
+
+        if (subscription == null || subscription.Status != SubscriptionStatus.Trial)
+        {
+            return false;
+        }
+
+        return subscription.TrialEndDate.HasValue
+            && subscription.TrialEndDate.Value <= DateTime.UtcNow;
+    }
+
+    public async Task<string> GetTrialStatusMessageAsync(Guid libraryId)
+    {
+        var subscription = await _subscriptionRepository.GetByLibraryIdAsync(libraryId);
+
+        if (subscription == null || subscription.Status != SubscriptionStatus.Trial)
+        {
+            return "";
+        }
+
+        if (!subscription.TrialEndDate.HasValue)
+        {
+            return "";
+        }
+
+        var daysRemaining = (subscription.TrialEndDate.Value - DateTime.UtcNow).Days;
+
+        if (daysRemaining <= 0)
+        {
+            return "Your free trial has expired. Please add a payment method to continue using your subscription.";
+        }
+        else if (daysRemaining <= 3)
+        {
+            return $"Your free trial expires in {daysRemaining} day{(daysRemaining != 1 ? "s" : "")}. Add a payment method to avoid interruption.";
+        }
+        else if (daysRemaining <= 7)
+        {
+            return $"Your free trial expires in {daysRemaining} days.";
+        }
+
+        return "";
+    }
+
+    public async Task<bool> HasValidSubscriptionAsync(string userId)
+    {
+        try
+        {
+            var userLibraries = await _librariesRepository.GetLibrariesForUserAsync(userId);
+            if (!userLibraries.Any())
+            {
+                // No libraries yet - consider valid to allow library creation
+                return true;
+            }
+
+            // Check subscription for the first library (primary library)
+            var primaryLibrary = userLibraries.First();
+            var subscription = await _subscriptionRepository.GetByLibraryIdAsync(
+                primaryLibrary.LibraryId
+            );
+
+            // Check if user has active or trial subscription
+            var hasValidSubscription =
+                subscription != null
+                && (
+                    subscription.Status == SubscriptionStatus.Active
+                    || subscription.Status == SubscriptionStatus.Trial
+                );
+
+            // If trial, check if it's expired
+            if (subscription?.Status == SubscriptionStatus.Trial)
+            {
+                var isTrialExpired =
+                    subscription.TrialEndDate.HasValue
+                    && subscription.TrialEndDate.Value <= DateTime.UtcNow;
+                if (isTrialExpired)
+                {
+                    hasValidSubscription = false;
+                }
+            }
+
+            return hasValidSubscription;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking subscription status for user {UserId}", userId);
+            return true; // Return true on error to avoid blocking users
+        }
+    }
+
+    public async Task ProcessExpiredTrialsAsync()
+    {
+        try
+        {
+            _logger.LogInformation("Processing expired trials...");
+
+            var expiredTrials = await _subscriptionRepository.GetExpiredTrialsAsync();
+
+            foreach (var subscription in expiredTrials)
+            {
+                _logger.LogInformation(
+                    "Processing expired trial for library {LibraryId}",
+                    subscription.LibraryId
+                );
+
+                // Update status to indicate trial has expired
+                subscription.Status = SubscriptionStatus.Cancelled;
+                await _subscriptionRepository.UpdateAsync(subscription);
+
+                // You might want to send an email notification here
+                _logger.LogInformation(
+                    "Trial expired for library {LibraryId}, status updated to Cancelled",
+                    subscription.LibraryId
+                );
+            }
+
+            _logger.LogInformation("Processed {Count} expired trials", expiredTrials.Count());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing expired trials");
+            throw;
+        }
     }
 }

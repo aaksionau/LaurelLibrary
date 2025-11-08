@@ -33,12 +33,19 @@ public class IndexModel : PageModel
     public List<SubscriptionPlanDto> AvailablePlans { get; set; } = new();
     public SubscriptionUsageDto Usage { get; set; } = new();
 
-    public async Task<IActionResult> OnGetAsync(string? message)
+    public async Task<IActionResult> OnGetAsync(string? message, string? redirected)
     {
         // Handle upgrade requirement message
         if (!string.IsNullOrEmpty(message))
         {
             TempData["ErrorMessage"] = message;
+        }
+
+        // Handle redirected users due to subscription issues
+        if (redirected == "subscription_required")
+        {
+            TempData["ErrorMessage"] =
+                "Your subscription has expired or is not active. Please choose a plan to continue using LaurelLibrary.";
         }
 
         var libraryId = await GetCurrentLibraryIdAsync();
@@ -59,11 +66,11 @@ public class IndexModel : PageModel
         {
             try
             {
-                CurrentSubscription = await _subscriptionService.CreateFreeSubscriptionAsync(
+                CurrentSubscription = await _subscriptionService.CreateTrialSubscriptionAsync(
                     libraryId.Value
                 );
                 TempData["SuccessMessage"] =
-                    "Welcome! You've been automatically enrolled in our free Bookworm Basic plan.";
+                    "Welcome! You've been automatically enrolled in our Library Lover plan.";
             }
             catch (Exception ex)
             {
@@ -78,6 +85,28 @@ public class IndexModel : PageModel
         }
 
         AvailablePlans = await _subscriptionService.GetAvailablePlansAsync(libraryId.Value);
+
+        // Check trial status and show appropriate messages
+        if (CurrentSubscription?.Status == Domain.Enums.SubscriptionStatus.Trial)
+        {
+            var trialStatusMessage = await _subscriptionService.GetTrialStatusMessageAsync(
+                libraryId.Value
+            );
+            if (!string.IsNullOrEmpty(trialStatusMessage))
+            {
+                var isTrialExpired = await _subscriptionService.IsTrialExpiredAsync(
+                    libraryId.Value
+                );
+                if (isTrialExpired)
+                {
+                    TempData["ErrorMessage"] = trialStatusMessage;
+                }
+                else
+                {
+                    TempData["InfoMessage"] = trialStatusMessage;
+                }
+            }
+        }
         Usage = await _subscriptionService.GetSubscriptionUsageAsync(libraryId.Value);
 
         return Page();
@@ -167,36 +196,62 @@ public class IndexModel : PageModel
                 User?.Identity?.Name
             );
 
-            // For free tier, create subscription directly
-            if (request.Tier == SubscriptionTier.BookwormBasic)
+            // Check if there's an existing subscription
+            var existingSubscription = await _subscriptionService.GetLibrarySubscriptionAsync(
+                libraryId.Value
+            );
+
+            // If no subscription exists, start with a trial
+            if (existingSubscription == null)
             {
                 _logger.LogInformation(
-                    "Creating free subscription for library {LibraryId}",
-                    libraryId.Value
-                );
-                var existingSubscription = await _subscriptionService.GetLibrarySubscriptionAsync(
-                    libraryId.Value
+                    "Creating trial subscription for library {LibraryId}, Tier {Tier}",
+                    libraryId.Value,
+                    request.Tier
                 );
 
-                if (
-                    existingSubscription != null
-                    && existingSubscription.Tier != SubscriptionTier.BookwormBasic
-                )
-                {
-                    await _subscriptionService.CancelSubscriptionAsync(
-                        existingSubscription.SubscriptionId
-                    );
-                }
-
-                var subscription = await _subscriptionService.CreateFreeSubscriptionAsync(
-                    libraryId.Value
+                var trialSubscription = await _subscriptionService.CreateTrialSubscriptionAsync(
+                    libraryId.Value,
+                    request.Tier,
+                    request.BillingInterval
                 );
+
                 _logger.LogInformation(
-                    "Free subscription created successfully: {SubscriptionId}",
-                    subscription?.SubscriptionId
+                    "Trial subscription created successfully: {SubscriptionId}",
+                    trialSubscription?.SubscriptionId
                 );
 
-                return new JsonResult(new { success = true, redirectUrl = Url.Page("Index") });
+                return new JsonResult(
+                    new
+                    {
+                        success = true,
+                        redirectUrl = Url.Page("Index"),
+                        message = "Free trial started! Enjoy 1 month of full access.",
+                    }
+                );
+            }
+
+            // If user is on trial, convert to paid subscription
+            if (existingSubscription.Status == Domain.Enums.SubscriptionStatus.Trial)
+            {
+                _logger.LogInformation(
+                    "Converting trial to paid subscription for library {LibraryId}",
+                    libraryId.Value
+                );
+
+                // For trial to paid conversion, go through Stripe checkout
+                var trialToCheckoutUrl = await _subscriptionService.CreateCheckoutSessionAsync(
+                    request
+                );
+                return new JsonResult(new { success = true, redirectUrl = trialToCheckoutUrl });
+            }
+
+            // If user has active paid subscription, cancel it first then go to Stripe
+            if (existingSubscription.Status == Domain.Enums.SubscriptionStatus.Active)
+            {
+                await _subscriptionService.CancelSubscriptionAsync(
+                    existingSubscription.SubscriptionId
+                );
             }
 
             // For paid tiers, create Stripe checkout session

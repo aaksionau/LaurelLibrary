@@ -80,7 +80,7 @@ public class SubscriptionServiceTests
         var subscription = new Subscription
         {
             LibraryId = libraryId,
-            Tier = SubscriptionTier.BookwormBasic,
+            Tier = SubscriptionTier.LibraryLover,
             Status = SubscriptionStatus.Active,
         };
 

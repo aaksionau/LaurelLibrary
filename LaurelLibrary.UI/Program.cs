@@ -198,7 +198,11 @@ app.UseRouting();
 
 app.UseSession();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
+// Add subscription check middleware after authentication
+app.UseMiddleware<SubscriptionCheckMiddleware>();
 
 // Add health check endpoint for container orchestration
 app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));

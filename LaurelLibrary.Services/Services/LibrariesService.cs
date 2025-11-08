@@ -272,7 +272,6 @@ public class LibrariesService : ILibrariesService
                     );
                     var tierName = subscription?.Tier switch
                     {
-                        Domain.Enums.SubscriptionTier.BookwormBasic => "Free",
                         Domain.Enums.SubscriptionTier.LibraryLover => "Library Lover",
                         Domain.Enums.SubscriptionTier.BibliothecaPro => "Bibliotheca Pro",
                         _ => "current",
@@ -300,7 +299,7 @@ public class LibrariesService : ILibrariesService
             await AddAdministratorByEmailAsync(createdLibrary.LibraryId, currentUser.Email);
 
             // Create a free subscription for the new library if the user doesn't have one
-            await _subscriptionService.CreateFreeSubscriptionAsync(createdLibrary.LibraryId);
+            await _subscriptionService.CreateTrialSubscriptionAsync(createdLibrary.LibraryId);
 
             // Log audit action for library creation
             var currentUserName = $"{currentUser.FirstName} {currentUser.LastName}".Trim();

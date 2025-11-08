@@ -223,8 +223,8 @@
                         style="border-radius: 15px; overflow: hidden; @(plan.Name == "Library Lover" ? "transform: scale(1.05); border: 3px solid var(--color-secondary) !important;" : "")">
                         <div class="card-header text-center py-4"
                             style="@(plan.Name == "Bookworm Basic" ? "background-color: var(--color-bg-light); border-bottom: 2px solid var(--color-border);" : 
-                                                                                                                                                                                                                                                                                                                                                          plan.Name == "Library Lover" ? "background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-hover)); color: white;" :
-                                                                                                                                                                                                                                                                                                                                                          "background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white;")">
+                                                                                                                                                                                                                                                                                                                                                                                      plan.Name == "Library Lover" ? "background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-hover)); color: white;" :
+                                                                                                                                                                                                                                                                                                                                                                                      "background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); color: white;")">
                             @if (plan.Name == "Library Lover")
                             {
                                 <div class="badge mb-2"
@@ -289,13 +289,13 @@
                                 }
                                 else if (plan.Name == "Library Lover")
                                 {
-                                    <a href="/Account/Register" class="btn w-100"
+                                    <a href="/Identity/Account/Register" class="btn w-100"
                                         style="background-color: var(--color-secondary); color: white; border-radius: 10px; padding: 12px; border: none;">Start
                                         Free Trial</a>
                                 }
                                 else
                                 {
-                                    <a href="/Account/Register" class="btn w-100"
+                                    <a href="/Identity/Account/Register" class="btn w-100"
                                         style="background-color: var(--color-primary); color: white !important; border-radius: 10px; padding: 12px; border: none;">Start
                                         Free Trial</a>
                                 }

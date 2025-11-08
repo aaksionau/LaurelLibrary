@@ -84,4 +84,16 @@ public class SubscriptionRepository : ISubscriptionRepository
             .Where(s => s.Status == status)
             .ToListAsync();
     }
+
+    public async Task<List<Subscription>> GetExpiredTrialsAsync()
+    {
+        return await _context
+            .Subscriptions.Include(s => s.Library)
+            .Where(s =>
+                s.Status == SubscriptionStatus.Trial
+                && s.TrialEndDate.HasValue
+                && s.TrialEndDate.Value <= DateTime.UtcNow
+            )
+            .ToListAsync();
+    }
 }
