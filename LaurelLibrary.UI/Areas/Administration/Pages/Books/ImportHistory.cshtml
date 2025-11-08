@@ -14,27 +14,26 @@
                     <!-- Tab Navigation -->
                     <ul class="nav nav-tabs" id="importTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link @(Model.CurrentTab != "history" ? "active" : "")" 
-                               href="?pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" 
-                               role="tab">
+                            <a class="nav-link @(Model.CurrentTab != "history" ? "active" : "")"
+                                href="?pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" role="tab">
                                 <i class="fas fa-file-upload"></i> Import Functionality
                             </a>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <a class="nav-link @(Model.CurrentTab == "history" ? "active" : "")" 
-                               href="?tab=history&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" 
-                               role="tab">
+                            <a class="nav-link @(Model.CurrentTab == "history" ? "active" : "")"
+                                href="?tab=history&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize" role="tab">
                                 <i class="fas fa-history"></i> History
                             </a>
                         </li>
-                    </ul>                    <!-- Tab Content -->
+                    </ul> <!-- Tab Content -->
                     <div class="tab-content mt-3" id="importTabContent">
                         <!-- Import Functionality Tab -->
-                        <div class="tab-pane fade @(Model.CurrentTab != "history" ? "show active" : "")" id="import-pane" role="tabpanel" aria-labelledby="import-tab">
+                        <div class="tab-pane fade @(Model.CurrentTab != "history" ? "show active" : "")"
+                            id="import-pane" role="tabpanel" aria-labelledby="import-tab">
                             <div class="alert alert-info" role="alert">
                                 <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Instructions</h6>
                                 <p class="mb-0">
-                                    Upload a CSV file containing ISBN numbers (up to 1000). The file can contain:
+                                    Upload a CSV file containing ISBN numbers. The file can contain:
                                 </p>
                                 <ul class="mb-0">
                                     <li>One ISBN per line</li>
@@ -43,7 +42,7 @@
                                     <li>Optional header row (will be automatically detected and skipped)</li>
                                 </ul>
                                 <p class="mt-2 mb-0">
-                                    <strong>Example CSV format:</strong><br/>
+                                    <strong>Example CSV format:</strong><br />
                                     <code>
                                         9781492666868<br/>
                                         9781616555719<br/>
@@ -67,10 +66,12 @@
                                                 <span id="statusTitle">Import Progress</span>
                                                 <span id="statusBadge" class="badge bg-info ms-2">Processing</span>
                                             </h6>
-                                            
+
                                             <div class="progress mb-3" style="height: 25px;">
-                                                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                                                     role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                                <div id="progressBar"
+                                                    class="progress-bar progress-bar-striped progress-bar-animated"
+                                                    role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                                    style="width: 0%">
                                                     <span id="progressText">0%</span>
                                                 </div>
                                             </div>
@@ -115,7 +116,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <input type="hidden" id="importHistoryId" value="@Model.ImportHistoryId" />
                                 }
                             }
@@ -125,7 +126,8 @@
                                     <label for="csvFile" class="form-label">
                                         <i class="fas fa-file-csv"></i> Select CSV File
                                     </label>
-                                    <input class="form-control" type="file" id="csvFile" asp-for="CsvFile" accept=".csv" required />
+                                    <input class="form-control" type="file" id="csvFile" asp-for="CsvFile" accept=".csv"
+                                        required />
                                     <div class="form-text">Maximum file size: 5MB. Supported format: CSV only.</div>
                                 </div>
 
@@ -138,11 +140,13 @@
                         </div>
 
                         <!-- History Tab -->
-                        <div class="tab-pane fade @(Model.CurrentTab == "history" ? "show active" : "")" id="history-pane" role="tabpanel" aria-labelledby="history-tab">
+                        <div class="tab-pane fade @(Model.CurrentTab == "history" ? "show active" : "")"
+                            id="history-pane" role="tabpanel" aria-labelledby="history-tab">
                             @if (Model.TotalCount == 0)
                             {
                                 <div class="alert alert-info" role="alert">
-                                    <i class="fas fa-info-circle"></i> No import history found. Start by importing books from CSV using the Import Functionality tab.
+                                    <i class="fas fa-info-circle"></i> No import history found. Start by importing books
+                                    from CSV using the Import Functionality tab.
                                 </div>
                             }
                             else
@@ -166,17 +170,18 @@
                                             @foreach (var history in Model.ImportHistories)
                                             {
                                                 var successRate = history.TotalIsbns > 0
-                                                ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1")
+                                                                ? (history.SuccessCount * 100.0 / history.TotalIsbns).ToString("F1")
                                                 : "0";
                                                 var progressBarClass = history.SuccessCount == history.TotalIsbns
                                                 ? "bg-success"
-                                                : history.SuccessCount > history.FailedCount
+                                                                : history.SuccessCount > history.FailedCount
                                                 ? "bg-warning"
-                                                : "bg-danger";
+                                                                : "bg-danger";
 
                                                 <tr>
                                                     <td>
-                                                        <span data-bs-toggle="tooltip" title="@history.ImportedAt.ToString("F")">
+                                                        <span data-bs-toggle="tooltip"
+                                                            title="@history.ImportedAt.ToString("F")">
                                                             @history.ImportedAt.ToString("g")
                                                         </span>
                                                     </td>
@@ -263,7 +268,8 @@
                                                             </button>
 
                                                             <!-- Modal for Failed ISBNs -->
-                                                            <div class="modal fade" id="failedModal_@history.ImportHistoryId" tabindex="-1"
+                                                            <div class="modal fade" id="failedModal_@history.ImportHistoryId"
+                                                                tabindex="-1"
                                                                 aria-labelledby="failedModalLabel_@history.ImportHistoryId"
                                                                 aria-hidden="true">
                                                                 <div class="modal-dialog modal-lg">
@@ -273,18 +279,21 @@
                                                                                 id="failedModalLabel_@history.ImportHistoryId">
                                                                                 Failed ISBNs - @history.FileName
                                                                             </h5>
-                                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                                                aria-label="Close"></button>
+                                                                            <button type="button" class="btn-close"
+                                                                                data-bs-dismiss="modal" aria-label="Close"></button>
                                                                         </div>
                                                                         <div class="modal-body">
                                                                             <p class="text-muted">
-                                                                                The following ISBNs were not found or failed to import:
+                                                                                The following ISBNs were not found or failed to
+                                                                                import:
                                                                             </p>
                                                                             <div class="alert alert-warning">
                                                                                 @foreach (var isbn in
-                                                                                                                                            history.FailedIsbns.Split(',').Select(s => s.Trim()))
+                                                                                                                                                    history.FailedIsbns.Split(',').Select(s =>
+                                                                                                                                                    s.Trim()))
                                                                                 {
-                                                                                    <span class="badge bg-warning text-dark me-1">@isbn</span>
+                                                                                    <span
+                                                                                        class="badge bg-warning text-dark me-1">@isbn</span>
                                                                                 }
                                                                             </div>
                                                                         </div>
@@ -308,17 +317,18 @@
                                 </div>
 
                                 <!-- Pagination Controls at the bottom -->
-                                @await Component.InvokeAsync("PaginationControls", new LaurelLibrary.UI.ViewModels.PaginationViewModel
-                                {
+                                @await Component.InvokeAsync("PaginationControls", new
+                                LaurelLibrary.UI.ViewModels.PaginationViewModel
+                                                        {
                                     PageNumber = Model.PageNumber,
-                                    PageSize = Model.PageSize,
-                                    TotalPages = Model.TotalPages,
-                                    TotalCount = Model.TotalCount,
-                                    Area = "Administration",
-                                    Page = "/Books/ImportHistory",
-                                    Tab = Model.CurrentTab
-                                })
-                            }
+                                                        PageSize = Model.PageSize,
+                                                        TotalPages = Model.TotalPages,
+                                                        TotalCount = Model.TotalCount,
+                                                        Area = "Administration",
+                                                        Page = "/Books/ImportHistory",
+                                                        Tab = Model.CurrentTab
+                                                        })
+                                                        }
                         </div>
                     </div>
                 </div>
