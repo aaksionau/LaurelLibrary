@@ -10,6 +10,7 @@ using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
 using LaurelLibrary.UI.Middleware;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -166,6 +167,12 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
 builder.Services.AddScoped<IBooksService, BooksService>();
 
 var app = builder.Build();
+
+var forwardedHeaderOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+};
+app.UseForwardedHeaders(forwardedHeaderOptions);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
