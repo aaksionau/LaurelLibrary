@@ -25,8 +25,11 @@
                         </div>
                     }
 
-                    <div asp-validation-summary="All" class="alert alert-danger alert-dismissible fade show"
-                        role="alert"></div>
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div asp-validation-summary="All" class="alert alert-danger alert-dismissible fade show"
+                            role="alert"></div>
+                    }
 
                     <p class="text-muted mb-4">
                         Enter your email address below and we'll send you a new confirmation link to activate your
