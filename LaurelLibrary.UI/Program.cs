@@ -45,6 +45,13 @@ builder
         microsoftOptions.CallbackPath = "/signin-microsoft";
     });
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear(); // Clear if not using known proxies/networks
+    options.KnownProxies.Clear(); // Clear if not using known proxies/networks
+});
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddControllers();
@@ -168,11 +175,7 @@ builder.Services.AddScoped<IBooksService, BooksService>();
 
 var app = builder.Build();
 
-var forwardedHeaderOptions = new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-};
-app.UseForwardedHeaders(forwardedHeaderOptions);
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
