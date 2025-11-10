@@ -56,6 +56,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear(); // Clear if not using known proxies/networks
 });
 
+builder.Services.AddApplicationInsightsTelemetry(options =>
+    options.ConnectionString = builder.Configuration["ConnectionStrings:ApplicationInsights"]
+);
+
 builder.Services.AddRazorPages();
 
 builder.Services.AddControllers();
