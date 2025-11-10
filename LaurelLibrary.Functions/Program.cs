@@ -47,8 +47,9 @@ builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IBooksService, BooksService>();
+builder.Services.AddScoped<IMailgunService, MailgunService>();
 
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {
     client.BaseAddress = new Uri(
@@ -64,9 +65,11 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 
-// Register BooksService
-builder.Services.AddScoped<IBooksService, BooksService>();
-builder.Services.AddScoped<IMailgunService, MailgunService>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddApplicationInsightsTelemetry(options =>
+    options.ConnectionString = configuration["ConnectionStrings:ApplicationInsights"]
+);
 
 // register AI kernel
 var azureEndpoint =
