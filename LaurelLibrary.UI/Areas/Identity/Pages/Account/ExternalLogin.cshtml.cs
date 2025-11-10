@@ -10,6 +10,8 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.EmailSenderServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -29,13 +31,15 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<AppUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly IEmailTemplateService _emailTemplateService;
 
         public ExternalLoginModel(
             SignInManager<AppUser> signInManager,
             UserManager<AppUser> userManager,
             IUserStore<AppUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender
+            IEmailSender emailSender,
+            IEmailTemplateService emailTemplateService
         )
         {
             _signInManager = signInManager;
@@ -44,6 +48,7 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _emailTemplateService = emailTemplateService;
         }
 
         /// <summary>
@@ -237,10 +242,24 @@ namespace LaurelLibrary.UI.Areas.Identity.Pages.Account
                             protocol: Request.Scheme
                         );
 
+                        // Create the email model
+                        var emailModel = new EmailConfirmationDto
+                        {
+                            UserName = $"{user.FirstName} {user.LastName}".Trim(),
+                            Email = user.Email!,
+                            ConfirmationUrl = callbackUrl!,
+                            CreatedAt = DateTime.UtcNow,
+                        };
+
+                        // Render the email template
+                        var emailBody = await _emailTemplateService.RenderEmailConfirmationAsync(
+                            emailModel
+                        );
+
                         await _emailSender.SendEmailAsync(
                             Input.Email,
-                            "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."
+                            "Welcome to MyLibrarian - Confirm Your Email",
+                            emailBody
                         );
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
