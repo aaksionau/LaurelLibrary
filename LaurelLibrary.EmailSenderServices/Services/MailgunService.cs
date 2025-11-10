@@ -45,7 +45,7 @@ public class MailgunService : IMailgunService
             // Add form parameters for Mailgun API
             request.AddParameter(
                 "from",
-                _configuration["Mailgun:FromEmail"] ?? "noreply@laurellibrary.com"
+                _configuration["Mailgun:FromEmail"] ?? "DoNotReply@mylibrarian.org"
             );
             request.AddParameter("to", emailMessage.To);
             request.AddParameter("subject", emailMessage.Subject);
