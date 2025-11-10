@@ -48,8 +48,31 @@
                                 <label asp-for="Input.Password" class="form-label">
                                     <i class="bi bi-lock me-1"></i>Password
                                 </label>
-                                <input asp-for="Input.Password" class="form-control" autocomplete="new-password"
-                                    aria-required="true" placeholder="Create a password" />
+                                <div class="position-relative">
+                                    <input asp-for="Input.Password" type="password" class="form-control"
+                                        autocomplete="new-password" aria-required="true" placeholder="Create a password"
+                                        id="passwordField" />
+                                    <button type="button"
+                                        class="btn btn-link position-absolute end-0 top-50 translate-middle-y"
+                                        id="togglePassword" style="border: none; background: none; padding: 0 15px;">
+                                        <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordStrength" class="mt-2" style="display: none;">
+                                    <div class="small text-muted mb-1">Password must contain:</div>
+                                    <ul class="small mb-0" style="list-style: none; padding-left: 0;">
+                                        <li id="length-check" class="text-danger"><i class="bi bi-x-circle me-1"></i>At
+                                            least 8 characters</li>
+                                        <li id="uppercase-check" class="text-danger"><i
+                                                class="bi bi-x-circle me-1"></i>One uppercase letter</li>
+                                        <li id="lowercase-check" class="text-danger"><i
+                                                class="bi bi-x-circle me-1"></i>One lowercase letter</li>
+                                        <li id="digit-check" class="text-danger"><i class="bi bi-x-circle me-1"></i>One
+                                            digit</li>
+                                        <li id="special-check" class="text-danger"><i
+                                                class="bi bi-x-circle me-1"></i>One special character</li>
+                                    </ul>
+                                </div>
                                 <span asp-validation-for="Input.Password" class="text-danger"></span>
                             </div>
                             <div class="mb-4">
@@ -126,4 +149,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/register-password-validation.js" asp-append-version="true"></script>
 }

@@ -27,7 +27,11 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(conn
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder
-    .Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .Services.AddDefaultIdentity<AppUser>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.Password.RequiredLength = 8;
+    })
     .AddEntityFrameworkStores<AppDbContext>();
 
 // Add Microsoft Authentication
