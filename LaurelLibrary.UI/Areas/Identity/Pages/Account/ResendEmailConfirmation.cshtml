@@ -1,0 +1,75 @@
+@page
+@model ResendEmailConfirmationModel
+@{
+    ViewData["Title"] = "Resend email confirmation";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header text-white" style="background-color: #245C4F;">
+                    <h3 class="mb-0">
+                        <i class="bi bi-envelope-check-fill me-2"></i>@ViewData["Title"]
+                    </h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert @(Model.StatusMessage.Contains("sent") ? "alert-success" : "alert-danger") alert-dismissible fade show"
+                            role="alert">
+                            <i
+                                class="bi @(Model.StatusMessage.Contains("sent") ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+                            @Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div asp-validation-summary="All" class="alert alert-danger alert-dismissible fade show"
+                        role="alert"></div>
+
+                    <p class="text-muted mb-4">
+                        Enter your email address below and we'll send you a new confirmation link to activate your
+                        account.
+                    </p>
+
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="Input.Email" class="form-label">
+                                <i class="bi bi-envelope me-1"></i>Email Address
+                            </label>
+                            <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true"
+                                placeholder="name@example.com" autofocus />
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-envelope-check me-2"></i>Resend Confirmation Email
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-2">
+                            <a asp-page="./Login" class="text-decoration-none">
+                                <i class="bi bi-arrow-left me-1"></i>Back to login
+                            </a>
+                        </p>
+                        <p class="mb-0">
+                            <a asp-page="./Register" class="text-decoration-none">
+                                <i class="bi bi-person-plus me-1"></i>Don't have an account? Register here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
