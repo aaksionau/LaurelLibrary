@@ -1,4 +1,5 @@
 ﻿@page "{pageNumber:int?}/{pageSize:int?}"
+@using LaurelLibrary.UI.Extensions
 @model LaurelLibrary.UI.Areas.Administration.Pages.Readers.ListModel
 
 @{
@@ -135,7 +136,7 @@
                     <h4>@reader.FirstName @reader.LastName</h4>
                     <p><strong>EAN:</strong> @reader.Ean</p>
                     <p><strong>Library:</strong> @string.Join(", ", reader.LibraryNames)</p>
-                    <img src="@reader.BarcodeImageUrl" alt="Barcode for @reader.FullName" />
+                    <img src="@Html.GetBlobUrl(reader.BarcodeImageUrl)" alt="Barcode for @reader.FullName" />
                 </div>
             }
         }
