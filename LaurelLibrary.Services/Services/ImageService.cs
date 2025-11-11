@@ -72,7 +72,6 @@ public class ImageService : IImageService
 
             // Generate a unique filename
             var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var blobPath = $"book-images/{libraryAlias}/{uniqueFileName}";
 
             // Upload to blob storage
             using var stream = await response.Content.ReadAsStreamAsync();

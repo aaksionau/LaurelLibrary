@@ -248,7 +248,7 @@ public class BookImportService : IBookImportService
             var values = line.Split(',');
             foreach (var value in values)
             {
-                var isbn = value.Replace("-", "").Trim().Trim('"', '\'');
+                var isbn = value.Replace("-", "").Trim().Trim('"', '\'').NormalizeIsbn();
 
                 // Basic validation: ISBN should be 10 or 13 digits (can include hyphens)
                 var digits = new string(isbn.Where(char.IsDigit).ToArray());

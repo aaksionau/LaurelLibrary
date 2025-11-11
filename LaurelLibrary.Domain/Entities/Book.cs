@@ -55,4 +55,7 @@ public class Book : Audit
 
     [StringLength(1024)]
     public string ClassificationReasoning { get; set; } = string.Empty;
+
+    [StringLength(512)]
+    public string IsbnBarcodeImagePath { get; set; } = string.Empty;
 }

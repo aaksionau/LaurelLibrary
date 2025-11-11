@@ -316,7 +316,13 @@ namespace LaurelLibrary.Tests.Services
                 .Setup(x => x.GenerateEan13(It.IsAny<int>()))
                 .Returns("1234567890123");
             _barcodeServiceMock
-                .Setup(x => x.GenerateBarcodeImageAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .Setup(x =>
+                    x.GenerateBarcodeImageAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>()
+                    )
+                )
                 .ReturnsAsync("https://example.com/barcode.png");
 
             // Act
@@ -591,7 +597,9 @@ namespace LaurelLibrary.Tests.Services
                 .ReturnsAsync(reader);
             _librariesRepositoryMock.Setup(x => x.GetByIdAsync(libraryId)).ReturnsAsync(library);
             _barcodeServiceMock
-                .Setup(x => x.GenerateBarcodeImageAsync(reader.Ean!, It.IsAny<string>()))
+                .Setup(x =>
+                    x.GenerateBarcodeImageAsync(reader.Ean!, It.IsAny<string>(), It.IsAny<string>())
+                )
                 .ReturnsAsync("https://example.com/new-barcode.png");
 
             // Act

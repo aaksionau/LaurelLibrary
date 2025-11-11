@@ -50,6 +50,9 @@ public class LaurelBookWithInstancesDto
     [MaxLength(1024)]
     public string ClassificationReasoning { get; set; } = string.Empty;
 
+    [MaxLength(512)]
+    public string IsbnBarcodeImagePath { get; set; } = string.Empty;
+
     public List<BookInstanceDto> BookInstances { get; set; } = new List<BookInstanceDto>();
 
     // Navigation properties for proper object access

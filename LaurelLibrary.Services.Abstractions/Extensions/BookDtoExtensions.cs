@@ -141,6 +141,7 @@ public static class BookDtoExtensions
             MinAge = entity.MinAge,
             MaxAge = entity.MaxAge,
             ClassificationReasoning = entity.ClassificationReasoning,
+            IsbnBarcodeImagePath = entity.IsbnBarcodeImagePath,
             Authors = entity.Authors.Select(a => a.ToAuthorDto()).ToList(),
             Categories = entity.Categories.Select(c => c.ToCategoryDto()).ToList(),
             BookInstances = entity.BookInstances.Select(bi => bi.ToBookInstanceDto()).ToList(),
