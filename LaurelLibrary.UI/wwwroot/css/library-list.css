@@ -247,8 +247,8 @@
 }
 
 .empty-state-btn:hover {
-    background: var(--color-primary-hover);
+    background: var(--color-primary);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px 0 rgba(36, 92, 79, 0.35);
-    color: white;
+    color: white !important;
 }
