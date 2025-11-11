@@ -25,10 +25,10 @@
                         <div class="card corporate-library-card h-100">
                             <a asp-area="Administration" asp-page="/Libraries/Details" asp-route-id="@library.LibraryId"
                                 class="stretched-link text-decoration-none"></a>
-                            
+
                             <!-- Status Indicator -->
                             <div class="corporate-status-bar"></div>
-                            
+
                             <!-- Card Header -->
                             <div class="corporate-header">
                                 <div class="corporate-library-info">
@@ -45,16 +45,17 @@
                                     </a>
                                 </div>
                             </div>
-                            
+
                             <!-- Card Body -->
                             <div class="corporate-body">
                                 @if (!string.IsNullOrWhiteSpace(library.Description))
                                 {
                                     <div class="corporate-description">
-                                        <p>@(library.Description.Length > 120 ? library.Description.Substring(0, 120) + "..." : library.Description)</p>
+                                        <p>@(library.Description.Length > 120 ? library.Description.Substring(0, 120) + "..." :
+                                                                            library.Description)</p>
                                     </div>
                                 }
-                                
+
                                 @if (!string.IsNullOrWhiteSpace(library.Address))
                                 {
                                     <div class="corporate-meta-item">
@@ -65,7 +66,7 @@
                                         <div class="corporate-meta-value">@library.Address</div>
                                     </div>
                                 }
-                                
+
                                 <div class="corporate-meta-item">
                                     <div class="corporate-meta-label">
                                         <i class="bi bi-calendar3"></i>
@@ -74,7 +75,7 @@
                                     <div class="corporate-meta-value">@library.CreatedAt.ToString("MMMM dd, yyyy")</div>
                                 </div>
                             </div>
-                            
+
                             <!-- Statistics Section -->
                             <div class="corporate-stats-section">
                                 <h6 class="corporate-stats-title">Library Statistics</h6>
@@ -108,7 +109,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Card Footer -->
                             <div class="corporate-footer">
                                 <span class="corporate-footer-text">Manage Library</span>
@@ -124,8 +125,9 @@
             <div class="empty-state">
                 <i class="bi bi-building empty-state-icon"></i>
                 <h4 class="empty-state-title">No libraries found</h4>
-                <p class="empty-state-description">Get started by adding your first library to begin managing your collection.</p>
-                <a class="btn empty-state-btn" asp-area="Administration" asp-page="/Libraries/Update">
+                <p class="empty-state-description">Get started by adding your first library to begin managing your
+                    collection.</p>
+                <a class="btn empty-state-btn text-white" asp-area="Administration" asp-page="/Libraries/Update">
                     <i class="bi bi-plus-circle me-2"></i>Add Your First Library
                 </a>
             </div>
