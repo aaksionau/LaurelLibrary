@@ -1,0 +1,87 @@
+name: Pull Request CI
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "LaurelLibrary.UI/**"
+            - "LaurelLibrary.Functions/**"
+            - "LaurelLibrary.Domain/**"
+            - "LaurelLibrary.Services/**"
+            - "LaurelLibrary.Services.Abstractions/**"
+            - "LaurelLibrary.Persistence/**"
+            - "LaurelLibrary.EmailSenderServices/**"
+            - "tests/**"
+            - "*.sln"
+            - "**/*.csproj"
+            - ".github/workflows/pull-request.yml"
+
+permissions:
+    contents: read
+    checks: write
+    pull-requests: write
+    statuses: write
+
+env:
+    DOTNET_VERSION: "9.0.x"
+
+jobs:
+    test:
+        name: Build and Test
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+
+            - name: Cache NuGet packages
+              uses: actions/cache@v4
+              with:
+                  path: ~/.nuget/packages
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+                  restore-keys: |
+                      ${{ runner.os }}-nuget-
+
+            - name: Restore dependencies
+              run: dotnet restore
+
+            - name: Build solution
+              run: dotnet build --configuration Release --no-restore
+
+            - name: Run tests
+              run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test-results.trx"
+
+            - name: Upload test results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results
+                  path: |
+                      **/TestResults/**/*.trx
+
+
+            - name: Upload coverage reports
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: coverage-reports
+                  path: |
+                      **/TestResults/**/coverage.*.xml
+                      **/coverage.*.xml
+
+            - name: Publish test results
+              uses: EnricoMi/publish-unit-test-result-action@v2
+              if: always()
+              with:
+                  files: "**/TestResults/**/*.trx"
+                  check_name: "Test Results"
+                  comment_title: "Test Results"
+                  fail_on: "test failures"
