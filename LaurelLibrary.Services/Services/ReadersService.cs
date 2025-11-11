@@ -405,14 +405,14 @@ public class ReadersService : IReadersService
             return null;
         }
 
-        var blobName = $"{currentLibrary.LibraryId}-{ean}.png";
+        var blobName = $"{currentLibrary.LibraryId}/{ean}.png";
         _logger.LogInformation(
             "Uploading barcode for reader {ReaderId} with blob name: {BlobName}",
             readerId,
             blobName
         );
 
-        var barcodeUrl = await _barcodeService.GenerateBarcodeImageAsync(ean, blobName);
+        var barcodeUrl = await _barcodeService.GenerateBarcodeImageAsync(ean, blobName, "barcodes");
 
         if (barcodeUrl == null)
         {

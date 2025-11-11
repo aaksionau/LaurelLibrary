@@ -14,7 +14,6 @@ public class BarcodeService : IBarcodeService
 {
     private readonly ILogger<BarcodeService> _logger;
     private readonly IBlobStorageService _blobStorageService;
-    private readonly string _containerName;
 
     public BarcodeService(
         ILogger<BarcodeService> logger,
@@ -24,7 +23,6 @@ public class BarcodeService : IBarcodeService
     {
         _logger = logger;
         _blobStorageService = blobStorageService;
-        _containerName = configuration["AzureStorage:BarcodeContainerName"] ?? "barcodes";
     }
 
     public string GenerateEan13(int uniqueId)
@@ -39,7 +37,11 @@ public class BarcodeService : IBarcodeService
         return baseNumber + checkDigit;
     }
 
-    public async Task<string?> GenerateBarcodeImageAsync(string ean, string blobName)
+    public async Task<string?> GenerateBarcodeImageAsync(
+        string ean,
+        string blobName,
+        string containerName
+    )
     {
         try
         {
@@ -69,10 +71,10 @@ public class BarcodeService : IBarcodeService
             // Upload to Azure Blob Storage using BlobStorageService
             var blobUrl = await _blobStorageService.UploadStreamAsync(
                 stream,
-                _containerName,
+                containerName,
                 blobName,
                 "image/png",
-                Azure.Storage.Blobs.Models.PublicAccessType.None
+                Azure.Storage.Blobs.Models.PublicAccessType.Blob
             );
 
             if (blobUrl != null)

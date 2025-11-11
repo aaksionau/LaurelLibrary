@@ -20,6 +20,7 @@ public class BooksService : IBooksService
     private readonly IAuditLogService _auditLogService;
     private readonly IImageService _imageService;
     private readonly ILibrariesRepository _librariesRepository;
+    private readonly IBarcodeService _barcodeService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -32,6 +33,7 @@ public class BooksService : IBooksService
         IAuditLogService auditLogService,
         IImageService imageService,
         ILibrariesRepository librariesRepository,
+        IBarcodeService barcodeService,
         ILogger<BooksService> logger
     )
     {
@@ -44,6 +46,7 @@ public class BooksService : IBooksService
         _auditLogService = auditLogService;
         _imageService = imageService;
         _librariesRepository = librariesRepository;
+        _barcodeService = barcodeService;
         _logger = logger;
     }
 
@@ -242,7 +245,15 @@ public class BooksService : IBooksService
             }
         }
 
+        var blobName = $"{libraryId}/{entity.Isbn}.png";
+        var blobPath = await _barcodeService.GenerateBarcodeImageAsync(
+            entity.Isbn,
+            blobName,
+            "isbns"
+        );
+        entity.IsbnBarcodeImagePath = blobPath;
         await _booksRepository.AddBookAsync(entity);
+
         await DetermineAppropriateAgeAsync(entity);
         // Log audit action
         await _auditLogService.LogActionAsync(

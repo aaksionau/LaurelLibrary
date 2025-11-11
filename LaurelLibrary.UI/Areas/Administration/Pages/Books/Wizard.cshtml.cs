@@ -1,4 +1,5 @@
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -38,7 +39,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
             // Remove hyphens from ISBN immediately
             if (!string.IsNullOrWhiteSpace(SearchIsbn))
             {
-                SearchIsbn = SearchIsbn.Replace("-", "");
+                SearchIsbn = SearchIsbn.Replace("-", "").NormalizeIsbn();
             }
 
             // If user is searching by ISBN

@@ -12,6 +12,7 @@ public interface IBarcodeService
     /// </summary>
     /// <param name="ean">The EAN barcode value to encode</param>
     /// <param name="blobName">Name of the blob (e.g., "12345.png")</param>
+    /// <param name="containerName">Name of the container in Azure Blob Storage</param>
     /// <returns>The URL of the uploaded barcode image, or null if failed</returns>
-    Task<string?> GenerateBarcodeImageAsync(string ean, string blobName);
+    Task<string?> GenerateBarcodeImageAsync(string ean, string blobName, string containerName);
 }
