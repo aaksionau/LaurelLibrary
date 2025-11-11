@@ -17,6 +17,12 @@ on:
             - "**/*.csproj"
             - ".github/workflows/pull-request.yml"
 
+permissions:
+    contents: read
+    checks: write
+    pull-requests: write
+    statuses: write
+
 env:
     DOTNET_VERSION: "9.0.x"
 
@@ -72,10 +78,10 @@ jobs:
                       **/coverage.*.xml
 
             - name: Publish test results
-              uses: dorny/test-reporter@v1
+              uses: EnricoMi/publish-unit-test-result-action@v2
               if: always()
               with:
-                  name: Test Results
-                  path: "**/TestResults/**/*.trx"
-                  reporter: dotnet-trx
-                  fail-on-error: true
+                  files: "**/TestResults/**/*.trx"
+                  check_name: "Test Results"
+                  comment_title: "Test Results"
+                  fail_on: "test failures"
