@@ -35,18 +35,40 @@ public class BookImportBackgroundService : BackgroundService
     {
         _logger.LogInformation("BookImportBackgroundService started");
 
+        TimeSpan maxBackoff = TimeSpan.FromMinutes(5);
+        TimeSpan currentBackoff = _processInterval;
+
         while (!stoppingToken.IsCancellationRequested)
         {
+            bool success = false;
             try
             {
                 await ProcessPendingImportsAsync(stoppingToken);
+                success = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while processing pending imports");
+                // Exponential backoff: double the delay up to maxBackoff
+                currentBackoff = TimeSpan.FromTicks(Math.Min(currentBackoff.Ticks * 2, maxBackoff.Ticks));
+                _logger.LogWarning("Backing off for {Backoff} due to error", currentBackoff);
             }
 
-            await Task.Delay(_processInterval, stoppingToken);
+            if (success)
+            {
+                // Reset backoff on success
+                currentBackoff = _processInterval;
+            }
+
+            try
+            {
+                await Task.Delay(currentBackoff, stoppingToken);
+            }
+            catch (TaskCanceledException)
+            {
+                // Service is stopping
+                break;
+            }
         }
 
         _logger.LogInformation("BookImportBackgroundService stopped");
