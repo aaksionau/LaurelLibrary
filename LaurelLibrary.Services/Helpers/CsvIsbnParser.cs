@@ -62,16 +62,10 @@ public class CsvIsbnParser : ICsvIsbnParser
 
             // Extract ISBN
             string isbn;
-            if (isbnColumnIndex >= 0 && isbnColumnIndex < values.Count)
-            {
-                // Use specific ISBN column
-                isbn = values[isbnColumnIndex];
-            }
-            else
-            {
-                // Fallback: try to find ISBN in any column
-                isbn = values.FirstOrDefault(v => IsValidIsbnFormat(v)) ?? string.Empty;
-            }
+            // Use specific ISBN column if available, otherwise fallback to any valid ISBN in the row
+            isbn = (isbnColumnIndex >= 0 && isbnColumnIndex < values.Count)
+                ? values[isbnColumnIndex]
+                : values.FirstOrDefault(v => IsValidIsbnFormat(v)) ?? string.Empty;
 
             if (!string.IsNullOrWhiteSpace(isbn))
             {
