@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using Microsoft.AspNetCore.Http;
 
 namespace LaurelLibrary.Services.Abstractions.Services;
 
@@ -13,7 +14,7 @@ public interface IBookImportService
     /// Import books from CSV file containing ISBNs.
     /// Returns the ImportHistory record with statistics.
     /// </summary>
-    Task<ImportHistory> ImportBooksFromCsvAsync(Stream csvStream, string fileName);
+    Task<ImportHistory> ImportBooksFromCsvAsync(IFormFile csvFile);
 
     /// <summary>
     /// Get import history for the current user's library.

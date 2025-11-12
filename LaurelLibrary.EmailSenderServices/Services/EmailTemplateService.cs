@@ -28,6 +28,13 @@ namespace LaurelLibrary.EmailSenderServices.Services
             return await RenderTemplateAsync("BookCheckoutEmail", model);
         }
 
+        public async Task<string> RenderBulkImportCompletionEmailAsync(
+            BulkImportCompletionEmailDto model
+        )
+        {
+            return await RenderTemplateAsync("BulkImportCompletionEmail", model);
+        }
+
         public async Task<string> RenderTemplateAsync<T>(string templateName, T model)
         {
             try

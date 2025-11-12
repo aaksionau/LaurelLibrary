@@ -1,0 +1,250 @@
+@model LaurelLibrary.EmailSenderServices.Dtos.BulkImportCompletionEmailDto
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Import Completed - MyLibrarian</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2E2B28;
+            background-color: #F9F6F1;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .header {
+            background-color: #245C4F;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            color: #245C4F;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background-color: #F8F9FA;
+            border-left: 4px solid #245C4F;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+
+        .summary-card h2 {
+            margin-top: 0;
+            color: #245C4F;
+            font-size: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #245C4F;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #6C757D;
+            margin-top: 5px;
+        }
+
+        .success-stat .stat-number {
+            color: #28A745;
+        }
+
+        .failed-stat .stat-number {
+            color: #DC3545;
+        }
+
+        .failed-section {
+            background-color: #FFF3CD;
+            border: 1px solid #FFEAA7;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .failed-section h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+
+        .failed-isbns {
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            border: 1px solid #DEE2E6;
+        }
+
+        .completion-info {
+            font-size: 14px;
+            color: #6C757D;
+            border-top: 1px solid #E9ECEF;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+
+        .footer {
+            background-color: #F9F6F1;
+            color: #7A6F66;
+            text-align: center;
+            padding: 30px;
+            font-size: 14px;
+            border-top: 1px solid #e8e3db;
+        }
+
+        .footer .library-info {
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #2E2B28;
+        }
+
+        @@media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+
+            .content {
+                padding: 20px !important;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MyLibrarian</h1>
+            <div class="subtitle">Bulk Import Completed</div>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Hello @Model.ReaderName,
+            </div>
+
+            <p>Your bulk book import has been successfully processed!</p>
+
+            <div class="summary-card">
+                <h2>Import Summary</h2>
+                <p><strong>File:</strong> @Model.FileName</p>
+                <p><strong>Completed At:</strong> @Model.CompletedAt.ToString("MMMM dd, yyyy 'at' h:mm tt") UTC</p>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">@Model.TotalBooks</div>
+                        <div class="stat-label">Total Books</div>
+                    </div>
+                    <div class="stat-item success-stat">
+                        <div class="stat-number">@Model.SuccessfullyAdded</div>
+                        <div class="stat-label">Successfully Added</div>
+                    </div>
+                </div>
+
+                @if (Model.Failed > 0)
+                {
+                    <div class="stats-grid">
+                        <div class="stat-item failed-stat">
+                            <div class="stat-number">@Model.Failed</div>
+                            <div class="stat-label">Failed to Add</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">@(((decimal)Model.SuccessfullyAdded / Model.TotalBooks *
+                                                            100).ToString("F1"))%</div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (Model.Failed > 0 && !string.IsNullOrEmpty(Model.FailedIsbns))
+            {
+                <div class="failed-section">
+                    <h3>Failed ISBNs</h3>
+                    <p>The following ISBNs could not be processed:</p>
+                    <div class="failed-isbns">@Model.FailedIsbns</div>
+                    <p><em>These books may not have been found in our database or there was an error processing them.</em>
+                    </p>
+                </div>
+            }
+
+            @if (Model.SuccessfullyAdded > 0)
+            {
+                <p><strong>@Model.SuccessfullyAdded</strong> books have been successfully added to your library and are
+                    now available for checkout.</p>
+            }
+
+            <div class="completion-info">
+                <p>If you have any questions about this import or need assistance with the failed ISBNs, please contact
+                    your library administrator.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="library-info">
+                MyLibrarian System
+            </div>
+            <div>
+                This is an automated message from MyLibrarian.
+                Please do not reply to this email.
+            </div>
+            <div style="margin-top: 15px; font-size: 12px; color: #adb5bd;">
+                © @DateTime.UtcNow.Year MyLibrarian. All rights reserved.
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -81,32 +81,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 return Page();
             }
 
-            // Validate file extension
-            var extension = Path.GetExtension(CsvFile.FileName).ToLowerInvariant();
-            if (extension != ".csv")
-            {
-                Message = "Only CSV files are allowed.";
-                IsSuccess = false;
-                await LoadImportHistoryAsync();
-                return Page();
-            }
-
-            // Validate file size (max 5MB)
-            if (CsvFile.Length > 5 * 1024 * 1024)
-            {
-                Message = "File size must not exceed 5MB.";
-                IsSuccess = false;
-                await LoadImportHistoryAsync();
-                return Page();
-            }
-
             try
             {
-                using var stream = CsvFile.OpenReadStream();
-                var importHistory = await _bookImportService.ImportBooksFromCsvAsync(
-                    stream,
-                    CsvFile.FileName
-                );
+                var importHistory = await _bookImportService.ImportBooksFromCsvAsync(CsvFile);
 
                 ImportHistoryId = importHistory.ImportHistoryId;
                 TotalIsbns = importHistory.TotalIsbns;
@@ -122,6 +99,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                     importHistory.ImportHistoryId,
                     TotalIsbns
                 );
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid file provided for bulk import");
+                Message = ex.Message;
+                IsSuccess = false;
             }
             catch (Exception ex)
             {

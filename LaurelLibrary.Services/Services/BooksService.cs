@@ -318,30 +318,17 @@ public class BooksService : IBooksService
             return;
         }
 
-        // Check if age classification is enabled for this library
-        var isAgeClassificationEnabled = await _subscriptionService.IsAgeClassificationEnabledAsync(
-            entity.LibraryId
-        );
-        if (!isAgeClassificationEnabled)
-        {
-            _logger.LogInformation(
-                "Age classification skipped for book {BookId} - feature not enabled for library {LibraryId}",
-                entity.BookId,
-                entity.LibraryId
-            );
-            return;
-        }
         Thread.Sleep(1000); // slight delay to ensure book creation transaction is committed
-        var createdBook = new AgeClassificationBookDto()
+
+        // Create a LaurelBookDto from the entity for the age classification message
+        var bookDto = new LaurelBookDto
         {
             BookId = entity.BookId,
             Title = entity.Title,
-            Description = entity.Synopsis,
+            Synopsis = entity.Synopsis,
         };
 
-        var message = JsonSerializer.Serialize(createdBook);
-
-        await this._queueService.SendMessageAsync(message, "age-classification-books");
+        await _queueService.SendAgeClassificationMessageAsync(bookDto, entity.LibraryId);
     }
 
     private async Task AddOrAttachAuthorsAsync(Book entity, string authorNames, Guid libraryId)

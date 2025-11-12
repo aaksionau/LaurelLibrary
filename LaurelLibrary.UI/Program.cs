@@ -7,8 +7,10 @@ using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Persistence.Repositories;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Helpers;
 using LaurelLibrary.Services.Services;
 using LaurelLibrary.UI.Middleware;
+using LaurelLibrary.UI.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -150,19 +152,26 @@ builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
 builder.Services.AddScoped<IBookImportService, BookImportService>();
+builder.Services.AddScoped<IBookImportProcessorService, BookImportProcessorService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
 builder.Services.AddScoped<ISemanticSearchService, SemanticSearchService>();
-builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IImportHistoryService, ImportHistoryService>();
+builder.Services.AddScoped<IBooksService, BooksService>();
+
+// Helper services
+builder.Services.AddScoped<ICsvIsbnParser, CsvIsbnParser>();
 
 builder.Services.AddHttpContextAccessor();
 
+// Configure HttpClient for external services
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {
     client.BaseAddress = new Uri(
@@ -178,8 +187,8 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 
-// Register BooksService
-builder.Services.AddScoped<IBooksService, BooksService>();
+// Register background service for book import processing
+builder.Services.AddHostedService<BookImportBackgroundService>();
 
 var app = builder.Build();
 
