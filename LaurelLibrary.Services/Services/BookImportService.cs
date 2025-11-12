@@ -45,7 +45,7 @@ public class BookImportService : IBookImportService
         _csvIsbnParser = csvIsbnParser;
 
         // Load configuration settings
-        _chunkSize = _configuration.GetValue<int>("BulkImport:ChunkSize", 50);
+        _chunkSize = _configuration.GetValue<int>("BulkImport:ChunkSize", 10);
         _maxIsbnsPerImport = _configuration.GetValue<int>("BulkImport:MaxIsbnsPerImport", 1000);
     }
 
