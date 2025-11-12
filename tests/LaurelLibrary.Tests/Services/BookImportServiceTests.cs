@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
@@ -9,582 +8,482 @@ using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Helpers;
 using LaurelLibrary.Services.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace LaurelLibrary.Tests.Services
+namespace LaurelLibrary.Tests.Services;
+
+public class BookImportServiceTests
 {
-    public class BookImportServiceTests
+    private readonly Mock<IImportHistoryRepository> _importHistoryRepositoryMock;
+    private readonly Mock<IAuthenticationService> _authenticationServiceMock;
+    private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
+    private readonly Mock<IAuditLogService> _auditLogServiceMock;
+    private readonly Mock<IBlobStorageService> _blobStorageServiceMock;
+    private readonly IConfiguration _configuration;
+    private readonly Mock<ILogger<BookImportService>> _loggerMock;
+    private readonly CsvIsbnParser _csvIsbnParser;
+    private readonly BookImportService _bookImportService;
+
+    private readonly Guid _testLibraryId = Guid.NewGuid();
+    private readonly string _testUserId = "test-user-id";
+    private readonly AppUser _testUser;
+
+    public BookImportServiceTests()
     {
-        private readonly Mock<IImportHistoryRepository> _importHistoryRepositoryMock;
-        private readonly Mock<IAuthenticationService> _authenticationServiceMock;
-        private readonly Mock<IAzureQueueService> _queueServiceMock;
-        private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
-        private readonly Mock<IAuditLogService> _auditLogServiceMock;
-        private readonly IConfiguration _configuration;
-        private readonly Mock<ILogger<BookImportService>> _loggerMock;
-        private readonly BookImportService _bookImportService;
-        private readonly AppUser _testUser;
-        private readonly Guid _testLibraryId;
-        private readonly string _testUserId;
+        _importHistoryRepositoryMock = new Mock<IImportHistoryRepository>();
+        _authenticationServiceMock = new Mock<IAuthenticationService>();
+        _subscriptionServiceMock = new Mock<ISubscriptionService>();
+        _auditLogServiceMock = new Mock<IAuditLogService>();
+        _blobStorageServiceMock = new Mock<IBlobStorageService>();
+        _loggerMock = new Mock<ILogger<BookImportService>>();
+        _csvIsbnParser = new CsvIsbnParser(Mock.Of<ILogger<CsvIsbnParser>>());
 
-        public BookImportServiceTests()
+        // Setup test user
+        _testUser = new AppUser
         {
-            _importHistoryRepositoryMock = new Mock<IImportHistoryRepository>();
-            _authenticationServiceMock = new Mock<IAuthenticationService>();
-            _queueServiceMock = new Mock<IAzureQueueService>();
-            _subscriptionServiceMock = new Mock<ISubscriptionService>();
-            _auditLogServiceMock = new Mock<IAuditLogService>();
-            _loggerMock = new Mock<ILogger<BookImportService>>();
+            Id = _testUserId,
+            UserName = "testuser",
+            FirstName = "Test",
+            LastName = "User",
+            CurrentLibraryId = _testLibraryId,
+        };
 
-            // Setup test data
-            _testLibraryId = Guid.NewGuid();
-            _testUserId = Guid.NewGuid().ToString();
-            _testUser = new AppUser
+        // Setup configuration with in-memory provider
+        _configuration = CreateConfiguration();
+
+        // Setup blob storage mock to return a successful upload path
+        _blobStorageServiceMock
+            .Setup(b =>
+                b.UploadFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>())
+            )
+            .ReturnsAsync("book-imports/test-blob-path.csv");
+
+        _bookImportService = new BookImportService(
+            _importHistoryRepositoryMock.Object,
+            _authenticationServiceMock.Object,
+            _subscriptionServiceMock.Object,
+            _auditLogServiceMock.Object,
+            _blobStorageServiceMock.Object,
+            _configuration,
+            _loggerMock.Object,
+            _csvIsbnParser
+        );
+    }
+
+    #region ImportBooksFromCsvAsync Tests
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_NullFile_ThrowsArgumentException()
+    {
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(null!)
+        );
+
+        Assert.Equal("CSV file cannot be null or empty. (Parameter 'csvFile')", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_EmptyFile_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(0);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile.Object)
+        );
+
+        Assert.Equal("CSV file cannot be null or empty. (Parameter 'csvFile')", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_InvalidFileExtension_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(1000);
+        mockFile.Setup(f => f.FileName).Returns("test.txt");
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile.Object)
+        );
+
+        Assert.Equal("Only CSV files are allowed. (Parameter 'csvFile')", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_FileTooLarge_ThrowsArgumentException()
+    {
+        // Arrange
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(6 * 1024 * 1024); // 6MB
+        mockFile.Setup(f => f.FileName).Returns("test.csv");
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile.Object)
+        );
+
+        Assert.Equal("File size must not exceed 5MB. (Parameter 'csvFile')", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_UserNotFound_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var mockFile = CreateValidMockFile();
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync((AppUser?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile)
+        );
+
+        Assert.Equal("Current user or library not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_UserHasNoCurrentLibrary_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var mockFile = CreateValidMockFile();
+        var userWithoutLibrary = new AppUser
+        {
+            Id = _testUserId,
+            UserName = "testuser",
+            CurrentLibraryId = null,
+        };
+
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync(userWithoutLibrary);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile)
+        );
+
+        Assert.Equal("Current user or library not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_ValidFile_CreatesImportHistoryAndQueuesChunks()
+    {
+        // Arrange
+        var mockFile = CreateValidMockFile();
+        SetupSuccessfulImport(new List<string>()); // We don't need to specify ISBNs since CSV parser will do the actual work
+
+        // Act
+        var result = await _bookImportService.ImportBooksFromCsvAsync(mockFile);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(_testLibraryId, result.LibraryId);
+        Assert.Equal(_testUserId, result.UserId);
+        Assert.Equal("test.csv", result.FileName);
+        Assert.Equal(3, result.TotalIsbns); // 3 ISBNs in the CSV content
+        Assert.Equal(ImportStatus.Pending, result.Status);
+        Assert.Equal(1, result.TotalChunks); // 3 ISBNs with chunk size 50 = 1 chunk
+
+        // Verify repository call
+        _importHistoryRepositoryMock.Verify(r => r.AddAsync(It.IsAny<ImportHistory>()), Times.Once);
+
+        // Verify subscription validation
+        _subscriptionServiceMock.Verify(
+            s => s.ValidateBookImportLimitsAsync(_testLibraryId, 3),
+            Times.Once
+        );
+
+        // Verify blob storage upload was called
+        _blobStorageServiceMock.Verify(
+            b =>
+                b.UploadFileAsync(
+                    It.IsAny<IFormFile>(),
+                    "book-imports",
+                    It.Is<string>(path => path.Contains(_testLibraryId.ToString()))
+                ),
+            Times.Once
+        );
+
+        // Verify blob path is set in the import history
+        Assert.NotNull(result.BlobPath);
+        Assert.Equal("book-imports/test-blob-path.csv", result.BlobPath);
+    }
+
+    [Fact]
+    public async Task ImportBooksFromCsvAsync_BlobUploadFails_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var mockFile = CreateValidMockFile();
+        SetupSuccessfulImport(new List<string>());
+
+        // Setup blob storage to fail
+        _blobStorageServiceMock
+            .Setup(b =>
+                b.UploadFileAsync(It.IsAny<IFormFile>(), It.IsAny<string>(), It.IsAny<string>())
+            )
+            .ReturnsAsync((string?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _bookImportService.ImportBooksFromCsvAsync(mockFile)
+        );
+
+        Assert.Equal("Failed to upload CSV file to blob storage.", exception.Message);
+    }
+
+    #endregion
+
+    #region GetImportHistoryAsync Tests
+
+    [Fact]
+    public async Task GetImportHistoryAsync_UserNotFound_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync((AppUser?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _bookImportService.GetImportHistoryAsync()
+        );
+
+        Assert.Equal("Current user or library not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetImportHistoryAsync_ValidUser_ReturnsImportHistory()
+    {
+        // Arrange
+        var expectedHistory = new List<ImportHistory>
+        {
+            new ImportHistory
             {
-                Id = _testUserId,
-                CurrentLibraryId = _testLibraryId,
-                FirstName = "John",
-                LastName = "Doe",
-                UserName = "johndoe",
-            };
-
-            // Setup configuration
-            _configuration = CreateConfiguration();
-
-            _bookImportService = new BookImportService(
-                _importHistoryRepositoryMock.Object,
-                _authenticationServiceMock.Object,
-                _queueServiceMock.Object,
-                _subscriptionServiceMock.Object,
-                _auditLogServiceMock.Object,
-                _configuration,
-                _loggerMock.Object
-            );
-        }
-
-        private static IConfiguration CreateConfiguration()
-        {
-            var configData = new Dictionary<string, string?>
-            {
-                ["BulkImport:ChunkSize"] = "50",
-                ["BulkImport:MaxIsbnsPerImport"] = "1000",
-                ["AzureStorage:IsbnImportQueueName"] = "isbn-import-queue",
-            };
-
-            return new ConfigurationBuilder().AddInMemoryCollection(configData).Build();
-        }
-
-        private static Stream CreateCsvStream(string content)
-        {
-            var bytes = Encoding.UTF8.GetBytes(content);
-            return new MemoryStream(bytes);
-        }
-
-        private ImportHistory CreateTestImportHistory(Guid? id = null, string? fileName = null)
-        {
-            return new ImportHistory
-            {
-                ImportHistoryId = id ?? Guid.NewGuid(),
+                ImportHistoryId = Guid.NewGuid(),
                 LibraryId = _testLibraryId,
+                FileName = "test1.csv",
+                Status = ImportStatus.Completed,
+                UserId = _testUserId,
                 Library = new Library
                 {
                     LibraryId = _testLibraryId,
                     Name = "Test Library",
-                    Alias = "test-lib",
-                    CreatedBy = "Test",
-                    UpdatedBy = "Test",
+                    Alias = "test",
                 },
-                UserId = _testUserId,
-                FileName = fileName ?? "test.csv",
-                TotalIsbns = 1,
-                Status = ImportStatus.Pending,
-                TotalChunks = 1,
-                ProcessedChunks = 0,
-                SuccessCount = 0,
-                FailedCount = 0,
-                FailedIsbns = null,
-                ImportedAt = DateTimeOffset.UtcNow,
-                CompletedAt = null,
-                CreatedAt = DateTimeOffset.UtcNow,
-                UpdatedAt = DateTimeOffset.UtcNow,
-                CreatedBy = "John Doe",
-                UpdatedBy = "John Doe",
-                RowVersion = new byte[8],
-            };
-        }
+            },
+        };
 
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_ValidCsv_ReturnsImportHistory()
-        {
-            // Arrange
-            var csvContent = "ISBN\n9781234567890\n9780987654321";
-            var fileName = "test-books.csv";
-            var csvStream = CreateCsvStream(csvContent);
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync(_testUser);
+        _importHistoryRepositoryMock
+            .Setup(r => r.GetByLibraryIdAsync(_testLibraryId))
+            .ReturnsAsync(expectedHistory);
 
-            var expectedImportHistory = CreateTestImportHistory(fileName: fileName);
-            expectedImportHistory.TotalIsbns = 2;
+        // Act
+        var result = await _bookImportService.GetImportHistoryAsync();
 
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 2))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(true);
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(csvStream, fileName);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(fileName, result.FileName);
-            Assert.Equal(2, result.TotalIsbns);
-            Assert.Equal(1, result.TotalChunks);
-            Assert.Equal(ImportStatus.Pending, result.Status);
-            Assert.Equal(_testLibraryId, result.LibraryId);
-            Assert.Equal(_testUserId, result.UserId);
-            Assert.Equal("John Doe", result.CreatedBy);
-
-            // Verify repository and service calls
-            _importHistoryRepositoryMock.Verify(
-                x => x.AddAsync(It.IsAny<ImportHistory>()),
-                Times.Once
-            );
-            _auditLogServiceMock.Verify(
-                x =>
-                    x.LogActionAsync(
-                        "Bulk Add",
-                        "Book",
-                        _testLibraryId,
-                        _testUserId,
-                        "John Doe",
-                        It.IsAny<string>(),
-                        fileName,
-                        It.IsAny<string>()
-                    ),
-                Times.Once
-            );
-            _queueServiceMock.Verify(
-                x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"),
-                Times.Once
-            );
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_UserNotAuthenticated_ThrowsException()
-        {
-            // Arrange
-            var csvStream = CreateCsvStream("9781234567890");
-            _authenticationServiceMock
-                .Setup(x => x.GetAppUserAsync())
-                .ThrowsAsync(new InvalidOperationException("User not found"));
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _bookImportService.ImportBooksFromCsvAsync(csvStream, "test.csv")
-            );
-            Assert.Equal("User not found", exception.Message);
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_UserHasNoCurrentLibrary_ThrowsException()
-        {
-            // Arrange
-            var csvStream = CreateCsvStream("9781234567890");
-            var userWithoutLibrary = new AppUser
-            {
-                Id = _testUserId,
-                CurrentLibraryId = null,
-                FirstName = "John",
-                LastName = "Doe",
-            };
-            _authenticationServiceMock
-                .Setup(x => x.GetAppUserAsync())
-                .ReturnsAsync(userWithoutLibrary);
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _bookImportService.ImportBooksFromCsvAsync(csvStream, "test.csv")
-            );
-            Assert.Equal("Current user or library not found.", exception.Message);
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_LargeCsv_CreatesMultipleChunks()
-        {
-            // Arrange
-            var csvBuilder = new StringBuilder("ISBN\n");
-            for (int i = 0; i < 100; i++)
-            {
-                // Generate valid 13-digit ISBNs
-                csvBuilder.AppendLine($"978123456{i:D4}");
-            }
-            var csvStream = CreateCsvStream(csvBuilder.ToString());
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 100))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(true);
-
-            // Setup repository to return the same ImportHistory that was passed to it
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync((ImportHistory importHistory) => importHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(
-                csvStream,
-                "large-books.csv"
-            );
-
-            // Assert
-            Assert.Equal(100, result.TotalIsbns);
-            Assert.Equal(2, result.TotalChunks); // 100 ISBNs with chunk size 50 = 2 chunks
-
-            // Verify queue messages sent for each chunk
-            _queueServiceMock.Verify(
-                x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"),
-                Times.Exactly(2)
-            );
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_CsvWithInvalidIsbns_FiltersOutInvalidOnes()
-        {
-            // Arrange
-            var csvContent =
-                @"ISBN
-9781234567890
-invalid-isbn
-978098765432
-short
-9780987654321";
-            var csvStream = CreateCsvStream(csvContent);
-            var expectedImportHistory = CreateTestImportHistory(fileName: "mixed-books.csv");
-            expectedImportHistory.TotalIsbns = 2;
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 2))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(true);
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(
-                csvStream,
-                "mixed-books.csv"
-            );
-
-            // Assert
-            Assert.Equal(2, result.TotalIsbns); // Only valid ISBNs should be counted
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_EmptyCsv_ReturnsImportHistoryWithZeroIsbns()
-        {
-            // Arrange
-            var csvContent = "ISBN\n"; // Only header
-            var csvStream = CreateCsvStream(csvContent);
-            var expectedImportHistory = CreateTestImportHistory(fileName: "empty-books.csv");
-            expectedImportHistory.TotalIsbns = 0;
-            expectedImportHistory.TotalChunks = 0;
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 0))
-                .Returns(Task.CompletedTask);
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(
-                csvStream,
-                "empty-books.csv"
-            );
-
-            // Assert
-            Assert.Equal(0, result.TotalIsbns);
-            Assert.Equal(0, result.TotalChunks);
-
-            // Verify no queue messages sent
-            _queueServiceMock.Verify(
-                x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"),
-                Times.Never
-            );
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_UserNameIsEmpty_UsesUserNameAsFallback()
-        {
-            // Arrange
-            var userWithEmptyName = new AppUser
-            {
-                Id = _testUserId,
-                CurrentLibraryId = _testLibraryId,
-                FirstName = "",
-                LastName = "",
-                UserName = "testuser",
-            };
-            var csvStream = CreateCsvStream("9781234567890");
-            var expectedImportHistory = CreateTestImportHistory();
-            expectedImportHistory.CreatedBy = "testuser";
-
-            _authenticationServiceMock
-                .Setup(x => x.GetAppUserAsync())
-                .ReturnsAsync(userWithEmptyName);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 1))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(true);
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(csvStream, "test.csv");
-
-            // Assert
-            Assert.Equal("testuser", result.CreatedBy);
-        }
-
-        [Fact]
-        public async Task GetImportHistoryAsync_ValidUser_ReturnsImportHistory()
-        {
-            // Arrange
-            var importHistories = new List<ImportHistory>
-            {
-                CreateTestImportHistory(),
-                CreateTestImportHistory(),
-            };
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _importHistoryRepositoryMock
-                .Setup(x => x.GetByLibraryIdAsync(_testLibraryId))
-                .ReturnsAsync(importHistories);
-
-            // Act
-            var result = await _bookImportService.GetImportHistoryAsync();
-
-            // Assert
-            Assert.Equal(2, result.Count);
-            Assert.All(result, ih => Assert.Equal(_testLibraryId, ih.LibraryId));
-        }
-
-        [Fact]
-        public async Task GetImportHistoryAsync_UserNotAuthenticated_ThrowsException()
-        {
-            // Arrange
-            _authenticationServiceMock
-                .Setup(x => x.GetAppUserAsync())
-                .ThrowsAsync(new InvalidOperationException("User not found"));
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _bookImportService.GetImportHistoryAsync()
-            );
-            Assert.Equal("User not found", exception.Message);
-        }
-
-        [Fact]
-        public async Task GetImportHistoryPagedAsync_ValidUser_ReturnsPagedResult()
-        {
-            // Arrange
-            var pagedResult = new PagedResult<ImportHistory>
-            {
-                Items = new List<ImportHistory> { CreateTestImportHistory() },
-                TotalCount = 1,
-                Page = 1,
-                PageSize = 10,
-            };
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _importHistoryRepositoryMock
-                .Setup(x => x.GetByLibraryIdPagedAsync(_testLibraryId, 1, 10))
-                .ReturnsAsync(pagedResult);
-
-            // Act
-            var result = await _bookImportService.GetImportHistoryPagedAsync(1, 10);
-
-            // Assert
-            Assert.Equal(1, result.TotalCount);
-            Assert.Equal(1, result.Page);
-            Assert.Equal(10, result.PageSize);
-            Assert.Single(result.Items);
-        }
-
-        [Fact]
-        public async Task GetImportHistoryPagedAsync_UserNotAuthenticated_ThrowsException()
-        {
-            // Arrange
-            _authenticationServiceMock
-                .Setup(x => x.GetAppUserAsync())
-                .ThrowsAsync(new InvalidOperationException("User not found"));
-
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _bookImportService.GetImportHistoryPagedAsync(1, 10)
-            );
-            Assert.Equal("User not found", exception.Message);
-        }
-
-        [Fact]
-        public async Task GetImportHistoryByIdAsync_ValidId_ReturnsImportHistory()
-        {
-            // Arrange
-            var importHistoryId = Guid.NewGuid();
-            var importHistory = CreateTestImportHistory(importHistoryId);
-
-            _importHistoryRepositoryMock
-                .Setup(x => x.GetByIdAsync(importHistoryId))
-                .ReturnsAsync(importHistory);
-
-            // Act
-            var result = await _bookImportService.GetImportHistoryByIdAsync(importHistoryId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(importHistoryId, result.ImportHistoryId);
-        }
-
-        [Fact]
-        public async Task GetImportHistoryByIdAsync_InvalidId_ReturnsNull()
-        {
-            // Arrange
-            var importHistoryId = Guid.NewGuid();
-            _importHistoryRepositoryMock
-                .Setup(x => x.GetByIdAsync(importHistoryId))
-                .ReturnsAsync((ImportHistory?)null);
-
-            // Act
-            var result = await _bookImportService.GetImportHistoryByIdAsync(importHistoryId);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_QueueServiceFails_ContinuesProcessing()
-        {
-            // Arrange
-            var csvContent = "ISBN\n9781234567890\n9780987654321";
-            var csvStream = CreateCsvStream(csvContent);
-            var expectedImportHistory = CreateTestImportHistory();
-            expectedImportHistory.TotalIsbns = 2;
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 2))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(false); // Simulate queue failure
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(csvStream, "test.csv");
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.TotalIsbns);
-
-            // Verify error was logged but processing continued
-            _loggerMock.Verify(
-                x =>
-                    x.Log(
-                        LogLevel.Error,
-                        It.IsAny<EventId>(),
-                        It.Is<It.IsAnyType>(
-                            (v, t) => v.ToString()!.Contains("Failed to send chunk")
-                        ),
-                        It.IsAny<Exception>(),
-                        It.IsAny<Func<It.IsAnyType, Exception?, string>>()
-                    ),
-                Times.Once
-            );
-        }
-
-        [Fact]
-        public async Task ImportBooksFromCsvAsync_CsvWithDuplicateIsbns_RemovesDuplicates()
-        {
-            // Arrange
-            var csvContent =
-                @"ISBN
-9781234567890
-9781234567890
-9780987654321
-9781234567890";
-            var csvStream = CreateCsvStream(csvContent);
-            var expectedImportHistory = CreateTestImportHistory(fileName: "duplicates.csv");
-            expectedImportHistory.TotalIsbns = 2;
-
-            _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(_testUser);
-            _subscriptionServiceMock
-                .Setup(x => x.ValidateBookImportLimitsAsync(_testLibraryId, 2))
-                .Returns(Task.CompletedTask);
-            _queueServiceMock
-                .Setup(x => x.SendMessageAsync(It.IsAny<string>(), "isbn-import-queue"))
-                .ReturnsAsync(true);
-            _importHistoryRepositoryMock
-                .Setup(x => x.AddAsync(It.IsAny<ImportHistory>()))
-                .ReturnsAsync(expectedImportHistory);
-
-            // Act
-            var result = await _bookImportService.ImportBooksFromCsvAsync(
-                csvStream,
-                "duplicates.csv"
-            );
-
-            // Assert
-            Assert.Equal(2, result.TotalIsbns); // Duplicates should be removed
-        }
-
-        [Fact]
-        public void ImportBooksFromCsvAsync_ConfigurationMissing_ThrowsException()
-        {
-            // Arrange
-            var configData = new Dictionary<string, string?>
-            {
-                ["BulkImport:ChunkSize"] = "50",
-                ["BulkImport:MaxIsbnsPerImport"] = "1000",
-                // Missing IsbnImportQueueName
-            };
-            var configWithMissingSettings = new ConfigurationBuilder()
-                .AddInMemoryCollection(configData)
-                .Build();
-
-            // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() =>
-                new BookImportService(
-                    _importHistoryRepositoryMock.Object,
-                    _authenticationServiceMock.Object,
-                    _queueServiceMock.Object,
-                    _subscriptionServiceMock.Object,
-                    _auditLogServiceMock.Object,
-                    configWithMissingSettings,
-                    _loggerMock.Object
-                )
-            );
-            Assert.Equal("IsbnImportQueueName is not configured.", exception.Message);
-        }
+        // Assert
+        Assert.Equal(expectedHistory, result);
+        _importHistoryRepositoryMock.Verify(r => r.GetByLibraryIdAsync(_testLibraryId), Times.Once);
     }
+
+    #endregion
+
+    #region GetImportHistoryPagedAsync Tests
+
+    [Fact]
+    public async Task GetImportHistoryPagedAsync_UserNotFound_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync((AppUser?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _bookImportService.GetImportHistoryPagedAsync(1, 10)
+        );
+
+        Assert.Equal("Current user or library not found.", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetImportHistoryPagedAsync_ValidUser_ReturnsPagedResult()
+    {
+        // Arrange
+        var expectedResult = new PagedResult<ImportHistory>
+        {
+            Items = new List<ImportHistory>
+            {
+                new ImportHistory
+                {
+                    ImportHistoryId = Guid.NewGuid(),
+                    LibraryId = _testLibraryId,
+                    FileName = "test1.csv",
+                    Status = ImportStatus.Completed,
+                    UserId = _testUserId,
+                    Library = new Library
+                    {
+                        LibraryId = _testLibraryId,
+                        Name = "Test Library",
+                        Alias = "test",
+                    },
+                },
+            },
+            TotalCount = 1,
+            Page = 1,
+            PageSize = 10,
+        };
+
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync(_testUser);
+        _importHistoryRepositoryMock
+            .Setup(r => r.GetByLibraryIdPagedAsync(_testLibraryId, 1, 10))
+            .ReturnsAsync(expectedResult);
+
+        // Act
+        var result = await _bookImportService.GetImportHistoryPagedAsync(1, 10);
+
+        // Assert
+        Assert.Equal(expectedResult, result);
+        _importHistoryRepositoryMock.Verify(
+            r => r.GetByLibraryIdPagedAsync(_testLibraryId, 1, 10),
+            Times.Once
+        );
+    }
+
+    #endregion
+
+    #region GetImportHistoryByIdAsync Tests
+
+    [Fact]
+    public async Task GetImportHistoryByIdAsync_ValidId_ReturnsImportHistory()
+    {
+        // Arrange
+        var importHistoryId = Guid.NewGuid();
+        var expectedHistory = new ImportHistory
+        {
+            ImportHistoryId = importHistoryId,
+            LibraryId = _testLibraryId,
+            FileName = "test.csv",
+            Status = ImportStatus.Completed,
+            UserId = _testUserId,
+            Library = new Library
+            {
+                LibraryId = _testLibraryId,
+                Name = "Test Library",
+                Alias = "test",
+            },
+        };
+
+        _importHistoryRepositoryMock
+            .Setup(r => r.GetByIdAsync(importHistoryId))
+            .ReturnsAsync(expectedHistory);
+
+        // Act
+        var result = await _bookImportService.GetImportHistoryByIdAsync(importHistoryId);
+
+        // Assert
+        Assert.Equal(expectedHistory, result);
+        _importHistoryRepositoryMock.Verify(r => r.GetByIdAsync(importHistoryId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetImportHistoryByIdAsync_InvalidId_ReturnsNull()
+    {
+        // Arrange
+        var importHistoryId = Guid.NewGuid();
+        _importHistoryRepositoryMock
+            .Setup(r => r.GetByIdAsync(importHistoryId))
+            .ReturnsAsync((ImportHistory?)null);
+
+        // Act
+        var result = await _bookImportService.GetImportHistoryByIdAsync(importHistoryId);
+
+        // Assert
+        Assert.Null(result);
+        _importHistoryRepositoryMock.Verify(r => r.GetByIdAsync(importHistoryId), Times.Once);
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private IConfiguration CreateConfiguration()
+    {
+        var configData = new Dictionary<string, string?>
+        {
+            ["BulkImport:ChunkSize"] = "50",
+            ["BulkImport:MaxIsbnsPerImport"] = "1000",
+            ["AzureStorage:IsbnImportQueueName"] = "test-queue",
+        };
+
+        return new ConfigurationBuilder().AddInMemoryCollection(configData).Build();
+    }
+
+    private IFormFile CreateValidMockFile()
+    {
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(1000);
+        mockFile.Setup(f => f.FileName).Returns("test.csv");
+
+        // Create CSV content with ISBN header and valid ISBNs
+        var content = "ISBN\n9780134685991\n9780321573513\n9780596517748";
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        mockFile.Setup(f => f.OpenReadStream()).Returns(stream);
+
+        return mockFile.Object;
+    }
+
+    private IFormFile CreateLargeMockFile()
+    {
+        var mockFile = new Mock<IFormFile>();
+        mockFile.Setup(f => f.Length).Returns(5000);
+        mockFile.Setup(f => f.FileName).Returns("large-test.csv");
+
+        // Create CSV content with ISBN header and 150 valid 13-digit ISBNs for chunking test
+        var content = "ISBN\n";
+        for (int i = 0; i < 150; i++)
+        {
+            // Generate valid 13-digit ISBNs: 9780134680XXX where XXX is a 3-digit number
+            content += $"9780134680{i:D3}\n";
+        }
+
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        mockFile.Setup(f => f.OpenReadStream()).Returns(stream);
+
+        return mockFile.Object;
+    }
+
+    private void SetupSuccessfulImport(List<string> isbns)
+    {
+        _authenticationServiceMock.Setup(a => a.GetAppUserAsync()).ReturnsAsync(_testUser);
+
+        _subscriptionServiceMock
+            .Setup(s => s.ValidateBookImportLimitsAsync(It.IsAny<Guid>(), It.IsAny<int>()))
+            .Returns(Task.CompletedTask);
+
+        _importHistoryRepositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<ImportHistory>()))
+            .ReturnsAsync((ImportHistory history) => history);
+
+        _auditLogServiceMock
+            .Setup(a =>
+                a.LogActionAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>()
+                )
+            )
+            .Returns(Task.CompletedTask);
+    }
+
+    #endregion
 }

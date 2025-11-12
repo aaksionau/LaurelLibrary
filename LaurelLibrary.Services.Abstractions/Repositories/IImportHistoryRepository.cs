@@ -24,4 +24,24 @@ public interface IImportHistoryRepository
         int? maxRetries = 3
     );
     Task<List<ImportHistory>> GetActiveImportsAsync();
+
+    /// <summary>
+    /// Gets all import history records that are pending processing
+    /// </summary>
+    Task<List<ImportHistory>> GetPendingImportsAsync();
+
+    /// <summary>
+    /// Updates an import history record
+    /// </summary>
+    Task<ImportHistory> UpdateAsync(ImportHistory importHistory);
+
+    /// <summary>
+    /// Marks the notification as sent for the specified import
+    /// </summary>
+    Task MarkNotificationSentAsync(Guid importHistoryId);
+
+    /// <summary>
+    /// Marks an import as failed with error message
+    /// </summary>
+    Task MarkAsFailedAsync(Guid importHistoryId, string errorMessage);
 }

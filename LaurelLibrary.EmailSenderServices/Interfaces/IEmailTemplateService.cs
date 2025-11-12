@@ -8,6 +8,7 @@ namespace LaurelLibrary.EmailSenderServices.Interfaces
         Task<string> RenderEmailConfirmationAsync(EmailConfirmationDto model);
         Task<string> RenderReaderVerificationEmailAsync(ReaderVerificationEmailDto model);
         Task<string> RenderBookCheckoutEmailAsync(BookCheckoutEmailDto model);
+        Task<string> RenderBulkImportCompletionEmailAsync(BulkImportCompletionEmailDto model);
         Task<string> RenderTemplateAsync<T>(string templateName, T model);
     }
 }

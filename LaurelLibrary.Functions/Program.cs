@@ -39,8 +39,8 @@ builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
 // BooksService is registered with HttpClient below
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 builder.Services.AddScoped<IReaderKioskService, ReaderKioskService>();
-builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
@@ -49,6 +49,7 @@ builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IMailgunService, MailgunService>();
+builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
 
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {

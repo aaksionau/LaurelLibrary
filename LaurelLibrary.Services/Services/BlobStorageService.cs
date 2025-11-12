@@ -265,4 +265,42 @@ public class BlobStorageService : IBlobStorageService
             return 0;
         }
     }
+
+    public async Task<Stream?> DownloadBlobStreamAsync(string containerName, string blobPath)
+    {
+        try
+        {
+            // Get container client
+            var containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Get blob client
+            var blobClient = containerClient.GetBlobClient(blobPath);
+
+            // Check if blob exists
+            var exists = await blobClient.ExistsAsync();
+            if (!exists)
+            {
+                _logger.LogWarning(
+                    "Blob {BlobPath} not found in container {ContainerName}",
+                    blobPath,
+                    containerName
+                );
+                return null;
+            }
+
+            // Download blob content
+            var response = await blobClient.DownloadContentAsync();
+            return response.Value.Content.ToStream();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to download blob {BlobPath} from container {ContainerName}",
+                blobPath,
+                containerName
+            );
+            return null;
+        }
+    }
 }

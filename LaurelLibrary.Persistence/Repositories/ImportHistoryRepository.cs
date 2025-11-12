@@ -206,4 +206,78 @@ public class ImportHistoryRepository : IImportHistoryRepository
             .OrderByDescending(ih => ih.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<List<ImportHistory>> GetPendingImportsAsync()
+    {
+        return await _dbContext
+            .Set<ImportHistory>()
+            .Where(i => i.Status == ImportStatus.Pending)
+            .OrderBy(i => i.ImportedAt)
+            .ToListAsync();
+    }
+
+    public async Task<ImportHistory> UpdateAsync(ImportHistory importHistory)
+    {
+        if (importHistory == null)
+        {
+            throw new ArgumentNullException(nameof(importHistory));
+        }
+
+        importHistory.UpdatedAt = DateTimeOffset.UtcNow;
+        _dbContext.Set<ImportHistory>().Update(importHistory);
+        await _dbContext.SaveChangesAsync();
+        return importHistory;
+    }
+
+    public async Task MarkNotificationSentAsync(Guid importHistoryId)
+    {
+        var importHistory = await _dbContext
+            .Set<ImportHistory>()
+            .FirstOrDefaultAsync(i => i.ImportHistoryId == importHistoryId);
+
+        if (importHistory == null)
+        {
+            throw new InvalidOperationException(
+                $"ImportHistory with ID {importHistoryId} not found"
+            );
+        }
+
+        importHistory.NotificationSent = true;
+        importHistory.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        _logger.LogDebug(
+            "Marked notification as sent for import {ImportHistoryId}",
+            importHistoryId
+        );
+    }
+
+    public async Task MarkAsFailedAsync(Guid importHistoryId, string errorMessage)
+    {
+        var importHistory = await _dbContext
+            .Set<ImportHistory>()
+            .FirstOrDefaultAsync(i => i.ImportHistoryId == importHistoryId);
+
+        if (importHistory == null)
+        {
+            throw new InvalidOperationException(
+                $"ImportHistory with ID {importHistoryId} not found"
+            );
+        }
+
+        importHistory.Status = ImportStatus.Failed;
+        importHistory.ErrorMessage =
+            errorMessage.Length > 2000 ? errorMessage.Substring(0, 2000) : errorMessage;
+        importHistory.CompletedAt = DateTimeOffset.UtcNow;
+        importHistory.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _dbContext.SaveChangesAsync();
+
+        _logger.LogError(
+            "Marked import {ImportHistoryId} as failed: {Error}",
+            importHistoryId,
+            errorMessage
+        );
+    }
 }

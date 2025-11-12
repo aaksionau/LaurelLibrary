@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.Services.Abstractions.Dtos;
-using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -20,44 +14,62 @@ public class BookImportService : IBookImportService
 {
     private readonly IImportHistoryRepository _importHistoryRepository;
     private readonly IAuthenticationService _authenticationService;
-    private readonly IAzureQueueService _queueService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
+    private readonly IBlobStorageService _blobStorageService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<BookImportService> _logger;
+    private readonly ICsvIsbnParser _csvIsbnParser;
 
     private readonly int _chunkSize;
     private readonly int _maxIsbnsPerImport;
-    private readonly string _isbnImportQueueName;
 
     public BookImportService(
         IImportHistoryRepository importHistoryRepository,
         IAuthenticationService authenticationService,
-        IAzureQueueService queueService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
+        IBlobStorageService blobStorageService,
         IConfiguration configuration,
-        ILogger<BookImportService> logger
+        ILogger<BookImportService> logger,
+        ICsvIsbnParser csvIsbnParser
     )
     {
         _importHistoryRepository = importHistoryRepository;
         _authenticationService = authenticationService;
-        _queueService = queueService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
+        _blobStorageService = blobStorageService;
         _configuration = configuration;
         _logger = logger;
+        _csvIsbnParser = csvIsbnParser;
 
         // Load configuration settings
         _chunkSize = _configuration.GetValue<int>("BulkImport:ChunkSize", 50);
         _maxIsbnsPerImport = _configuration.GetValue<int>("BulkImport:MaxIsbnsPerImport", 1000);
-        _isbnImportQueueName =
-            _configuration["AzureStorage:IsbnImportQueueName"]
-            ?? throw new InvalidOperationException("IsbnImportQueueName is not configured.");
     }
 
-    public async Task<ImportHistory> ImportBooksFromCsvAsync(Stream csvStream, string fileName)
+    public async Task<ImportHistory> ImportBooksFromCsvAsync(IFormFile csvFile)
     {
+        // Validate the CSV file
+        if (csvFile == null || csvFile.Length == 0)
+        {
+            throw new ArgumentException("CSV file cannot be null or empty.", nameof(csvFile));
+        }
+
+        // Validate file extension
+        var extension = Path.GetExtension(csvFile.FileName).ToLowerInvariant();
+        if (extension != ".csv")
+        {
+            throw new ArgumentException("Only CSV files are allowed.", nameof(csvFile));
+        }
+
+        // Validate file size (max 5MB)
+        if (csvFile.Length > 5 * 1024 * 1024)
+        {
+            throw new ArgumentException("File size must not exceed 5MB.", nameof(csvFile));
+        }
+
         var currentUser = await _authenticationService.GetAppUserAsync();
         if (currentUser?.CurrentLibraryId == null)
         {
@@ -73,7 +85,7 @@ public class BookImportService : IBookImportService
         }
 
         // Parse ISBNs from CSV
-        var isbns = await ParseIsbnsFromCsvAsync(csvStream);
+        var isbns = await _csvIsbnParser.ParseIsbnsFromCsvAsync(csvFile, _maxIsbnsPerImport);
         var totalIsbns = isbns.Count;
 
         // Check subscription limits before processing
@@ -84,6 +96,8 @@ public class BookImportService : IBookImportService
             totalIsbns,
             libraryId
         );
+
+        string? blobPath = await SaveCsvFileAsync(csvFile, libraryId);
 
         // Calculate chunks
         var chunks = isbns.Chunk(_chunkSize).ToList();
@@ -96,7 +110,8 @@ public class BookImportService : IBookImportService
             LibraryId = libraryId,
             Library = null!, // Will be set by EF Core
             UserId = userId,
-            FileName = fileName,
+            FileName = csvFile.FileName,
+            BlobPath = blobPath,
             TotalIsbns = totalIsbns,
             Status = ImportStatus.Pending,
             TotalChunks = totalChunks,
@@ -122,7 +137,7 @@ public class BookImportService : IBookImportService
             currentUser.Id,
             userName,
             importHistory.ImportHistoryId.ToString(),
-            fileName,
+            csvFile.FileName,
             $"Started bulk import of {totalIsbns} ISBNs from CSV file"
         );
 
@@ -132,56 +147,35 @@ public class BookImportService : IBookImportService
             totalChunks
         );
 
-        // Send chunks to queue
-        var chunkNumber = 1;
-        foreach (var chunk in chunks)
+        return importHistory;
+    }
+
+    private async Task<string?> SaveCsvFileAsync(IFormFile csvFile, Guid libraryId)
+    {
+        // Upload CSV file to blob storage
+        var containerName = "book-imports";
+        var blobName =
+            $"{libraryId}/{DateTime.UtcNow:yyyy/MM/dd}/{Guid.NewGuid()}"
+            + $"{Path.GetExtension(csvFile.FileName)}";
+
+        _logger.LogInformation(
+            "Uploading CSV file {FileName} to blob storage at {BlobPath}",
+            csvFile.FileName,
+            $"{containerName}/{blobName}"
+        );
+
+        var blobPath = await _blobStorageService.UploadFileAsync(csvFile, containerName, blobName);
+
+        if (string.IsNullOrEmpty(blobPath))
         {
-            var remainingIsbns = totalIsbns - ((chunkNumber - 1) * _chunkSize);
-
-            var message = new IsbnImportQueueMessage
-            {
-                ImportHistoryId = importHistory.ImportHistoryId,
-                Isbns = chunk.ToList(),
-                ChunkNumber = chunkNumber,
-                TotalChunks = totalChunks,
-                TotalIsbns = totalIsbns,
-                RemainingIsbns = remainingIsbns,
-            };
-
-            var messageJson = JsonSerializer.Serialize(message);
-            var sent = await _queueService.SendMessageAsync(messageJson, _isbnImportQueueName);
-
-            if (!sent)
-            {
-                _logger.LogError(
-                    "Failed to send chunk {ChunkNumber}/{TotalChunks} to queue for ImportHistory {ImportHistoryId}",
-                    chunkNumber,
-                    totalChunks,
-                    importHistory.ImportHistoryId
-                );
-                // Note: You may want to mark the import as failed here
-                // For now, we'll continue and let the Azure Function handle retries
-            }
-            else
-            {
-                _logger.LogDebug(
-                    "Sent chunk {ChunkNumber}/{TotalChunks} to queue ({IsbnCount} ISBNs)",
-                    chunkNumber,
-                    totalChunks,
-                    chunk.Length
-                );
-            }
-            Thread.Sleep(1000); // Slight delay to avoid overwhelming the queue
-            chunkNumber++;
+            throw new InvalidOperationException("Failed to upload CSV file to blob storage.");
         }
 
         _logger.LogInformation(
-            "Queued {TotalChunks} chunks for import {ImportHistoryId}. Processing will happen asynchronously.",
-            totalChunks,
-            importHistory.ImportHistoryId
+            "CSV file uploaded successfully to blob storage at {BlobPath}",
+            blobPath
         );
-
-        return importHistory;
+        return blobPath;
     }
 
     public async Task<List<ImportHistory>> GetImportHistoryAsync()
@@ -218,58 +212,5 @@ public class BookImportService : IBookImportService
     public async Task<ImportHistory?> GetImportHistoryByIdAsync(Guid importHistoryId)
     {
         return await _importHistoryRepository.GetByIdAsync(importHistoryId);
-    }
-
-    private async Task<List<string>> ParseIsbnsFromCsvAsync(Stream csvStream)
-    {
-        var isbns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        using var reader = new StreamReader(csvStream, Encoding.UTF8);
-        string? line;
-        var lineNumber = 0;
-
-        while ((line = await reader.ReadLineAsync()) != null)
-        {
-            lineNumber++;
-
-            // Skip empty lines
-            if (string.IsNullOrWhiteSpace(line))
-            {
-                continue;
-            }
-
-            // Skip header row if it looks like a header
-            if (lineNumber == 1 && line.Contains("ISBN", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            // Parse CSV line (handle comma-separated values)
-            var values = line.Split(',');
-            foreach (var value in values)
-            {
-                var isbn = value.Replace("-", "").Trim().Trim('"', '\'').NormalizeIsbn();
-
-                // Basic validation: ISBN should be 10 or 13 digits (can include hyphens)
-                var digits = new string(isbn.Where(char.IsDigit).ToArray());
-                if (digits.Length == 10 || digits.Length == 13)
-                {
-                    isbns.Add(isbn);
-                }
-            }
-
-            // Limit to max ISBNs as per requirement
-            if (isbns.Count >= _maxIsbnsPerImport)
-            {
-                _logger.LogWarning(
-                    "CSV contains more than {MaxIsbns} ISBNs. Only first {MaxIsbns} will be processed.",
-                    _maxIsbnsPerImport,
-                    _maxIsbnsPerImport
-                );
-                break;
-            }
-        }
-
-        return isbns.ToList();
     }
 }

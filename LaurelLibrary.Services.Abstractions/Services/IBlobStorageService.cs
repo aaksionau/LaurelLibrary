@@ -45,4 +45,12 @@ public interface IBlobStorageService
     /// <param name="folderPrefix">The folder prefix (e.g., "book-images/library-alias/")</param>
     /// <returns>The number of files deleted</returns>
     Task<int> DeleteFolderAsync(string containerName, string folderPrefix);
+
+    /// <summary>
+    /// Downloads a blob as a stream from the specified container and blob path.
+    /// </summary>
+    /// <param name="containerName">The name of the container.</param>
+    /// <param name="blobPath">The path to the blob.</param>
+    /// <returns>A stream containing the blob data, or null if the blob doesn't exist.</returns>
+    Task<Stream?> DownloadBlobStreamAsync(string containerName, string blobPath);
 }
