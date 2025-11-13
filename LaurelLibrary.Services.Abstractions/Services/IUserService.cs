@@ -9,4 +9,5 @@ public interface IUserService
     Task<AppUser?> FindUserByEmailAsync(string email);
     Task<AppUser?> FindUserByIdAsync(string userId);
     Task<bool> SetCurrentLibraryAsync(string userId, Guid? libraryId);
+    Task<bool> HasAdministratorClaimAsync(string userId);
 }

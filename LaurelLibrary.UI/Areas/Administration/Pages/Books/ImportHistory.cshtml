@@ -113,9 +113,12 @@
                                                 <button type="button" class="btn btn-primary" onclick="switchToHistoryTab()">
                                                     <i class="fas fa-history"></i> View Import History
                                                 </button>
-                                                <a href="/hangfire" target="_blank" class="btn btn-info ms-2">
-                                                    <i class="fas fa-chart-line"></i> View Job Dashboard
-                                                </a>
+                                                @if (Model.IsUserAdministrator)
+                                                {
+                                                    <a href="/hangfire" target="_blank" class="btn btn-info ms-2">
+                                                        <i class="fas fa-chart-line"></i> View Job Dashboard
+                                                    </a>
+                                                }
                                             </div>
                                         </div>
                                     </div>

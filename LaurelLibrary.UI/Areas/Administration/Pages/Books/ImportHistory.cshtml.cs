@@ -11,16 +11,22 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     {
         private readonly IBookImportService _bookImportService;
         private readonly BookImportJobService _bookImportJobService;
+        private readonly IAuthenticationService _authenticationService;
+        private readonly IUserService _userService;
         private readonly ILogger<ImportHistoryModel> _logger;
 
         public ImportHistoryModel(
             IBookImportService bookImportService,
             BookImportJobService bookImportJobService,
+            IAuthenticationService authenticationService,
+            IUserService userService,
             ILogger<ImportHistoryModel> logger
         )
         {
             _bookImportService = bookImportService;
             _bookImportJobService = bookImportJobService;
+            _authenticationService = authenticationService;
+            _userService = userService;
             _logger = logger;
         }
 
@@ -47,10 +53,16 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         // Add property to track current tab
         public string? CurrentTab { get; set; }
 
+        // Property to track if user is administrator
+        public bool IsUserAdministrator { get; set; }
+
         public async Task OnGetAsync(int? pageNumber, int? pageSize, string? tab)
         {
             // Store the current tab
             CurrentTab = tab;
+
+            // Check if user is administrator
+            await SetUserAdministratorStatusAsync();
 
             try
             {
@@ -123,8 +135,23 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 IsSuccess = false;
             }
 
+            await SetUserAdministratorStatusAsync();
             await LoadImportHistoryAsync();
             return Page();
+        }
+
+        private async Task SetUserAdministratorStatusAsync()
+        {
+            try
+            {
+                var currentUser = await _authenticationService.GetAppUserAsync();
+                IsUserAdministrator = await _userService.HasAdministratorClaimAsync(currentUser.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking user administrator status");
+                IsUserAdministrator = false;
+            }
         }
 
         private async Task LoadImportHistoryAsync()
@@ -147,6 +174,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 _logger.LogError(ex, "Error loading import history");
                 ImportHistories = new List<ImportHistory>();
             }
+
+            // Ensure administrator status is set
+            await SetUserAdministratorStatusAsync();
         }
     }
 }
