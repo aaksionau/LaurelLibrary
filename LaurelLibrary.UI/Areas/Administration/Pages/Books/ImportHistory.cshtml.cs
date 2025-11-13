@@ -1,6 +1,7 @@
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -9,14 +10,17 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     public class ImportHistoryModel : PageModel
     {
         private readonly IBookImportService _bookImportService;
+        private readonly BookImportJobService _bookImportJobService;
         private readonly ILogger<ImportHistoryModel> _logger;
 
         public ImportHistoryModel(
             IBookImportService bookImportService,
+            BookImportJobService bookImportJobService,
             ILogger<ImportHistoryModel> logger
         )
         {
             _bookImportService = bookImportService;
+            _bookImportJobService = bookImportJobService;
             _logger = logger;
         }
 
@@ -38,6 +42,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         public int SuccessCount { get; set; }
         public int FailedCount { get; set; }
         public Guid? ImportHistoryId { get; set; }
+        public string? HangfireJobId { get; set; }
 
         // Add property to track current tab
         public string? CurrentTab { get; set; }
@@ -90,14 +95,19 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 SuccessCount = importHistory.SuccessCount;
                 FailedCount = importHistory.FailedCount;
 
+                // Enqueue the Hangfire job to process the import
+                var jobId = _bookImportJobService.EnqueueImportJob(importHistory.ImportHistoryId);
+                HangfireJobId = jobId;
+
                 Message =
-                    $"Import started successfully! Processing {TotalIsbns} ISBNs in the background.";
+                    $"Import started successfully! Processing {TotalIsbns} ISBNs in the background. Job ID: {jobId}";
                 IsSuccess = true;
 
                 _logger.LogInformation(
-                    "Bulk import started: {ImportId}, Total ISBNs: {Total}",
+                    "Bulk import started: {ImportId}, Total ISBNs: {Total}, Hangfire Job ID: {JobId}",
                     importHistory.ImportHistoryId,
-                    TotalIsbns
+                    TotalIsbns,
+                    jobId
                 );
             }
             catch (ArgumentException ex)
