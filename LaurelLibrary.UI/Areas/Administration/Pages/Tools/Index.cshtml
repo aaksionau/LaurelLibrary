@@ -1,0 +1,157 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Tools.IndexModel
+@{
+    ViewData["Title"] = "Tools";
+}
+
+<style>
+    .tools-card-header {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .tools-card:hover .tools-card-header {
+        opacity: 0.9;
+    }
+
+    .tools-link {
+        transition: all 0.2s ease-in-out;
+        border: none !important;
+    }
+
+    .tools-link:hover {
+        background-color: rgba(36, 92, 79, 0.05) !important;
+        transform: translateX(5px);
+    }
+
+    .tools-empty-state {
+        color: var(--color-text-secondary);
+        opacity: 0.7;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Tools</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <p class="text-muted mb-4">
+            Access administrative tools organized by category to help manage your library system efficiently.
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Books Tools -->
+    <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card h-100 tools-card">
+            <div class="card-header tools-card-header" style="background-color: var(--color-primary); color: white;">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-book me-2"></i>Books
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text text-muted mb-3">
+                    Tools for managing books and book-related operations.
+                </p>
+                <div class="list-group list-group-flush">
+                    <a asp-area="Administration" asp-page="/Books/ImportHistory"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center tools-link">
+                        <div>
+                            <i class="bi bi-file-arrow-up me-2"></i>
+                            <strong>Book Bulk Import</strong>
+                            <br>
+                            <small class="text-muted">Import multiple books from CSV files or other sources</small>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a asp-area="Administration" asp-page="/Books/Wizard"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center tools-link">
+                        <div>
+                            <i class="bi bi-upc-scan me-2"></i>
+                            <strong>Scan multiple books</strong>
+                            <br>
+                            <small class="text-muted">Use the Books Wizard to scan and add multiple books
+                                efficiently</small>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Readers Tools -->
+    <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card h-100 tools-card">
+            <div class="card-header tools-card-header"
+                style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-people-fill me-2"></i>Readers
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text text-muted mb-3">
+                    Tools for managing readers and member-related operations.
+                </p>
+                <div class="list-group list-group-flush">
+                    <div class="text-center py-3 tools-empty-state">
+                        <i class="bi bi-tools"></i>
+                        <p class="mb-0">No tools available yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries Tools -->
+    <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card h-100 tools-card">
+            <div class="card-header tools-card-header"
+                style="background-color: var(--color-accent); color: var(--color-text-primary);">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-building me-2"></i>Libraries
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text text-muted mb-3">
+                    Tools for managing library locations and settings.
+                </p>
+                <div class="list-group list-group-flush">
+                    <div class="text-center py-3 tools-empty-state">
+                        <i class="bi bi-tools"></i>
+                        <p class="mb-0">No tools available yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Tools -->
+    <div class="col-lg-6 col-md-12 mb-4">
+        <div class="card h-100 tools-card">
+            <div class="card-header tools-card-header" style="background-color: var(--color-info); color: white;">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-gear-fill me-2"></i>System
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text text-muted mb-3">
+                    System maintenance and administrative tools.
+                </p>
+                <div class="list-group list-group-flush">
+                    <a asp-area="Administration" asp-page="/AuditLogs/List"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center tools-link">
+                        <div>
+                            <i class="bi bi-shield-check me-2"></i>
+                            <strong>Audit Logs</strong>
+                            <br>
+                            <small class="text-muted">View system audit logs and user activity tracking</small>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
