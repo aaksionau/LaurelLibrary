@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
@@ -39,5 +40,19 @@ public class UserService : IUserService
         user.CurrentLibraryId = libraryId;
         var result = await this.userManager.UpdateAsync(user);
         return result.Succeeded;
+    }
+
+    public async Task<bool> HasAdministratorClaimAsync(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        // Check if user has Administrator claim
+        var claims = await userManager.GetClaimsAsync(user);
+        return claims.Any(c => c.Type == "Administrator" && c.Value == "true")
+            || claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Administrator");
     }
 }
