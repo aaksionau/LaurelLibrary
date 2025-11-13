@@ -1,4 +1,7 @@
 using Azure.Storage.Blobs;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.SqlServer;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.EmailSenderServices.Services;
@@ -27,6 +30,28 @@ var connectionString =
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+// Add Hangfire services
+builder.Services.AddHangfire(configuration =>
+    configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(
+            connectionString,
+            new SqlServerStorageOptions
+            {
+                CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                QueuePollInterval = TimeSpan.Zero,
+                UseRecommendedIsolationLevel = true,
+                DisableGlobalLocks = true,
+            }
+        )
+);
+
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer();
 
 builder
     .Services.AddDefaultIdentity<AppUser>(options =>
@@ -187,8 +212,8 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 
-// Register background service for book import processing
-builder.Services.AddHostedService<BookImportBackgroundService>();
+// Register Hangfire job service for book import processing
+builder.Services.AddTransient<BookImportJobService>();
 
 var app = builder.Build();
 
@@ -227,6 +252,12 @@ app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add Hangfire dashboard - place after authentication for security
+app.UseHangfireDashboard(
+    "/hangfire",
+    new DashboardOptions() { Authorization = new[] { new HangfireDashboardAuthorizationFilter() } }
+);
 
 // Add subscription check middleware after authentication
 app.UseMiddleware<SubscriptionCheckMiddleware>();
