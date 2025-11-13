@@ -24,6 +24,7 @@ namespace LaurelLibrary.Tests.Services
         private readonly Mock<IUserService> _userServiceMock;
         private readonly Mock<IAuthenticationService> _authenticationServiceMock;
         private readonly Mock<IBarcodeService> _barcodeServiceMock;
+        private readonly Mock<IBlobStorageService> _blobStorageServiceMock;
         private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
         private readonly Mock<IAuditLogService> _auditLogServiceMock;
         private readonly Mock<IReaderActionService> _readerActionServiceMock;
@@ -38,6 +39,7 @@ namespace LaurelLibrary.Tests.Services
             _userServiceMock = new Mock<IUserService>();
             _authenticationServiceMock = new Mock<IAuthenticationService>();
             _barcodeServiceMock = new Mock<IBarcodeService>();
+            _blobStorageServiceMock = new Mock<IBlobStorageService>();
             _subscriptionServiceMock = new Mock<ISubscriptionService>();
             _auditLogServiceMock = new Mock<IAuditLogService>();
             _readerActionServiceMock = new Mock<IReaderActionService>();
@@ -50,6 +52,7 @@ namespace LaurelLibrary.Tests.Services
                 _userServiceMock.Object,
                 _authenticationServiceMock.Object,
                 _barcodeServiceMock.Object,
+                _blobStorageServiceMock.Object,
                 _subscriptionServiceMock.Object,
                 _auditLogServiceMock.Object,
                 _readerActionServiceMock.Object,
@@ -316,11 +319,16 @@ namespace LaurelLibrary.Tests.Services
                 .Setup(x => x.GenerateEan13(It.IsAny<int>()))
                 .Returns("1234567890123");
             _barcodeServiceMock
+                .Setup(x => x.GenerateBarcodeImage(It.IsAny<string>()))
+                .Returns(new MemoryStream());
+            _blobStorageServiceMock
                 .Setup(x =>
-                    x.GenerateBarcodeImageAsync(
+                    x.UploadStreamAsync(
+                        It.IsAny<Stream>(),
                         It.IsAny<string>(),
                         It.IsAny<string>(),
-                        It.IsAny<string>()
+                        It.IsAny<string>(),
+                        It.IsAny<Azure.Storage.Blobs.Models.PublicAccessType>()
                     )
                 )
                 .ReturnsAsync("https://example.com/barcode.png");
@@ -597,8 +605,17 @@ namespace LaurelLibrary.Tests.Services
                 .ReturnsAsync(reader);
             _librariesRepositoryMock.Setup(x => x.GetByIdAsync(libraryId)).ReturnsAsync(library);
             _barcodeServiceMock
+                .Setup(x => x.GenerateBarcodeImage(reader.Ean!))
+                .Returns(new MemoryStream());
+            _blobStorageServiceMock
                 .Setup(x =>
-                    x.GenerateBarcodeImageAsync(reader.Ean!, It.IsAny<string>(), It.IsAny<string>())
+                    x.UploadStreamAsync(
+                        It.IsAny<Stream>(),
+                        "barcodes",
+                        It.IsAny<string>(),
+                        "image/png",
+                        Azure.Storage.Blobs.Models.PublicAccessType.Blob
+                    )
                 )
                 .ReturnsAsync("https://example.com/new-barcode.png");
 

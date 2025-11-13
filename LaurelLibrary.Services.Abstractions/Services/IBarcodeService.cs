@@ -8,6 +8,13 @@ public interface IBarcodeService
     string GenerateEan13(int uniqueId);
 
     /// <summary>
+    /// Generates a barcode image as a stream.
+    /// </summary>
+    /// <param name="ean">The EAN barcode value to encode</param>
+    /// <returns>A memory stream containing the barcode image as PNG</returns>
+    MemoryStream GenerateBarcodeImage(string ean);
+
+    /// <summary>
     /// Generates a barcode image and saves it to Azure Blob Storage.
     /// </summary>
     /// <param name="ean">The EAN barcode value to encode</param>

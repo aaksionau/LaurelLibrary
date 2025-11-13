@@ -125,6 +125,66 @@ function setScanningMode(isScanning, scanToggleBtn, searchIsbnInput) {
     }
 }
 
+/**
+ * Print the barcode image directly without showing a popup
+ */
+function printBarcode() {
+    var barcodeImage = document.getElementById('barcodeImage');
+
+    if (barcodeImage) {
+        // Create a new window for printing
+        var printWindow = window.open('', '_blank');
+
+        printWindow.document.write('<html><head><title>Print Barcode</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('@page { size: auto; margin: 10mm; }');
+        printWindow.document.write('body { margin: 0; text-align: center; }');
+        printWindow.document.write('img { max-width: 100%; height: auto; }');
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<img src="' + barcodeImage.src + '" alt="Barcode" />');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        // Wait for image to load before printing
+        setTimeout(function () {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    }
+}
+
+/**
+ * Print the barcode image from the modal
+ */
+function printBarcodeImage() {
+    var modalImage = document.getElementById('modalBarcodeImage');
+
+    if (modalImage) {
+        // Create a new window for printing
+        var printWindow = window.open('', '_blank');
+
+        printWindow.document.write('<html><head><title>Print Barcode</title>');
+        printWindow.document.write('<style>');
+        printWindow.document.write('@page { size: auto; margin: 10mm; }');
+        printWindow.document.write('body { margin: 0; text-align: center; }');
+        printWindow.document.write('img { max-width: 100%; height: auto; }');
+        printWindow.document.write('</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<img src="' + modalImage.src + '" alt="Barcode" />');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+
+        // Wait for image to load before printing
+        setTimeout(function () {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+    }
+}
+
 // Export functions for global access if needed
 window.setScanningMode = setScanningMode;
 window.restoreScanningMode = restoreScanningMode;
+window.printBarcode = printBarcode;
+window.printBarcodeImage = printBarcodeImage;

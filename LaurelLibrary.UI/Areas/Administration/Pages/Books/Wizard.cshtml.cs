@@ -10,11 +10,17 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
     {
         private readonly IBooksService _booksService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IBarcodeService _barcodeService;
 
-        public WizardModel(IBooksService booksService, IAuthenticationService authenticationService)
+        public WizardModel(
+            IBooksService booksService,
+            IAuthenticationService authenticationService,
+            IBarcodeService barcodeService
+        )
         {
             _booksService = booksService;
             _authenticationService = authenticationService;
+            _barcodeService = barcodeService;
         }
 
         [BindProperty]
@@ -25,9 +31,12 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
 
         [BindProperty]
         public bool IsScanning { get; set; }
-
         public bool BookFound { get; set; }
+        public bool BookSaved { get; set; } = false;
         public string SearchMessage { get; set; } = string.Empty;
+        public string SaveMessage { get; set; } = string.Empty;
+        public byte[]? BarcodeImageBytes { get; set; }
+        public bool ShowBarcodeForPrint { get; set; }
 
         public void OnGet()
         {
@@ -36,51 +45,114 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Remove hyphens from ISBN immediately
-            if (!string.IsNullOrWhiteSpace(SearchIsbn))
+            ResetBarcodeState();
+
+            var isbnProcessingResult = ProcessIsbnInput();
+            var processedIsbn = isbnProcessingResult.ProcessedIsbn;
+            var shouldGenerateBarcode = isbnProcessingResult.ShouldGenerateBarcode;
+
+            if (string.IsNullOrWhiteSpace(processedIsbn))
             {
-                SearchIsbn = SearchIsbn.Replace("-", "").NormalizeIsbn();
-            }
-
-            // If user is searching by ISBN
-            if (!string.IsNullOrWhiteSpace(SearchIsbn))
-            {
-                if (
-                    Book != null
-                    && string.IsNullOrWhiteSpace(Book.Title)
-                    && !string.IsNullOrWhiteSpace(Book.Isbn)
-                )
-                {
-                    await CreateBookAsync();
-                }
-
-                // Now perform the search by ISBN
-                var foundBook = await _booksService.SearchBookByIsbnAsync(SearchIsbn);
-                if (foundBook != null)
-                {
-                    Book = foundBook;
-                    BookFound = true;
-                    SearchMessage = $"Book '{Book.Title}' found. ISBN: {Book.Isbn}.";
-                }
-                else
-                {
-                    Book = new LaurelBookDto { Isbn = SearchIsbn };
-                    BookFound = false;
-                    SearchMessage = $"No book found for ISBN {SearchIsbn}.";
-                }
-
-                SearchIsbn = string.Empty; // Clear search field
-                ModelState.Remove(nameof(SearchIsbn)); // Clear from ModelState
+                await CreateBookAsync();
+                ClearSearchIsbn();
                 return Page();
             }
-            else
+
+            if (shouldGenerateBarcode)
+            {
+                await HandleBarcodeGeneration(processedIsbn);
+            }
+
+            await HandleExistingBookCreation();
+            return await SearchForBook(processedIsbn);
+        }
+
+        private void ResetBarcodeState()
+        {
+            BarcodeImageBytes = null;
+            ShowBarcodeForPrint = false;
+        }
+
+        private (string ProcessedIsbn, bool ShouldGenerateBarcode) ProcessIsbnInput()
+        {
+            if (string.IsNullOrWhiteSpace(SearchIsbn))
+            {
+                return (string.Empty, false);
+            }
+
+            var shouldGenerateBarcode = SearchIsbn.EndsWith(
+                "p",
+                StringComparison.OrdinalIgnoreCase
+            );
+            var processedIsbn = shouldGenerateBarcode
+                ? SearchIsbn.Substring(0, SearchIsbn.Length - 1)
+                : SearchIsbn;
+
+            processedIsbn = processedIsbn.Replace("-", "").NormalizeIsbn();
+
+            return (processedIsbn, shouldGenerateBarcode);
+        }
+
+        private async Task HandleBarcodeGeneration(string isbn)
+        {
+            if (string.IsNullOrWhiteSpace(isbn))
+            {
+                SearchMessage = "Please enter a valid ISBN before the 'p' character.";
+                ClearSearchIsbn();
+            }
+
+            try
+            {
+                using var barcodeStream = _barcodeService.GenerateBarcodeImage(isbn);
+                BarcodeImageBytes = barcodeStream.ToArray();
+                ShowBarcodeForPrint = true;
+                SearchMessage = $"Barcode generated for ISBN {isbn} and ready for printing.";
+                ClearSearchIsbn();
+            }
+            catch (Exception ex)
+            {
+                SearchMessage = $"Failed to generate barcode for ISBN {isbn}: {ex.Message}";
+                ClearSearchIsbn();
+            }
+        }
+
+        private async Task HandleExistingBookCreation()
+        {
+            if (
+                Book != null
+                && !string.IsNullOrWhiteSpace(Book.Title)
+                && !string.IsNullOrWhiteSpace(Book.Isbn)
+            )
             {
                 await CreateBookAsync();
             }
+        }
 
-            SearchIsbn = string.Empty; // Clear search field
-            // If not searching by ISBN, just reload page
+        private async Task<IActionResult> SearchForBook(string isbn)
+        {
+            var foundBook = await _booksService.SearchBookByIsbnAsync(isbn);
+
+            if (foundBook != null)
+            {
+                Book = foundBook;
+                BookFound = true;
+                SearchMessage = $"Book '{Book.Title}' found. ISBN: {Book.Isbn}.";
+            }
+            else
+            {
+                Book = new LaurelBookDto { Isbn = isbn };
+                BookFound = false;
+                SearchMessage = $"No book found for ISBN {isbn}.";
+            }
+
+            ClearSearchIsbn();
             return Page();
+        }
+
+        private void ClearSearchIsbn()
+        {
+            SearchIsbn = string.Empty;
+            ModelState.Remove(nameof(SearchIsbn));
         }
 
         private async Task CreateBookAsync()
@@ -111,11 +183,21 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
                 userFullName,
                 currentUser.CurrentLibraryId.Value
             );
-
+            SaveMessage = $"Book '{Book.Title}' created successfully.";
+            BookSaved = true;
             Book = new LaurelBookDto(); // Clear the book form
-            SearchMessage = "Book created successfully.";
 
             return;
+        }
+
+        public IActionResult OnGetBarcodeImage()
+        {
+            if (BarcodeImageBytes != null && BarcodeImageBytes.Length > 0)
+            {
+                return File(BarcodeImageBytes, "image/png", "barcode.png");
+            }
+
+            return NotFound();
         }
     }
 }
