@@ -37,11 +37,7 @@ public class BarcodeService : IBarcodeService
         return baseNumber + checkDigit;
     }
 
-    public async Task<string?> GenerateBarcodeImageAsync(
-        string ean,
-        string blobName,
-        string containerName
-    )
+    public MemoryStream GenerateBarcodeImage(string ean)
     {
         try
         {
@@ -66,11 +62,34 @@ public class BarcodeService : IBarcodeService
             // Convert to PNG stream
             using var image = SKImage.FromBitmap(bitmap);
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-            using var stream = data.AsStream();
+
+            var memoryStream = new MemoryStream();
+            data.AsStream().CopyTo(memoryStream);
+            memoryStream.Position = 0;
+
+            _logger.LogInformation("Barcode image generated successfully for EAN {Ean}", ean);
+            return memoryStream;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate barcode image for EAN {Ean}", ean);
+            throw;
+        }
+    }
+
+    public async Task<string?> GenerateBarcodeImageAsync(
+        string ean,
+        string blobName,
+        string containerName
+    )
+    {
+        try
+        {
+            using var barcodeStream = GenerateBarcodeImage(ean);
 
             // Upload to Azure Blob Storage using BlobStorageService
             var blobUrl = await _blobStorageService.UploadStreamAsync(
-                stream,
+                barcodeStream,
                 containerName,
                 blobName,
                 "image/png",

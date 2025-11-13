@@ -17,6 +17,7 @@ public class ReadersService : IReadersService
     private readonly IUserService _userService;
     private readonly IAuthenticationService _authenticationService;
     private readonly IBarcodeService _barcodeService;
+    private readonly IBlobStorageService _blobStorageService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
     private readonly IReaderActionService _readerActionService;
@@ -29,6 +30,7 @@ public class ReadersService : IReadersService
         IUserService userService,
         IAuthenticationService authenticationService,
         IBarcodeService barcodeService,
+        IBlobStorageService blobStorageService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
         IReaderActionService readerActionService,
@@ -41,6 +43,7 @@ public class ReadersService : IReadersService
         _userService = userService;
         _authenticationService = authenticationService;
         _barcodeService = barcodeService;
+        _blobStorageService = blobStorageService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
         _readerActionService = readerActionService;
@@ -412,7 +415,15 @@ public class ReadersService : IReadersService
             blobName
         );
 
-        var barcodeUrl = await _barcodeService.GenerateBarcodeImageAsync(ean, blobName, "barcodes");
+        // Generate barcode image and save it using BlobStorageService directly
+        using var barcodeStream = _barcodeService.GenerateBarcodeImage(ean);
+        var barcodeUrl = await _blobStorageService.UploadStreamAsync(
+            barcodeStream,
+            "barcodes",
+            blobName,
+            "image/png",
+            Azure.Storage.Blobs.Models.PublicAccessType.Blob
+        );
 
         if (barcodeUrl == null)
         {

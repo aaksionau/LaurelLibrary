@@ -21,6 +21,7 @@ public class BooksService : IBooksService
     private readonly IImageService _imageService;
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IBarcodeService _barcodeService;
+    private readonly IBlobStorageService _blobStorageService;
     private readonly ILogger<BooksService> _logger;
 
     public BooksService(
@@ -34,6 +35,7 @@ public class BooksService : IBooksService
         IImageService imageService,
         ILibrariesRepository librariesRepository,
         IBarcodeService barcodeService,
+        IBlobStorageService blobStorageService,
         ILogger<BooksService> logger
     )
     {
@@ -47,6 +49,7 @@ public class BooksService : IBooksService
         _imageService = imageService;
         _librariesRepository = librariesRepository;
         _barcodeService = barcodeService;
+        _blobStorageService = blobStorageService;
         _logger = logger;
     }
 
@@ -246,12 +249,20 @@ public class BooksService : IBooksService
         }
 
         var blobName = $"{libraryId}/{entity.Isbn}.png";
-        var blobPath = await _barcodeService.GenerateBarcodeImageAsync(
-            entity.Isbn,
-            blobName,
-            "isbns"
-        );
-        entity.IsbnBarcodeImagePath = blobPath;
+
+        // Generate barcode image and save it using BlobStorageService directly
+        if (!string.IsNullOrEmpty(entity.Isbn))
+        {
+            using var barcodeStream = _barcodeService.GenerateBarcodeImage(entity.Isbn);
+            var blobPath = await _blobStorageService.UploadStreamAsync(
+                barcodeStream,
+                "isbns",
+                blobName,
+                "image/png",
+                Azure.Storage.Blobs.Models.PublicAccessType.Blob
+            );
+            entity.IsbnBarcodeImagePath = blobPath ?? string.Empty;
+        }
         await _booksRepository.AddBookAsync(entity);
 
         await DetermineAppropriateAgeAsync(entity);
