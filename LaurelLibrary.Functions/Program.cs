@@ -1,6 +1,8 @@
 using Azure.Identity;
 using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.EmailSenderServices.Services;
+using LaurelLibrary.Jobs.Interfaces;
+using LaurelLibrary.Jobs.Services;
 using LaurelLibrary.Persistence.Data;
 using LaurelLibrary.Persistence.Repositories;
 using LaurelLibrary.Services;
@@ -51,6 +53,7 @@ builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IMailgunService, MailgunService>();
 builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
 builder.Services.AddScoped<IPlanningCenterService, PlanningCenterService>();
+builder.Services.AddScoped<IAgeClassificationService, AgeClassificationService>();
 
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {

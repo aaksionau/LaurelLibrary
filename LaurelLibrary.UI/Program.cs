@@ -269,8 +269,9 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
     client.Timeout = TimeSpan.FromMinutes(2); // Set timeout for image downloads
 });
 
-// Register Hangfire job service for book import processing
+// Register Hangfire job services
 builder.Services.AddTransient<BookImportJobService>();
+builder.Services.AddTransient<AgeClassificationJobService>();
 
 var app = builder.Build();
 
