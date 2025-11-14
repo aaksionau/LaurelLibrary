@@ -36,4 +36,12 @@ public class LibraryDto
     )]
     [Display(Name = "Library Alias")]
     public string Alias { get; set; } = string.Empty;
+
+    [MaxLength(512)]
+    [Display(Name = "Planning Center Application ID")]
+    public string? PlanningCenterApplicationId { get; set; }
+
+    [MaxLength(512)]
+    [Display(Name = "Planning Center Secret")]
+    public string? PlanningCenterSecret { get; set; }
 }

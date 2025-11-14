@@ -1,0 +1,388 @@
+@page
+@model LaurelLibrary.UI.Areas.Administration.Pages.Readers.ImportPlanningCenterModel
+@{
+    ViewData["Title"] = "Import from Planning Center";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a asp-area="Administration" asp-page="/Readers/List">Readers</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Import from Planning Center</li>
+                        </ol>
+                    </nav>
+                    <h1><i class="bi bi-cloud-download me-2"></i>Import from Planning Center</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @Model.StatusMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @Model.ErrorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Connection Status Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-wifi me-2"></i>Connection Status</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.HasCredentials)
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="mb-0">Planning Center credentials are configured for this library.</p>
+                        <small class="text-muted">Click "Test Connection" to verify the connection is working.</small>
+                    </div>
+                    <div>
+                        <form method="post" asp-page-handler="TestConnection" class="d-inline">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Test Connection
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>No Planning Center credentials configured.</strong>
+                    Please configure your Planning Center Application ID and Secret in the
+                    <a href="@Url.Page("/Libraries/Update", new { libraryId = Model.CurrentLibraryId })" class="alert-link">
+                        Library Settings
+                    </a> to use this integration.
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.HasCredentials)
+    {
+        <!-- Import People Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-download me-2"></i>Import People from Planning Center</h5>
+            </div>
+            <div class="card-body">
+                <p>Import people from Planning Center as readers in your library. This will fetch all people from your
+                    Planning Center database and allow you to select which ones to import.</p>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>What happens during import:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Fetches all people from Planning Center
+                            </li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Shows people with valid email addresses
+                            </li>
+                            <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Highlights people without valid
+                                emails (need attention)</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Allows you to review and select who to
+                                import</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Creates reader accounts with library
+                                card numbers</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <form method="post" asp-page-handler="FetchPeople">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-download me-2"></i>Fetch People from Planning Center
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.ImportSummary != null)
+        {
+            <!-- Import Summary -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Import Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-primary mb-1">@Model.ImportSummary.TotalCount</h4>
+                                <small class="text-muted">Total People</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-success mb-1">@Model.ImportSummary.ActiveCount</h4>
+                                <small class="text-muted">Active</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-secondary mb-1">@Model.ImportSummary.InactiveCount</h4>
+                                <small class="text-muted">Inactive</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-warning mb-1">@Model.ImportSummary.PeopleNeedingAttention.Count</h4>
+                                <small class="text-muted">Need Attention</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.ImportSummary.MissingEmailCount > 0 || Model.ImportSummary.InvalidEmailCount > 0 ||
+                                Model.ImportSummary.DuplicateEmailCount > 0)
+                    {
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6>Issue Breakdown:</h6>
+                            </div>
+                            @if (Model.ImportSummary.MissingEmailCount > 0)
+                            {
+                                <div class="col-md-4">
+                                    <div class="text-center p-2 border rounded bg-light">
+                                        <small class="text-danger d-block"><i
+                                                class="bi bi-x-circle me-1"></i>@Model.ImportSummary.MissingEmailCount</small>
+                                        <small class="text-muted">No Email</small>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.ImportSummary.InvalidEmailCount > 0)
+                            {
+                                <div class="col-md-4">
+                                    <div class="text-center p-2 border rounded bg-light">
+                                        <small class="text-warning d-block"><i
+                                                class="bi bi-exclamation-triangle me-1"></i>@Model.ImportSummary.InvalidEmailCount</small>
+                                        <small class="text-muted">Invalid Email</small>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.ImportSummary.DuplicateEmailCount > 0)
+                            {
+                                <div class="col-md-4">
+                                    <div class="text-center p-2 border rounded bg-light">
+                                        <small class="text-info d-block"><i
+                                                class="bi bi-info-circle me-1"></i>@Model.ImportSummary.DuplicateEmailCount</small>
+                                        <small class="text-muted">Duplicate Email</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (Model.ImportSummary.PeopleNeedingAttention.Any())
+            {
+                <!-- People Needing Attention -->
+                <div class="card mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>People Needing Attention</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>The following people have issues that prevent them from being imported automatically:</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Issue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var person in Model.ImportSummary.PeopleNeedingAttention)
+                                    {
+                                        <tr>
+                                            <td>@person.FullName</td>
+                                            <td>
+                                                <span class="badge @(person.Status ? "bg-success" : "bg-secondary")">
+                                                    @(person.Status ? "Active" : "Inactive")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (string.IsNullOrWhiteSpace(person.PrimaryEmail))
+                                                {
+                                                    <span class="text-danger"><i class="bi bi-x-circle me-1"></i>No email address</span>
+                                                }
+                                                else if (!person.HasValidEmail)
+                                                {
+                                                    <span class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Invalid email:
+                                                        @person.PrimaryEmail</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-info"><i class="bi bi-info-circle me-1"></i>Duplicate email already
+                                                        exists in system</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Importable People -->
+            <div class="card mt-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>People Ready to Import</h5>
+                    <div>
+                        <button type="submit" form="importForm" class="btn btn-success" id="importBtn" disabled>
+                            <i class="bi bi-download me-1"></i>Import Selected (<span id="selectedCount">0</span>)
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @{
+                        var peopleNeedingAttentionIds = Model.ImportSummary.PeopleNeedingAttention.Select(p => p.Id).ToHashSet();
+                        var importablePeople = Model.ImportSummary.People
+                        .Where(p => !peopleNeedingAttentionIds.Contains(p.Id))
+                        .ToList();
+                    }
+
+                    <form method="post" asp-page-handler="ImportSelected" id="importForm">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label" for="selectAll">
+                                    Select All (@importablePeople.Count people)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Select</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var person in importablePeople)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input class="form-check-input person-checkbox" type="checkbox"
+                                                        name="SelectedPeopleIds" value="@person.Id" id="person_@person.Id">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>@person.FullName</strong>
+                                                @if (person.Birthdate.HasValue)
+                                                {
+                                                    <br>
+
+                                                    <small class="text-muted">Born: @person.Birthdate.Value.ToString("MMM d, yyyy")</small>
+                                                }
+                                            </td>
+                                            <td>@person.PrimaryEmail</td>
+                                            <td>
+                                                <span class="badge @(person.Status ? "bg-success" : "bg-secondary")">
+                                                    @(person.Status ? "Active" : "Inactive")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(person.StreetAddress))
+                                                {
+                                                    @person.StreetAddress
+
+                                                    <br>
+                                                    @($"{person.City}, {person.State} {person.Zip}")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">No address</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+
+        @if (Model.ImportResult != null)
+        {
+            <!-- Import Results -->
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Import Results</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-primary mb-1">@Model.ImportResult.TotalProcessed</h4>
+                                <small class="text-muted">Total Processed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-success mb-1">@Model.ImportResult.SuccessfullyCreated</h4>
+                                <small class="text-muted">Created</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-info mb-1">@Model.ImportResult.Updated</h4>
+                                <small class="text-muted">Updated</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <h4 class="text-warning mb-1">@Model.ImportResult.Skipped</h4>
+                                <small class="text-muted">Skipped</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.ImportResult.Errors.Any())
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <h6><i class="bi bi-exclamation-triangle me-2"></i>Import Errors:</h6>
+                            <ul class="mb-0">
+                                @foreach (var error in Model.ImportResult.Errors)
+                                {
+                                    <li>@error</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/planning-center-import.js"></script>
+}

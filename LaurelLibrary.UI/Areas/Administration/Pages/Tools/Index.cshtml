@@ -95,10 +95,16 @@
                     Tools for managing readers and member-related operations.
                 </p>
                 <div class="list-group list-group-flush">
-                    <div class="text-center py-3 tools-empty-state">
-                        <i class="bi bi-tools"></i>
-                        <p class="mb-0">No tools available yet</p>
-                    </div>
+                    <a asp-area="Administration" asp-page="/Readers/ImportPlanningCenter"
+                        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center tools-link">
+                        <div>
+                            <i class="bi bi-people-fill me-2"></i>
+                            <strong>Import people from Planning Center</strong>
+                            <br>
+                            <small class="text-muted">Import congregation members from Planning Center Online</small>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
                 </div>
             </div>
         </div>

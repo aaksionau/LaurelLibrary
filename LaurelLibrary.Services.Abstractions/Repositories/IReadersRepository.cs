@@ -21,4 +21,5 @@ public interface IReadersRepository
     Task<int> GetReadersCountAsync(Guid libraryId, string? searchName = null);
     Task<bool> DeleteReaderAsync(int readerId, Guid libraryId);
     Task<int> GetReaderCountByLibraryIdAsync(Guid libraryId);
+    Task<HashSet<string>> GetAllEmailsAsync(Guid libraryId);
 }

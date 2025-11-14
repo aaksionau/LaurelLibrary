@@ -30,6 +30,12 @@ public class Library : Audit
 
     public int CheckoutDurationDays { get; set; } = 14;
 
+    [StringLength(512)]
+    public string? PlanningCenterApplicationId { get; set; }
+
+    [StringLength(512)]
+    public string? PlanningCenterSecret { get; set; }
+
     public virtual Collection<Book> Books { get; set; } = new Collection<Book>();
 
     public virtual Collection<Reader> Students { get; set; } = new Collection<Reader>();

@@ -50,6 +50,7 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IMailgunService, MailgunService>();
 builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
+builder.Services.AddScoped<IPlanningCenterService, PlanningCenterService>();
 
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {
@@ -58,6 +59,16 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
             ?? throw new InvalidOperationException("ISBNdb:BaseUrl not configured")
     );
     client.DefaultRequestHeaders.Add("Authorization", configuration["ISBNdb:ApiKey"]);
+});
+
+// Configure HttpClient for Planning Center API
+builder.Services.AddHttpClient<IPlanningCenterService, PlanningCenterService>(client =>
+{
+    client.BaseAddress = new Uri(
+        configuration["PlanningCenter:BaseUrl"]
+            ?? throw new InvalidOperationException("Planning Center Base URL not configured")
+    );
+    client.Timeout = TimeSpan.FromMinutes(5);
 });
 
 // Add HttpClient for ImageService to download images

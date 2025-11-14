@@ -17,6 +17,8 @@ public static class LibraryDtoExtensions
             Logo = libraryDto.Logo,
             Description = libraryDto.Description,
             CheckoutDurationDays = libraryDto.CheckoutDurationDays,
+            PlanningCenterApplicationId = libraryDto.PlanningCenterApplicationId,
+            PlanningCenterSecret = libraryDto.PlanningCenterSecret,
         };
     }
 
@@ -32,6 +34,8 @@ public static class LibraryDtoExtensions
             Logo = library.Logo,
             Description = library.Description,
             CheckoutDurationDays = library.CheckoutDurationDays,
+            PlanningCenterApplicationId = library.PlanningCenterApplicationId,
+            PlanningCenterSecret = library.PlanningCenterSecret,
         };
     }
 }

@@ -190,6 +190,7 @@ builder.Services.AddScoped<IReaderActionService, ReaderActionService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IImportHistoryService, ImportHistoryService>();
 builder.Services.AddScoped<IBooksService, BooksService>();
+builder.Services.AddScoped<IPlanningCenterService, PlanningCenterService>();
 
 // Helper services
 builder.Services.AddScoped<ICsvIsbnParser, CsvIsbnParser>();
@@ -204,6 +205,16 @@ builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
             ?? throw new InvalidOperationException("Base URL not configured")
     );
     client.DefaultRequestHeaders.Add("Authorization", builder.Configuration["ISBNdb:ApiKey"]);
+});
+
+// Configure HttpClient for Planning Center API
+builder.Services.AddHttpClient<IPlanningCenterService, PlanningCenterService>(client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["PlanningCenter:BaseUrl"]
+            ?? throw new InvalidOperationException("Planning Center Base URL not configured")
+    );
+    client.Timeout = TimeSpan.FromMinutes(5); // Planning Center can be slow with large datasets
 });
 
 // Add HttpClient for ImageService to download images

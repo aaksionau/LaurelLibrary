@@ -143,6 +143,19 @@ public class ReadersService : IReadersService
             throw new InvalidOperationException("Current user library not found.");
         }
 
+        var possibleExistedReaders = await _readersRepository.GetAllEmailsAsync(
+            currentUser.CurrentLibraryId.Value
+        );
+
+        if (
+            possibleExistedReaders?.Any(r =>
+                string.Equals(readerDto.Email, r, StringComparison.OrdinalIgnoreCase)
+            ) == true
+        )
+        {
+            return false;
+        }
+
         var displayName = await GetUserFullNameAsync();
         var currentLibrary = await _librariesRepository.GetByIdAsync(
             currentUser.CurrentLibraryId.Value
