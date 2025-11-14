@@ -148,9 +148,9 @@ public class ReadersService : IReadersService
         );
 
         if (
-            possibleExistedReaders.Any(r =>
+            possibleExistedReaders?.Any(r =>
                 string.Equals(readerDto.Email, r, StringComparison.OrdinalIgnoreCase)
-            )
+            ) == true
         )
         {
             throw new InvalidOperationException(

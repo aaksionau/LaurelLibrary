@@ -159,10 +159,11 @@ public class PlanningCenterServiceTests : IDisposable
 
         _authenticationServiceMock.Setup(x => x.GetAppUserAsync()).ReturnsAsync(currentUser);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _planningCenterService.TestConnectionAsync()
-        );
+        // Act
+        var result = await _planningCenterService.TestConnectionAsync();
+
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
@@ -190,10 +191,11 @@ public class PlanningCenterServiceTests : IDisposable
 
         _librariesRepositoryMock.Setup(x => x.GetByIdAsync(_testLibraryId)).ReturnsAsync(library);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            _planningCenterService.TestConnectionAsync()
-        );
+        // Act
+        var result = await _planningCenterService.TestConnectionAsync();
+
+        // Assert
+        Assert.False(result);
     }
 
     [Fact]
