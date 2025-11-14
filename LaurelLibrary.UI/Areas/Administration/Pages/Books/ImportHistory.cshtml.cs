@@ -1,7 +1,6 @@
 using LaurelLibrary.Domain.Entities;
-using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
-using LaurelLibrary.UI.Services;
+using LaurelLibrary.Services.Jobs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 

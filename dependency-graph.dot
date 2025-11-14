@@ -1,0 +1,35 @@
+
+		digraph G{
+      node [shape = box;];
+			"LaurelLibrary.Domain" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.Domain</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.EmailSenderServices" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.EmailSenderServices</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.EmailSenderServices"->"LaurelLibrary.Services";"LaurelLibrary.EmailSenderServices"->"LaurelLibrary.Services.Abstractions";"LaurelLibrary.Persistence" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.Persistence</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.Persistence"->"LaurelLibrary.Domain";"LaurelLibrary.Persistence"->"LaurelLibrary.Services";"LaurelLibrary.Persistence"->"LaurelLibrary.Services.Abstractions";"LaurelLibrary.Services" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.Services</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.Services"->"LaurelLibrary.Domain";"LaurelLibrary.Services"->"LaurelLibrary.EmailSenderServices";"LaurelLibrary.Services"->"LaurelLibrary.Persistence";"LaurelLibrary.Services"->"LaurelLibrary.Services.Abstractions";"LaurelLibrary.Services.Abstractions" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.Services.Abstractions</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.Services.Abstractions"->"LaurelLibrary.Domain";"LaurelLibrary.UI" [
+            label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                <TR><TD><FONT POINT-SIZE="14">LaurelLibrary.UI</FONT></TD></TR>
+                <TR><TD><FONT POINT-SIZE="10">net8.0</FONT></TD></TR>
+              </TABLE>>
+        ];"LaurelLibrary.UI"->"LaurelLibrary.Domain";"LaurelLibrary.UI"->"LaurelLibrary.Persistence";"LaurelLibrary.UI"->"LaurelLibrary.Services";"LaurelLibrary.UI"->"LaurelLibrary.Services.Abstractions";
+  }

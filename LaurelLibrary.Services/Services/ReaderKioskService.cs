@@ -2,8 +2,10 @@ using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
 namespace LaurelLibrary.Services.Services;
@@ -14,8 +16,8 @@ public class ReaderKioskService : IReaderKioskService
     private readonly ILibrariesRepository _librariesRepository;
     private readonly IReadersRepository _readersRepository;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueService _queueService;
     private readonly IReaderActionService _readerActionService;
+    private readonly IEmailSender _emailSender;
     private readonly ILogger<ReaderKioskService> _logger;
 
     public ReaderKioskService(
@@ -23,8 +25,8 @@ public class ReaderKioskService : IReaderKioskService
         ILibrariesRepository librariesRepository,
         IReadersRepository readersRepository,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueService queueService,
         IReaderActionService readerActionService,
+        IEmailSender emailSender,
         ILogger<ReaderKioskService> logger
     )
     {
@@ -32,8 +34,8 @@ public class ReaderKioskService : IReaderKioskService
         _librariesRepository = librariesRepository;
         _readersRepository = readersRepository;
         _emailTemplateService = emailTemplateService;
-        _queueService = queueService;
         _readerActionService = readerActionService;
+        _emailSender = emailSender;
         _logger = logger;
     }
 
@@ -135,21 +137,9 @@ public class ReaderKioskService : IReaderKioskService
                     emailModel
                 );
 
-                var emailMessage = new LaurelLibrary.EmailSenderServices.Dtos.EmailMessageDto
-                {
-                    To = reader.Email,
-                    Subject = $"Books Checked Out from {library.Name}",
-                    Body = emailBody,
-                    Timestamp = DateTime.UtcNow,
-                };
+                var subject = $"Books Checked Out from {library.Name}";
 
-                // Serialize to JSON for queue message
-                var messageJson = JsonSerializer.Serialize(
-                    emailMessage,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
-
-                await _queueService.SendMessageAsync(messageJson, "emails");
+                await _emailSender.SendEmailAsync(reader.Email, subject, emailBody);
 
                 _logger.LogInformation(
                     "Checkout confirmation email sent to reader {ReaderId} at {Email}",

@@ -1,11 +1,11 @@
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Domain.Enums;
+using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
-using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
-using LaurelLibrary.Services.Helpers;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -21,9 +21,7 @@ public class BookImportProcessorService : IBookImportProcessorService
     private readonly IAuditLogService _auditLogService;
     private readonly IEmailSender _emailService;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueService _azureQueueService;
     private readonly IUserService _userService;
-    private readonly ILaurelEmailSenderService _laurelEmailSenderService;
     private readonly ICsvIsbnParser _csvIsbnParser;
     private readonly ILogger<BookImportProcessorService> _logger;
     private readonly int _chunkSize;
@@ -37,9 +35,7 @@ public class BookImportProcessorService : IBookImportProcessorService
         IAuditLogService auditLogService,
         IEmailSender emailService,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueService azureQueueService,
         IUserService userService,
-        ILaurelEmailSenderService laurelEmailSenderService,
         ICsvIsbnParser csvIsbnParser,
         ILogger<BookImportProcessorService> logger
     )
@@ -51,9 +47,7 @@ public class BookImportProcessorService : IBookImportProcessorService
         _auditLogService = auditLogService;
         _emailService = emailService;
         _emailTemplateService = emailTemplateService;
-        _azureQueueService = azureQueueService;
         _userService = userService;
-        _laurelEmailSenderService = laurelEmailSenderService;
         _csvIsbnParser = csvIsbnParser;
         _logger = logger;
 
@@ -161,12 +155,7 @@ public class BookImportProcessorService : IBookImportProcessorService
         // Age classification messages are sent immediately after each book creation
 
         // Send completion notification
-        await _laurelEmailSenderService.SendCompletionNotificationAsync(
-            importHistory,
-            _emailService,
-            _emailTemplateService,
-            _userService
-        );
+        await this.SendCompletionNotificationAsync(importHistory);
 
         // Update notification sent flag using repository method
         await _importHistoryRepository.MarkNotificationSentAsync(importHistory.ImportHistoryId);
@@ -248,16 +237,6 @@ public class BookImportProcessorService : IBookImportProcessorService
                     importHistory.LibraryId
                 );
 
-                // Send age classification message immediately after book creation
-                var createdBook = await _booksService.SearchBookByIsbnAsync(isbn);
-                if (createdBook?.BookId != null)
-                {
-                    await _azureQueueService.SendAgeClassificationMessageAsync(
-                        createdBook,
-                        importHistory.LibraryId
-                    );
-                }
-
                 processed++;
             }
             catch (Exception ex)
@@ -268,5 +247,57 @@ public class BookImportProcessorService : IBookImportProcessorService
         }
 
         return (processed, failed);
+    }
+
+    private async Task SendCompletionNotificationAsync(ImportHistory importHistory)
+    {
+        try
+        {
+            // Get user email from UserService
+            var user = await _userService.FindUserByIdAsync(importHistory.UserId);
+            if (user?.Email == null)
+            {
+                _logger.LogWarning(
+                    "Cannot send notification: User email not found for user {UserId}",
+                    importHistory.UserId
+                );
+                return;
+            }
+
+            // Create email model for the template
+            var emailModel = new BulkImportCompletionEmailDto
+            {
+                ReaderName = user.FirstName + " " + user.LastName,
+                LibraryName = importHistory.Library?.Name ?? "Your Library",
+                FileName = importHistory.FileName ?? "Unknown File",
+                TotalBooks = importHistory.TotalIsbns,
+                SuccessfullyAdded = importHistory.SuccessCount,
+                Failed = importHistory.FailedCount,
+                CompletedAt = (importHistory.CompletedAt ?? DateTimeOffset.UtcNow).DateTime,
+                FailedIsbns = importHistory.FailedIsbns,
+            };
+
+            // Render the email template
+            var emailBody = await _emailTemplateService.RenderBulkImportCompletionEmailAsync(
+                emailModel
+            );
+            var subject = $"Bulk Import Completed - {importHistory.FileName}";
+
+            await _emailService.SendEmailAsync(user.Email, subject, emailBody);
+
+            _logger.LogInformation(
+                "Completion notification sent to {Email} for import {ImportHistoryId}",
+                user.Email,
+                importHistory.ImportHistoryId
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to send completion notification for import {ImportHistoryId}",
+                importHistory.ImportHistoryId
+            );
+        }
     }
 }

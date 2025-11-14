@@ -5,6 +5,7 @@ using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Jobs;
 using Microsoft.Extensions.Logging;
 
 namespace LaurelLibrary.Services.Services;
@@ -15,7 +16,7 @@ public class BooksService : IBooksService
     private readonly IAuthorsRepository _authorsRepository;
     private readonly ICategoriesRepository _categoriesRepository;
     private readonly IIsbnService _isbnService;
-    private readonly IAzureQueueService _queueService;
+    private readonly AgeClassificationJobService _ageClassificationJobService;
     private readonly ISubscriptionService _subscriptionService;
     private readonly IAuditLogService _auditLogService;
     private readonly IImageService _imageService;
@@ -29,7 +30,7 @@ public class BooksService : IBooksService
         IAuthorsRepository authorsRepository,
         ICategoriesRepository categoriesRepository,
         IIsbnService isbnService,
-        IAzureQueueService queueService,
+        AgeClassificationJobService ageClassificationJobService,
         ISubscriptionService subscriptionService,
         IAuditLogService auditLogService,
         IImageService imageService,
@@ -43,7 +44,7 @@ public class BooksService : IBooksService
         _authorsRepository = authorsRepository;
         _categoriesRepository = categoriesRepository;
         _isbnService = isbnService;
-        _queueService = queueService;
+        _ageClassificationJobService = ageClassificationJobService;
         _subscriptionService = subscriptionService;
         _auditLogService = auditLogService;
         _imageService = imageService;
@@ -265,7 +266,7 @@ public class BooksService : IBooksService
         }
         await _booksRepository.AddBookAsync(entity);
 
-        await DetermineAppropriateAgeAsync(entity);
+        DetermineAppropriateAge(entity);
         // Log audit action
         await _auditLogService.LogActionAsync(
             "Add",
@@ -322,7 +323,7 @@ public class BooksService : IBooksService
         return true;
     }
 
-    private async Task DetermineAppropriateAgeAsync(Book entity)
+    private void DetermineAppropriateAge(Book entity)
     {
         if (string.IsNullOrWhiteSpace(entity.Synopsis))
         {
@@ -331,7 +332,7 @@ public class BooksService : IBooksService
 
         Thread.Sleep(1000); // slight delay to ensure book creation transaction is committed
 
-        // Create a LaurelBookDto from the entity for the age classification message
+        // Create a LaurelBookDto from the entity for the age classification job
         var bookDto = new LaurelBookDto
         {
             BookId = entity.BookId,
@@ -339,7 +340,7 @@ public class BooksService : IBooksService
             Synopsis = entity.Synopsis,
         };
 
-        await _queueService.SendAgeClassificationMessageAsync(bookDto, entity.LibraryId);
+        _ageClassificationJobService.EnqueueAgeClassificationJob(bookDto);
     }
 
     private async Task AddOrAttachAuthorsAsync(Book entity, string authorNames, Guid libraryId)

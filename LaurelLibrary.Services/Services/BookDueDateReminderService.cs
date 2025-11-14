@@ -2,41 +2,38 @@ using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.Azure.Functions.Worker;
+using LaurelLibrary.Services.Interfaces;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary;
+namespace LaurelLibrary.Services.Services;
 
-public class BookDueDateReminderFunction
+public class BookDueDateReminderService : IBookDueDateReminderService
 {
-    private readonly ILogger<BookDueDateReminderFunction> _logger;
+    private readonly ILogger<BookDueDateReminderService> _logger;
     private readonly IBooksRepository _booksRepository;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueService _queueService;
+    private readonly IEmailSender _emailSender;
 
-    public BookDueDateReminderFunction(
-        ILogger<BookDueDateReminderFunction> logger,
+    public BookDueDateReminderService(
+        ILogger<BookDueDateReminderService> logger,
         IBooksRepository booksRepository,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueService queueService
+        IEmailSender emailSender
     )
     {
         _logger = logger;
         _booksRepository = booksRepository;
         _emailTemplateService = emailTemplateService;
-        _queueService = queueService;
+        _emailSender = emailSender;
     }
 
-    /// <summary>
-    /// Timer function that runs daily at 9:00 AM to check for books that need due date reminders
-    /// </summary>
-    [Function(nameof(BookDueDateReminderFunction))]
-    public async Task Run([TimerTrigger("0 9 * * *")] TimerInfo myTimer)
+    public async Task ProcessDueDateRemindersAsync()
     {
-        _logger.LogInformation("BookDueDateReminderFunction executed at: {time}", DateTime.Now);
+        _logger.LogInformation("Processing due date reminders at: {time}", DateTime.Now);
 
         try
         {
@@ -64,7 +61,7 @@ public class BookDueDateReminderFunction
             {
                 try
                 {
-                    await ProcessReaderReminders(readerGroup.ToList());
+                    await ProcessReaderRemindersAsync(readerGroup.ToList());
                 }
                 catch (Exception ex)
                 {
@@ -83,12 +80,12 @@ public class BookDueDateReminderFunction
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in BookDueDateReminderFunction");
+            _logger.LogError(ex, "Error in ProcessDueDateRemindersAsync");
             throw;
         }
     }
 
-    private async Task ProcessReaderReminders(List<BookInstance> readerBooks)
+    public async Task ProcessReaderRemindersAsync(List<BookInstance> readerBooks)
     {
         if (!readerBooks.Any() || readerBooks.First().Reader == null)
             return;
@@ -127,19 +124,24 @@ public class BookDueDateReminderFunction
         // Send reminders for each type (in order of priority)
         if (overdueBooks.Any())
         {
-            await SendReminderEmail(reader, library, overdueBooks, ReminderType.Overdue);
+            await SendReminderEmailAsync(reader, library, overdueBooks, ReminderType.Overdue);
         }
         else if (dueTodayBooks.Any())
         {
-            await SendReminderEmail(reader, library, dueTodayBooks, ReminderType.DueToday);
+            await SendReminderEmailAsync(reader, library, dueTodayBooks, ReminderType.DueToday);
         }
         else if (upcomingBooks.Any())
         {
-            await SendReminderEmail(reader, library, upcomingBooks, ReminderType.UpcomingDueDate);
+            await SendReminderEmailAsync(
+                reader,
+                library,
+                upcomingBooks,
+                ReminderType.UpcomingDueDate
+            );
         }
     }
 
-    private async Task SendReminderEmail(
+    private async Task SendReminderEmailAsync(
         Reader reader,
         Library library,
         List<BookInstance> books,
@@ -186,29 +188,7 @@ public class BookDueDateReminderFunction
                 _ => $"Book Return Reminder from {library.Name}",
             };
 
-            var emailMessage = new EmailMessageDto
-            {
-                To = reader.Email,
-                Subject = subject,
-                Body = emailBody,
-                Timestamp = DateTime.UtcNow,
-            };
-
-            // Serialize to JSON for queue message
-            var messageJson = JsonSerializer.Serialize(
-                emailMessage,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-
-            await _queueService.SendMessageAsync(messageJson, "emails");
-
-            _logger.LogInformation(
-                "Sent {reminderType} email to reader {readerId} ({email}) for {bookCount} books",
-                reminderType,
-                reader.ReaderId,
-                reader.Email,
-                books.Count
-            );
+            await _emailSender.SendEmailAsync(reader.Email, subject, emailBody);
         }
         catch (Exception ex)
         {

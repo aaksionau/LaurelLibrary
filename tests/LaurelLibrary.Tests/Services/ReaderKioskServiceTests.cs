@@ -11,6 +11,7 @@ using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -23,7 +24,7 @@ namespace LaurelLibrary.Tests.Services
         private readonly Mock<ILibrariesRepository> _librariesRepositoryMock;
         private readonly Mock<IReadersRepository> _readersRepositoryMock;
         private readonly Mock<IEmailTemplateService> _emailTemplateServiceMock;
-        private readonly Mock<IAzureQueueService> _queueServiceMock;
+        private readonly Mock<IEmailSender> _queueServiceMock;
         private readonly Mock<IReaderActionService> _readerActionServiceMock;
         private readonly Mock<ILogger<ReaderKioskService>> _loggerMock;
         private readonly ReaderKioskService _readerKioskService;
@@ -34,7 +35,7 @@ namespace LaurelLibrary.Tests.Services
             _librariesRepositoryMock = new Mock<ILibrariesRepository>();
             _readersRepositoryMock = new Mock<IReadersRepository>();
             _emailTemplateServiceMock = new Mock<IEmailTemplateService>();
-            _queueServiceMock = new Mock<IAzureQueueService>();
+            _queueServiceMock = new Mock<IEmailSender>();
             _readerActionServiceMock = new Mock<IReaderActionService>();
             _loggerMock = new Mock<ILogger<ReaderKioskService>>();
 
@@ -43,8 +44,8 @@ namespace LaurelLibrary.Tests.Services
                 _librariesRepositoryMock.Object,
                 _readersRepositoryMock.Object,
                 _emailTemplateServiceMock.Object,
-                _queueServiceMock.Object,
                 _readerActionServiceMock.Object,
+                _queueServiceMock.Object,
                 _loggerMock.Object
             );
         }
@@ -204,7 +205,7 @@ namespace LaurelLibrary.Tests.Services
                 Times.Once
             );
             _queueServiceMock.Verify(
-                x => x.SendMessageAsync(It.IsAny<string>(), "emails"),
+                x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Once
             );
         }
@@ -304,7 +305,7 @@ namespace LaurelLibrary.Tests.Services
                 Times.Never
             );
             _queueServiceMock.Verify(
-                x => x.SendMessageAsync(It.IsAny<string>(), "emails"),
+                x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Never
             );
         }

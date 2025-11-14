@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +7,7 @@ using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Services;
 using LaurelLibrary.Services.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
@@ -28,9 +26,7 @@ public class BookImportProcessorServiceTests : IDisposable
     private readonly Mock<IAuditLogService> _auditLogServiceMock;
     private readonly Mock<IEmailSender> _emailSenderMock;
     private readonly Mock<IEmailTemplateService> _emailTemplateServiceMock;
-    private readonly Mock<IAzureQueueService> _azureQueueServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
-    private readonly Mock<ILaurelEmailSenderService> _laurelEmailSenderServiceMock;
     private readonly Mock<ICsvIsbnParser> _csvIsbnParserMock;
     private readonly Mock<ILogger<BookImportProcessorService>> _loggerMock;
     private readonly IConfiguration _configuration;
@@ -52,9 +48,7 @@ public class BookImportProcessorServiceTests : IDisposable
         _auditLogServiceMock = new Mock<IAuditLogService>();
         _emailSenderMock = new Mock<IEmailSender>();
         _emailTemplateServiceMock = new Mock<IEmailTemplateService>();
-        _azureQueueServiceMock = new Mock<IAzureQueueService>();
         _userServiceMock = new Mock<IUserService>();
-        _laurelEmailSenderServiceMock = new Mock<ILaurelEmailSenderService>();
         _csvIsbnParserMock = new Mock<ICsvIsbnParser>();
         _loggerMock = new Mock<ILogger<BookImportProcessorService>>();
 
@@ -71,9 +65,7 @@ public class BookImportProcessorServiceTests : IDisposable
             _auditLogServiceMock.Object,
             _emailSenderMock.Object,
             _emailTemplateServiceMock.Object,
-            _azureQueueServiceMock.Object,
             _userServiceMock.Object,
-            _laurelEmailSenderServiceMock.Object,
             _csvIsbnParserMock.Object,
             _loggerMock.Object
         );
@@ -143,9 +135,7 @@ public class BookImportProcessorServiceTests : IDisposable
                 _auditLogServiceMock.Object,
                 _emailSenderMock.Object,
                 _emailTemplateServiceMock.Object,
-                _azureQueueServiceMock.Object,
                 _userServiceMock.Object,
-                _laurelEmailSenderServiceMock.Object,
                 _csvIsbnParserMock.Object,
                 _loggerMock.Object
             )
@@ -206,26 +196,6 @@ public class BookImportProcessorServiceTests : IDisposable
                     testImport.LibraryId
                 ),
             Times.Exactly(2)
-        );
-
-        _azureQueueServiceMock.Verify(
-            q =>
-                q.SendAgeClassificationMessageAsync(
-                    It.IsAny<LaurelBookDto>(),
-                    testImport.LibraryId
-                ),
-            Times.AtLeast(1)
-        );
-
-        _laurelEmailSenderServiceMock.Verify(
-            l =>
-                l.SendCompletionNotificationAsync(
-                    testImport,
-                    _emailSenderMock.Object,
-                    _emailTemplateServiceMock.Object,
-                    _userServiceMock.Object
-                ),
-            Times.Once
         );
 
         _importHistoryRepositoryMock.Verify(
@@ -315,15 +285,6 @@ public class BookImportProcessorServiceTests : IDisposable
                     testImport.LibraryId
                 ),
             Times.Exactly(2)
-        );
-
-        _azureQueueServiceMock.Verify(
-            q =>
-                q.SendAgeClassificationMessageAsync(
-                    It.IsAny<LaurelBookDto>(),
-                    testImport.LibraryId
-                ),
-            Times.AtLeast(1)
         );
     }
 
@@ -456,16 +417,6 @@ public class BookImportProcessorServiceTests : IDisposable
                     testImport.LibraryId
                 ),
             Times.Once
-        );
-
-        // Should not try to send age classification message when book search returns null
-        _azureQueueServiceMock.Verify(
-            q =>
-                q.SendAgeClassificationMessageAsync(
-                    It.IsAny<LaurelBookDto>(),
-                    testImport.LibraryId
-                ),
-            Times.Never
         );
     }
 

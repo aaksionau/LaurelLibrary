@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Hangfire.Dashboard;
 
-namespace LaurelLibrary.UI.Services;
+namespace LaurelLibrary.UI.Filters;
 
 public class HangfireDashboardAuthorizationFilter : IDashboardAuthorizationFilter
 {

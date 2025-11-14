@@ -1,7 +1,7 @@
 using System;
-using LaurelLibrary.EmailSenderServices.Dtos;
+using LaurelLibrary.Services.Abstractions.Dtos;
 
-namespace LaurelLibrary.EmailSenderServices.Interfaces;
+namespace LaurelLibrary.Services.Interfaces;
 
 public interface IMailgunService
 {
