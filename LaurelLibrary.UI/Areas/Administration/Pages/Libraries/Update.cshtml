@@ -173,10 +173,19 @@
                                     <i class="bi bi-shield-lock me-1" style="color: var(--color-secondary);"></i>Secret
                                 </label>
                                 <input type="password" class="form-control" asp-for="Library.PlanningCenterSecret"
-                                    placeholder="Enter Planning Center Secret (current value not shown for security)" />
+                                    placeholder="Enter Planning Center Secret" />
                                 <span asp-validation-for="Library.PlanningCenterSecret" class="text-danger"></span>
                                 <small class="form-text" style="color: var(--color-text-secondary);">
-                                    <i class="bi bi-info-circle me-1"></i>Keep this secret secure
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    @if (!string.IsNullOrEmpty(Model.Library?.PlanningCenterSecret))
+                                    {
+                                        @:Leave blank to keep the current secret. Enter a new value only if you wish to
+                                        @:change it.
+                                    }
+                                    else
+                                    {
+                                        @:Set your Planning Center Secret here.
+                                    }
                                 </small>
                             </div>
                         </div>
@@ -214,7 +223,7 @@
                                     <i class="bi bi-arrow-left me-1"></i>Cancel
                                 </a>
                                 <button type="submit" asp-page-handler="post" class="btn btn-primary">
-                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Library" : "Create Library")
+                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Library" : "Create                                    Library")
                                 </button>
                             </div>
                         </div>

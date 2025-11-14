@@ -153,9 +153,7 @@ public class ReadersService : IReadersService
             ) == true
         )
         {
-            throw new InvalidOperationException(
-                $"A reader with the email '{readerDto.Email}' already exists."
-            );
+            return false;
         }
 
         var displayName = await GetUserFullNameAsync();

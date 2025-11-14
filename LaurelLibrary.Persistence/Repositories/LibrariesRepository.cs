@@ -89,7 +89,10 @@ public class LibrariesRepository : ILibrariesRepository
         existingLibrary.Alias = library.Alias;
         existingLibrary.Logo = library.Logo;
         existingLibrary.PlanningCenterApplicationId = library.PlanningCenterApplicationId;
-        existingLibrary.PlanningCenterSecret = library.PlanningCenterSecret;
+        if (!string.IsNullOrWhiteSpace(library.PlanningCenterSecret))
+        {
+            existingLibrary.PlanningCenterSecret = library.PlanningCenterSecret;
+        }
         existingLibrary.Description = library.Description;
         existingLibrary.CheckoutDurationDays = library.CheckoutDurationDays;
         existingLibrary.UpdatedAt = DateTime.UtcNow;
