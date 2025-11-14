@@ -1,9 +1,12 @@
 using Hangfire;
 using LaurelLibrary.Domain.Entities;
+using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.UI.Services;
+namespace LaurelLibrary.Jobs.Jobs;
 
 public class BookImportJobService
 {

@@ -28,6 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../LaurelLibrary.Domain/LaurelLibrary.Domain.csproj" />
+    <ProjectReference Include="../LaurelLibrary.Jobs/LaurelLibrary.Jobs.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services/LaurelLibrary.Services.csproj" />
     <ProjectReference Include="../LaurelLibrary.Services.Abstractions/LaurelLibrary.Services.Abstractions.csproj" />
     <ProjectReference Include="..\LaurelLibrary.Persistence\LaurelLibrary.Persistence.csproj" />

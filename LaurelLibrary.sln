@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Tests", "tests\LaurelLibrary.Tests\LaurelLibrary.Tests.csproj", "{538BEB96-6741-473A-A835-4971CCA3934C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Jobs", "LaurelLibrary.Jobs\LaurelLibrary.Jobs.csproj", "{E6226C22-42CF-4DB7-A219-28374CFB54CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6226C22-42CF-4DB7-A219-28374CFB54CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6226C22-42CF-4DB7-A219-28374CFB54CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6226C22-42CF-4DB7-A219-28374CFB54CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6226C22-42CF-4DB7-A219-28374CFB54CE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
