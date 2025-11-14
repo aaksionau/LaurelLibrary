@@ -12,7 +12,7 @@
             <form method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Library.LibraryId" />
-                
+
                 <div class="card shadow-sm">
                     <div class="card-header" style="background-color: var(--color-primary); color: white;">
                         <div class="d-flex align-items-center">
@@ -27,7 +27,8 @@
                         <!-- Library Information Section -->
                         <div class="row">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                <h5 class="border-bottom pb-2 mb-4"
+                                    style="color: var(--color-primary); border-color: var(--color-border) !important;">
                                     <i class="bi bi-info-circle me-2"></i>Basic Information
                                 </h5>
                             </div>
@@ -37,7 +38,9 @@
                             <div class="col-12 col-md-3 mb-3 text-center">
                                 @if (!string.IsNullOrWhiteSpace(Model.Library?.Logo))
                                 {
-                                    <img src="@Model.Library.Logo" alt="Library Logo" class="img-fluid img-thumbnail shadow-sm" style="max-height:200px; width:auto; display:block; margin:0 auto;" />
+                                    <img src="@Model.Library.Logo" alt="Library Logo"
+                                        class="img-fluid img-thumbnail shadow-sm"
+                                        style="max-height:200px; width:auto; display:block; margin:0 auto;" />
                                     <input asp-for="Library.Logo" type="hidden" />
                                 }
                                 else
@@ -49,7 +52,8 @@
                                 }
                                 <div class="mt-2">
                                     <label class="form-label fw-bold" style="color: var(--color-text-primary);">
-                                        <i class="bi bi-image me-1" style="color: var(--color-secondary);"></i>Upload Logo
+                                        <i class="bi bi-image me-1" style="color: var(--color-secondary);"></i>Upload
+                                        Logo
                                     </label>
                                     <input type="file" class="form-control" name="LogoFile" accept="image/*" />
                                     <small class="form-text" style="color: var(--color-text-secondary);">
@@ -60,29 +64,40 @@
 
                             <div class="col-12 col-md-9">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold" asp-for="Library.Name" style="color: var(--color-text-primary);">
-                                        <i class="bi bi-building me-1" style="color: var(--color-secondary);"></i>Library Name <span class="text-danger">*</span>
+                                    <label class="form-label fw-bold" asp-for="Library.Name"
+                                        style="color: var(--color-text-primary);">
+                                        <i class="bi bi-building me-1"
+                                            style="color: var(--color-secondary);"></i>Library Name <span
+                                            class="text-danger">*</span>
                                     </label>
-                                    <input class="form-control" asp-for="Library.Name" placeholder="Enter library name" />
+                                    <input class="form-control" asp-for="Library.Name"
+                                        placeholder="Enter library name" />
                                     <span asp-validation-for="Library.Name" class="text-danger"></span>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold" asp-for="Library.Alias" style="color: var(--color-text-primary);">
-                                        <i class="bi bi-tag me-1" style="color: var(--color-secondary);"></i>Library Alias
+                                    <label class="form-label fw-bold" asp-for="Library.Alias"
+                                        style="color: var(--color-text-primary);">
+                                        <i class="bi bi-tag me-1" style="color: var(--color-secondary);"></i>Library
+                                        Alias
                                     </label>
-                                    <input class="form-control" asp-for="Library.Alias" placeholder="Enter short alias or code" />
+                                    <input class="form-control" asp-for="Library.Alias"
+                                        placeholder="Enter short alias or code" />
                                     <span asp-validation-for="Library.Alias" class="text-danger"></span>
                                     <small class="form-text" style="color: var(--color-text-secondary);">
-                                        <i class="bi bi-info-circle me-1"></i>Short identifier for the library (e.g., "MAIN", "BRANCH1")
+                                        <i class="bi bi-info-circle me-1"></i>Short identifier for the library (e.g.,
+                                        "MAIN", "BRANCH1")
                                     </small>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold" asp-for="Library.Description" style="color: var(--color-text-primary);">
-                                        <i class="bi bi-file-text me-1" style="color: var(--color-secondary);"></i>Description
+                                    <label class="form-label fw-bold" asp-for="Library.Description"
+                                        style="color: var(--color-text-primary);">
+                                        <i class="bi bi-file-text me-1"
+                                            style="color: var(--color-secondary);"></i>Description
                                     </label>
-                                    <textarea class="form-control" asp-for="Library.Description" rows="4" placeholder="Enter library description"></textarea>
+                                    <textarea class="form-control" asp-for="Library.Description" rows="4"
+                                        placeholder="Enter library description"></textarea>
                                     <span asp-validation-for="Library.Description" class="text-danger"></span>
                                 </div>
                             </div>
@@ -91,7 +106,8 @@
                         <!-- Location & Settings Section -->
                         <div class="row mt-4">
                             <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-4" style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                <h5 class="border-bottom pb-2 mb-4"
+                                    style="color: var(--color-primary); border-color: var(--color-border) !important;">
                                     <i class="bi bi-geo-alt me-2"></i>Location & Settings
                                 </h5>
                             </div>
@@ -99,24 +115,84 @@
 
                         <div class="row">
                             <div class="col-md-8 mb-3">
-                                <label class="form-label fw-bold" asp-for="Library.Address" style="color: var(--color-text-primary);">
+                                <label class="form-label fw-bold" asp-for="Library.Address"
+                                    style="color: var(--color-text-primary);">
                                     <i class="bi bi-geo-alt me-1" style="color: var(--color-secondary);"></i>Address
                                 </label>
-                                <input class="form-control" asp-for="Library.Address" placeholder="Enter full address" />
+                                <input class="form-control" asp-for="Library.Address"
+                                    placeholder="Enter full address" />
                                 <span asp-validation-for="Library.Address" class="text-danger"></span>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold" asp-for="Library.CheckoutDurationDays" style="color: var(--color-text-primary);">
-                                    <i class="bi bi-calendar-check me-1" style="color: var(--color-secondary);"></i>Checkout Duration
+                                <label class="form-label fw-bold" asp-for="Library.CheckoutDurationDays"
+                                    style="color: var(--color-text-primary);">
+                                    <i class="bi bi-calendar-check me-1"
+                                        style="color: var(--color-secondary);"></i>Checkout Duration
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" asp-for="Library.CheckoutDurationDays" min="1" max="365" placeholder="14" />
-                                    <span class="input-group-text" style="background-color: var(--color-bg-light); border-color: var(--color-border);">days</span>
+                                    <input type="number" class="form-control" asp-for="Library.CheckoutDurationDays"
+                                        min="1" max="365" placeholder="14" />
+                                    <span class="input-group-text"
+                                        style="background-color: var(--color-bg-light); border-color: var(--color-border);">days</span>
                                 </div>
                                 <span asp-validation-for="Library.CheckoutDurationDays" class="text-danger"></span>
                                 <small class="form-text" style="color: var(--color-text-secondary);">
                                     <i class="bi bi-info-circle me-1"></i>How long patrons can keep books (1-365 days)
                                 </small>
+                            </div>
+                        </div>
+
+                        <!-- Planning Center Integration Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4"
+                                    style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-people me-2"></i>Planning Center Integration
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Library.PlanningCenterApplicationId"
+                                    style="color: var(--color-text-primary);">
+                                    <i class="bi bi-key me-1" style="color: var(--color-secondary);"></i>Application ID
+                                </label>
+                                <input class="form-control" asp-for="Library.PlanningCenterApplicationId"
+                                    placeholder="Enter Planning Center Application ID" />
+                                <span asp-validation-for="Library.PlanningCenterApplicationId"
+                                    class="text-danger"></span>
+                                <small class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Get this from your Planning Center Developer
+                                    Settings
+                                </small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Library.PlanningCenterSecret"
+                                    style="color: var(--color-text-primary);">
+                                    <i class="bi bi-shield-lock me-1" style="color: var(--color-secondary);"></i>Secret
+                                </label>
+                                <input type="password" class="form-control" asp-for="Library.PlanningCenterSecret"
+                                    placeholder="Enter Planning Center Secret (current value not shown for security)" />
+                                <span asp-validation-for="Library.PlanningCenterSecret" class="text-danger"></span>
+                                <small class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Keep this secret secure
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Planning Center Integration:</strong> Configure your Planning Center API
+                                    credentials to import people as library readers.
+                                    You can get your credentials from the
+                                    <a href="https://api.planningcenteronline.com/personal_access_tokens"
+                                        target="_blank" class="alert-link">
+                                        Planning Center Developer Portal <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>.
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -138,7 +214,7 @@
                                     <i class="bi bi-arrow-left me-1"></i>Cancel
                                 </a>
                                 <button type="submit" asp-page-handler="post" class="btn btn-primary">
-                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Library" : "Create Library")
+                                    <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Update Library" : "Create                  Library")
                                 </button>
                             </div>
                         </div>
@@ -152,7 +228,8 @@
             <!-- Sidebar with Library Information -->
             <div class="col-lg-4 col-xl-3">
                 <div class="card shadow-sm">
-                    <div class="card-header" style="background-color: var(--color-secondary); color: var(--color-text-primary);">
+                    <div class="card-header"
+                        style="background-color: var(--color-secondary); color: var(--color-text-primary);">
                         <h5 class="mb-0">
                             <i class="bi bi-info-circle me-2"></i>Library Summary
                         </h5>
@@ -161,7 +238,8 @@
                         <div class="text-center mb-3">
                             @if (!string.IsNullOrEmpty(Model.Library.Logo))
                             {
-                                <img src="@Model.Library.Logo" alt="Library Logo" class="img-fluid rounded shadow-sm" style="max-height: 80px; width: auto;" />
+                                <img src="@Model.Library.Logo" alt="Library Logo" class="img-fluid rounded shadow-sm"
+                                    style="max-height: 80px; width: auto;" />
                             }
                             else
                             {
@@ -180,7 +258,8 @@
                         {
                             <div class="mb-3">
                                 <small class="d-block" style="color: var(--color-text-secondary);">Alias</small>
-                                <code class="small" style="background-color: var(--color-bg-light); color: var(--color-primary); border: 1px solid var(--color-border);">@Model.Library.Alias</code>
+                                <code class="small"
+                                    style="background-color: var(--color-bg-light); color: var(--color-primary); border: 1px solid var(--color-border);">@Model.Library.Alias</code>
                             </div>
                         }
 
@@ -188,7 +267,8 @@
                         {
                             <div class="mb-3">
                                 <small class="d-block" style="color: var(--color-text-secondary);">Address</small>
-                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Library.Address</span>
+                                <span class="fw-semibold"
+                                    style="color: var(--color-text-primary);">@Model.Library.Address</span>
                             </div>
                         }
 
@@ -196,7 +276,8 @@
                         {
                             <div class="mb-3">
                                 <small class="d-block" style="color: var(--color-text-secondary);">Checkout Duration</small>
-                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Library.CheckoutDurationDays days</span>
+                                <span class="fw-semibold"
+                                    style="color: var(--color-text-primary);">@Model.Library.CheckoutDurationDays days</span>
                             </div>
                         }
 
@@ -208,7 +289,8 @@
                             </div>
                         }
                     </div>
-                    <div class="card-footer text-center" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                    <div class="card-footer text-center"
+                        style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
                         <small style="color: var(--color-text-secondary);">
                             <i class="bi bi-clock me-1"></i>Last updated: @DateTime.Now.ToString("MMM dd, yyyy")
                         </small>
@@ -239,20 +321,27 @@
                                 style="width: 60px; height: 60px; background-color: var(--color-danger);">
                                 <i class="bi bi-building-x text-white fs-3"></i>
                             </div>
-                            <h6 class="mb-2" style="color: var(--color-text-primary);">Delete Library: @Model.Library.Name</h6>
-                            <p class="mb-0" style="color: var(--color-text-secondary);">Library ID: @Model.Library.LibraryId</p>
+                            <h6 class="mb-2" style="color: var(--color-text-primary);">Delete Library: @Model.Library.Name
+                            </h6>
+                            <p class="mb-0" style="color: var(--color-text-secondary);">Library ID: @Model.Library.LibraryId
+                            </p>
                         </div>
 
-                        <div class="alert" style="background-color: rgba(230, 182, 85, 0.1); border-color: var(--color-accent); color: #8a6a14;" role="alert">
+                        <div class="alert"
+                            style="background-color: rgba(230, 182, 85, 0.1); border-color: var(--color-accent); color: #8a6a14;"
+                            role="alert">
                             <i class="bi bi-exclamation-triangle me-2"></i>
-                            <strong>Warning:</strong> This action cannot be undone. Deleting this library will also remove all books that belong to it.
+                            <strong>Warning:</strong> This action cannot be undone. Deleting this library will also remove
+                            all books that belong to it.
                         </div>
 
                         <p class="mb-0" style="color: var(--color-text-primary);">
-                            Are you sure you want to permanently delete this library and all its associated books from the system?
+                            Are you sure you want to permanently delete this library and all its associated books from the
+                            system?
                         </p>
                     </div>
-                    <div class="modal-footer" style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
+                    <div class="modal-footer"
+                        style="background-color: var(--color-bg-light); border-top: 1px solid var(--color-border);">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="bi bi-x-lg me-1"></i>Cancel
                         </button>

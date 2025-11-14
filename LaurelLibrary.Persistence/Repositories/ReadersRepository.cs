@@ -221,4 +221,14 @@ public class ReadersRepository : IReadersRepository
             .Readers.Where(r => r.Libraries.Any(l => l.LibraryId == libraryId))
             .CountAsync();
     }
+
+    public async Task<HashSet<string>> GetAllEmailsAsync(Guid libraryId)
+    {
+        var emails = await _dbContext
+            .Readers.Where(r => r.Libraries.Any(l => l.LibraryId == libraryId))
+            .Select(r => r.Email.ToLower())
+            .ToListAsync();
+
+        return new HashSet<string>(emails, StringComparer.OrdinalIgnoreCase);
+    }
 }
