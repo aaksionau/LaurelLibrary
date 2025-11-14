@@ -7,6 +7,7 @@ using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -18,7 +19,7 @@ namespace LaurelLibrary.Tests.Services
     {
         private readonly Mock<IReadersRepository> _readersRepositoryMock;
         private readonly Mock<IEmailTemplateService> _emailTemplateServiceMock;
-        private readonly Mock<IAzureQueueService> _azureQueueServiceMock;
+        private readonly Mock<IEmailSender> _emailSenderMock;
         private readonly Mock<IMemoryCache> _memoryCacheMock;
         private readonly Mock<ILogger<ReaderAuthService>> _loggerMock;
         private readonly ReaderAuthService _readerAuthService;
@@ -27,14 +28,14 @@ namespace LaurelLibrary.Tests.Services
         {
             _readersRepositoryMock = new Mock<IReadersRepository>();
             _emailTemplateServiceMock = new Mock<IEmailTemplateService>();
-            _azureQueueServiceMock = new Mock<IAzureQueueService>();
+            _emailSenderMock = new Mock<IEmailSender>();
             _memoryCacheMock = new Mock<IMemoryCache>();
             _loggerMock = new Mock<ILogger<ReaderAuthService>>();
 
             _readerAuthService = new ReaderAuthService(
                 _readersRepositoryMock.Object,
                 _emailTemplateServiceMock.Object,
-                _azureQueueServiceMock.Object,
+                _emailSenderMock.Object,
                 _memoryCacheMock.Object,
                 _loggerMock.Object
             );
@@ -77,9 +78,9 @@ namespace LaurelLibrary.Tests.Services
                 )
                 .ReturnsAsync("Email body content");
 
-            _azureQueueServiceMock
-                .Setup(q => q.SendMessageAsync(It.IsAny<string>(), "emails"))
-                .ReturnsAsync(true);
+            _emailSenderMock.Setup(q =>
+                q.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())
+            );
 
             var cacheEntryMock = new Mock<ICacheEntry>();
             _memoryCacheMock
@@ -99,8 +100,8 @@ namespace LaurelLibrary.Tests.Services
                 e => e.RenderReaderVerificationEmailAsync(It.IsAny<ReaderVerificationEmailDto>()),
                 Times.Once
             );
-            _azureQueueServiceMock.Verify(
-                q => q.SendMessageAsync(It.IsAny<string>(), "emails"),
+            _emailSenderMock.Verify(
+                q => q.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
                 Times.Once
             );
         }
@@ -322,9 +323,9 @@ namespace LaurelLibrary.Tests.Services
                 )
                 .ReturnsAsync("Email body content");
 
-            _azureQueueServiceMock
-                .Setup(q => q.SendMessageAsync(It.IsAny<string>(), "emails"))
-                .ReturnsAsync(true);
+            _emailSenderMock.Setup(q =>
+                q.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())
+            );
 
             var cacheEntryMock = new Mock<ICacheEntry>();
             _memoryCacheMock
@@ -571,9 +572,9 @@ namespace LaurelLibrary.Tests.Services
                 )
                 .ReturnsAsync("Email body content");
 
-            _azureQueueServiceMock
-                .Setup(q => q.SendMessageAsync(It.IsAny<string>(), "emails"))
-                .ReturnsAsync(true);
+            _emailSenderMock.Setup(q =>
+                q.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>())
+            );
 
             var cacheEntryMock = new Mock<ICacheEntry>();
             _memoryCacheMock
