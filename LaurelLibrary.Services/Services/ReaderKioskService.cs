@@ -2,6 +2,7 @@ using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -135,7 +136,7 @@ public class ReaderKioskService : IReaderKioskService
                     emailModel
                 );
 
-                var emailMessage = new LaurelLibrary.EmailSenderServices.Dtos.EmailMessageDto
+                var emailMessage = new EmailMessageDto
                 {
                     To = reader.Email,
                     Subject = $"Books Checked Out from {library.Name}",

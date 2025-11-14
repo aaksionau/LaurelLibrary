@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.Domain.Enums;
 using LaurelLibrary.EmailSenderServices.Interfaces;
+using LaurelLibrary.Jobs.Services;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;

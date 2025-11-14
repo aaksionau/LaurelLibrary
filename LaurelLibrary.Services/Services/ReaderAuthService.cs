@@ -104,7 +104,7 @@ public class ReaderAuthService : IReaderAuthService
                 emailModel
             );
 
-            var emailMessage = new LaurelLibrary.EmailSenderServices.Dtos.EmailMessageDto
+            var emailMessage = new EmailMessageDto
             {
                 To = reader.Email,
                 Subject = "Your Library Login Verification Code",

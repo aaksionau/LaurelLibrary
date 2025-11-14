@@ -222,8 +222,9 @@ builder.Services.AddScoped<IBookImportService, BookImportService>();
 builder.Services.AddScoped<IBookImportProcessorService, BookImportProcessorService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
-builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+
+builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IMobileLibraryService, MobileLibraryService>();
 builder.Services.AddScoped<IMobileReaderService, MobileReaderService>();
 builder.Services.AddScoped<IMobileBookService, MobileBookService>();
@@ -237,6 +238,7 @@ builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IImportHistoryService, ImportHistoryService>();
 builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<IPlanningCenterService, PlanningCenterService>();
+builder.Services.AddScoped<IMailgunService, MailgunService>();
 
 // Helper services
 builder.Services.AddScoped<ICsvIsbnParser, CsvIsbnParser>();
@@ -272,6 +274,7 @@ builder.Services.AddHttpClient<IImageService, ImageService>(client =>
 // Register Hangfire job services
 builder.Services.AddTransient<BookImportJobService>();
 builder.Services.AddTransient<AgeClassificationJobService>();
+builder.Services.AddTransient<EmailJobService>();
 
 var app = builder.Build();
 
