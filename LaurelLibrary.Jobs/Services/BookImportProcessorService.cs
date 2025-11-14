@@ -21,9 +21,7 @@ public class BookImportProcessorService : IBookImportProcessorService
     private readonly IAuditLogService _auditLogService;
     private readonly IEmailSender _emailService;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueService _azureQueueService;
     private readonly IUserService _userService;
-    private readonly ILaurelEmailSenderService _laurelEmailSenderService;
     private readonly ICsvIsbnParser _csvIsbnParser;
     private readonly ILogger<BookImportProcessorService> _logger;
     private readonly int _chunkSize;
@@ -37,9 +35,7 @@ public class BookImportProcessorService : IBookImportProcessorService
         IAuditLogService auditLogService,
         IEmailSender emailService,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueService azureQueueService,
         IUserService userService,
-        ILaurelEmailSenderService laurelEmailSenderService,
         ICsvIsbnParser csvIsbnParser,
         ILogger<BookImportProcessorService> logger
     )
@@ -51,9 +47,7 @@ public class BookImportProcessorService : IBookImportProcessorService
         _auditLogService = auditLogService;
         _emailService = emailService;
         _emailTemplateService = emailTemplateService;
-        _azureQueueService = azureQueueService;
         _userService = userService;
-        _laurelEmailSenderService = laurelEmailSenderService;
         _csvIsbnParser = csvIsbnParser;
         _logger = logger;
 
@@ -242,16 +236,6 @@ public class BookImportProcessorService : IBookImportProcessorService
                     importHistory.CreatedBy ?? "System",
                     importHistory.LibraryId
                 );
-
-                // Send age classification message immediately after book creation
-                var createdBook = await _booksService.SearchBookByIsbnAsync(isbn);
-                if (createdBook?.BookId != null)
-                {
-                    await _azureQueueService.SendAgeClassificationMessageAsync(
-                        createdBook,
-                        importHistory.LibraryId
-                    );
-                }
 
                 processed++;
             }

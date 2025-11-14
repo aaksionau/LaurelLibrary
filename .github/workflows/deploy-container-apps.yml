@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - "LaurelLibrary.UI/**"
-      - "LaurelLibrary.Functions/**"
+      - "LaurelLibrary.Jobs/**"
       - "LaurelLibrary.Domain/**"
       - "LaurelLibrary.Services/**"
       - "LaurelLibrary.Services.Abstractions/**"
@@ -22,7 +22,6 @@ env:
   DOCKER_REGISTRY: "docker.io"
   DOCKER_USERNAME: "aaksionau"
   WEB_CONTAINER_APP: "mylibrarian-prod-web"
-  FUNCTIONS_CONTAINER_APP: "mylibrarian-prod-func"
 
 jobs:
   build-and-test:
@@ -69,25 +68,12 @@ jobs:
           docker push ${{ env.DOCKER_USERNAME }}/laurellibrary-web:${{ github.sha }}
           docker push ${{ env.DOCKER_USERNAME }}/laurellibrary-web:latest
 
-      - name: Build and push Functions container
-        run: |
-          docker build -f LaurelLibrary.Functions/Dockerfile -t ${{ env.DOCKER_USERNAME }}/laurellibrary-functions:${{ github.sha }} -t ${{ env.DOCKER_USERNAME }}/laurellibrary-functions:latest .
-          docker push ${{ env.DOCKER_USERNAME }}/laurellibrary-functions:${{ github.sha }}
-          docker push ${{ env.DOCKER_USERNAME }}/laurellibrary-functions:latest
-
       - name: Deploy Web Container App
         run: |
           az containerapp update \
             --name ${{ env.WEB_CONTAINER_APP }} \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --image ${{ env.DOCKER_USERNAME }}/laurellibrary-web:${{ github.sha }}
-
-      - name: Deploy Functions Container App
-        run: |
-          az containerapp update \
-            --name ${{ env.FUNCTIONS_CONTAINER_APP }} \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --image ${{ env.DOCKER_USERNAME }}/laurellibrary-functions:${{ github.sha }}
 
       - name: Wait for Web App deployment
         run: |

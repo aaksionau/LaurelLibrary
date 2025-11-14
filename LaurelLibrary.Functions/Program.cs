@@ -54,6 +54,7 @@ builder.Services.AddScoped<IMailgunService, MailgunService>();
 builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
 builder.Services.AddScoped<IPlanningCenterService, PlanningCenterService>();
 builder.Services.AddScoped<IAgeClassificationService, AgeClassificationService>();
+builder.Services.AddScoped<IBookDueDateReminderService, BookDueDateReminderService>();
 
 builder.Services.AddHttpClient<IIsbnService, IsbnService>(client =>
 {

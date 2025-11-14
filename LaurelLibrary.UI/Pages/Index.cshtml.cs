@@ -4,6 +4,7 @@ using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.UI.ViewModels;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -11,9 +12,9 @@ namespace LaurelLibrary.UI.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly IAzureQueueService _queueService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<IndexModel> _logger;
+        private readonly IEmailSender _emailSender;
 
         [BindProperty]
         public FeedbackViewModel Feedback { get; set; } = new();
@@ -21,13 +22,13 @@ namespace LaurelLibrary.UI.Pages
         public SubscriptionPlan[] SubscriptionPlans { get; set; } = SubscriptionPlan.Plans;
 
         public IndexModel(
-            IAzureQueueService queueService,
+            IEmailSender emailSender,
             IConfiguration configuration,
             ILogger<IndexModel> logger
         )
         {
-            _queueService = queueService;
             _configuration = configuration;
+            _emailSender = emailSender;
             _logger = logger;
         }
 
@@ -61,36 +62,14 @@ namespace LaurelLibrary.UI.Pages
                     return RedirectToPage();
                 }
 
-                var emailMessage = new EmailMessageDto
-                {
-                    To = adminEmail,
-                    Subject = $"[{Feedback.FeedbackType}] {Feedback.Subject}",
-                    Body = CreateEmailBody(Feedback),
-                    Timestamp = DateTime.UtcNow,
-                };
+                var subject = $"[{Feedback.FeedbackType}] {Feedback.Subject}";
+                var body = CreateEmailBody(Feedback);
 
-                // Serialize and send to queue
-                var queueName = _configuration["AzureStorage:QueueName"] ?? "emails";
-                var messageJson = JsonSerializer.Serialize(emailMessage);
+                await _emailSender.SendEmailAsync(adminEmail, subject, body);
 
-                var success = await _queueService.SendMessageAsync(messageJson, queueName);
-
-                if (success)
-                {
-                    _logger.LogInformation(
-                        "Feedback sent successfully from {Email}",
-                        Feedback.Email
-                    );
-                    TempData["SuccessMessage"] =
-                        "Thank you for your feedback! We'll get back to you soon.";
-                    return RedirectToPage();
-                }
-                else
-                {
-                    _logger.LogError("Failed to send feedback to queue");
-                    TempData["ErrorMessage"] = "Unable to send feedback. Please try again later.";
-                    return RedirectToPage();
-                }
+                TempData["SuccessMessage"] =
+                    "Thank you for your feedback! We'll get back to you soon.";
+                return RedirectToPage();
             }
             catch (Exception ex)
             {

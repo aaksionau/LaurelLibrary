@@ -6,6 +6,7 @@ using LaurelLibrary.EmailSenderServices.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
@@ -21,22 +22,22 @@ public class ReaderAuthService : IReaderAuthService
 {
     private readonly IReadersRepository _readersRepository;
     private readonly IEmailTemplateService _emailTemplateService;
-    private readonly IAzureQueueService _mailService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<ReaderAuthService> _logger;
+    private readonly IEmailSender _emailSender;
     private const int VerificationCodeExpiryMinutes = 10;
 
     public ReaderAuthService(
         IReadersRepository readersRepository,
         IEmailTemplateService emailTemplateService,
-        IAzureQueueService mailService,
+        IEmailSender emailSender,
         IMemoryCache cache,
         ILogger<ReaderAuthService> logger
     )
     {
         _readersRepository = readersRepository;
         _emailTemplateService = emailTemplateService;
-        _mailService = mailService;
+        _emailSender = emailSender;
         _cache = cache;
         _logger = logger;
     }
@@ -104,21 +105,9 @@ public class ReaderAuthService : IReaderAuthService
                 emailModel
             );
 
-            var emailMessage = new EmailMessageDto
-            {
-                To = reader.Email,
-                Subject = "Your Library Login Verification Code",
-                Body = emailBody,
-                Timestamp = DateTime.UtcNow,
-            };
+            var subject = "Your Library Login Verification Code";
 
-            // Serialize to JSON for queue message
-            var messageJson = JsonSerializer.Serialize(
-                emailMessage,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-
-            await _mailService.SendMessageAsync(messageJson, "emails");
+            await _emailSender.SendEmailAsync(reader.Email, subject, emailBody);
 
             _logger.LogInformation("Verification code sent to reader {ReaderId}", reader.ReaderId);
 
