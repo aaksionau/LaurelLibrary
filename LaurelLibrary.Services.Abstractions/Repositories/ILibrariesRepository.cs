@@ -16,4 +16,12 @@ public interface ILibrariesRepository
     Task RemoveAdministratorAsync(Guid libraryId, string userId);
     Task<List<Library>> GetLibrariesForUserAsync(string userId);
     Task<int> GetLibraryCountByUserIdAsync(string userId);
+
+    // Mobile API method
+    Task<List<Library>> SearchLibrariesAsync(
+        string searchTerm,
+        string? city = null,
+        string? state = null,
+        int maxResults = 10
+    );
 }

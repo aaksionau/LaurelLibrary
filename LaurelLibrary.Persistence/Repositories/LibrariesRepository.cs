@@ -175,4 +175,41 @@ public class LibrariesRepository : ILibrariesRepository
             .Libraries.Where(l => l.Administrators.Any(a => a.Id == userId))
             .CountAsync();
     }
+
+    public async Task<List<Library>> SearchLibrariesAsync(
+        string searchTerm,
+        string? city = null,
+        string? state = null,
+        int maxResults = 10
+    )
+    {
+        var query = _dbContext.Libraries.AsQueryable();
+
+        // Search in name, description, and address
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(l =>
+                l.Name.Contains(searchTerm)
+                || (l.Description != null && l.Description.Contains(searchTerm))
+                || (l.Address != null && l.Address.Contains(searchTerm))
+            );
+        }
+
+        // Filter by city and state within address field
+        if (!string.IsNullOrWhiteSpace(city))
+        {
+            query = query.Where(l =>
+                l.Address != null && l.Address.ToLower().Contains(city.ToLower())
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(state))
+        {
+            query = query.Where(l =>
+                l.Address != null && l.Address.ToLower().Contains(state.ToLower())
+            );
+        }
+
+        return await query.Take(maxResults).ToListAsync();
+    }
 }

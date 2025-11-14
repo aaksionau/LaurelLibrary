@@ -43,4 +43,6 @@ public class AppDbContext : IdentityDbContext<AppUser>
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<ReaderAction> ReaderActions { get; set; }
+    public DbSet<PendingReturn> PendingReturns { get; set; }
+    public DbSet<PendingReturnItem> PendingReturnItems { get; set; }
 }

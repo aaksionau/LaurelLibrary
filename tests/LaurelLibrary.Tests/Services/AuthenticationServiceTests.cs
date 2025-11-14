@@ -6,6 +6,7 @@ using LaurelLibrary.Services.Abstractions.Services;
 using LaurelLibrary.Services.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
 
@@ -14,7 +15,9 @@ namespace LaurelLibrary.Tests.Services
     public class AuthenticationServiceTests
     {
         private readonly Mock<UserManager<AppUser>> userManagerMock;
+        private readonly Mock<SignInManager<AppUser>> signInManagerMock;
         private readonly Mock<IHttpContextAccessor> httpContextAccessorMock;
+        private readonly Mock<IConfiguration> configurationMock;
         private readonly AuthenticationService authenticationService;
 
         public AuthenticationServiceTests()
@@ -31,10 +34,27 @@ namespace LaurelLibrary.Tests.Services
                 null,
                 null
             );
+
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var claimsFactory = new Mock<IUserClaimsPrincipalFactory<AppUser>>();
+            signInManagerMock = new Mock<SignInManager<AppUser>>(
+                userManagerMock.Object,
+                contextAccessor.Object,
+                claimsFactory.Object,
+                null,
+                null,
+                null,
+                null
+            );
+
             httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+            configurationMock = new Mock<IConfiguration>();
+
             authenticationService = new AuthenticationService(
                 userManagerMock.Object,
-                httpContextAccessorMock.Object
+                signInManagerMock.Object,
+                httpContextAccessorMock.Object,
+                configurationMock.Object
             );
         }
 

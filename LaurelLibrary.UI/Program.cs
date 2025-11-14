@@ -1,3 +1,4 @@
+using System.Text;
 using Azure.Storage.Blobs;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -14,11 +15,13 @@ using LaurelLibrary.Services.Helpers;
 using LaurelLibrary.Services.Services;
 using LaurelLibrary.UI.Middleware;
 using LaurelLibrary.UI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 
@@ -74,7 +77,42 @@ builder
             ?? throw new InvalidOperationException("Microsoft ClientSecret not configured");
         // Explicitly set the callback path (default is /signin-microsoft)
         microsoftOptions.CallbackPath = "/signin-microsoft";
-    });
+    })
+    .AddJwtBearer(
+        JwtBearerDefaults.AuthenticationScheme,
+        options =>
+        {
+            var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "DefaultSecretKey12345";
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LaurelLibrary";
+            var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "LaurelLibrary";
+
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtIssuer,
+                ValidateAudience = true,
+                ValidAudience = jwtAudience,
+                ValidateLifetime = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero,
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    // Allow token from Authorization header or query string
+                    var accessToken = context.Request.Query["access_token"];
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                },
+            };
+        }
+    );
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -162,6 +200,7 @@ builder.Services.AddScoped<IImportHistoryRepository, ImportHistoryRepository>();
 builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
 builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
+builder.Services.AddScoped<IPendingReturnsRepository, PendingReturnsRepository>();
 
 // register services
 builder.Services.AddScoped<IBarcodeService, BarcodeService>();
@@ -182,6 +221,10 @@ builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<IAzureQueueService, AzureQueueService>();
 builder.Services.AddScoped<IEmailSender, EmailSenderService>();
 builder.Services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+builder.Services.AddScoped<IMobileLibraryService, MobileLibraryService>();
+builder.Services.AddScoped<IMobileReaderService, MobileReaderService>();
+builder.Services.AddScoped<IMobileBookService, MobileBookService>();
+builder.Services.AddScoped<IMobilePendingReturnsService, MobilePendingReturnsService>();
 builder.Services.AddScoped<ILaurelEmailSenderService, LaurelEmailSenderService>();
 builder.Services.AddScoped<ISemanticSearchService, SemanticSearchService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
