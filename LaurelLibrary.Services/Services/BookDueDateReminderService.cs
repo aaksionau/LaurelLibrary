@@ -2,14 +2,14 @@ using System.Text.Json;
 using LaurelLibrary.Domain.Entities;
 using LaurelLibrary.EmailSenderServices.Dtos;
 using LaurelLibrary.EmailSenderServices.Interfaces;
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Jobs.Services;
+namespace LaurelLibrary.Services.Services;
 
 public class BookDueDateReminderService : IBookDueDateReminderService
 {

@@ -1,24 +1,26 @@
 using Hangfire;
-using LaurelLibrary.Domain.Entities;
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Jobs.Jobs;
+namespace LaurelLibrary.Services.Jobs;
 
 public class BookImportJobService
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IImportHistoryRepository _importHistoryRepository;
+    private readonly IBookImportProcessorService _bookImportProcessor;
     private readonly ILogger<BookImportJobService> _logger;
 
     public BookImportJobService(
-        IServiceProvider serviceProvider,
+        IImportHistoryRepository importHistoryRepository,
+        IBookImportProcessorService bookImportProcessor,
         ILogger<BookImportJobService> logger
     )
     {
-        _serviceProvider = serviceProvider;
+        _importHistoryRepository = importHistoryRepository;
+        _bookImportProcessor = bookImportProcessor;
         _logger = logger;
     }
 
@@ -58,14 +60,8 @@ public class BookImportJobService
 
         try
         {
-            using var scope = _serviceProvider.CreateScope();
-            var importHistoryRepository =
-                scope.ServiceProvider.GetRequiredService<IImportHistoryRepository>();
-            var bookImportProcessor =
-                scope.ServiceProvider.GetRequiredService<IBookImportProcessorService>();
-
             // Get the import history record
-            var importHistory = await importHistoryRepository.GetByIdAsync(importHistoryId);
+            var importHistory = await _importHistoryRepository.GetByIdAsync(importHistoryId);
             if (importHistory == null)
             {
                 _logger.LogWarning("ImportHistory {ImportHistoryId} not found", importHistoryId);
@@ -73,7 +69,7 @@ public class BookImportJobService
             }
 
             // Process the import
-            await bookImportProcessor.ProcessImportAsync(importHistory, CancellationToken.None);
+            await _bookImportProcessor.ProcessImportAsync(importHistory, CancellationToken.None);
 
             _logger.LogInformation(
                 "Successfully completed Hangfire job for ImportHistory {ImportHistoryId}",
@@ -92,10 +88,7 @@ public class BookImportJobService
             // Mark import as failed
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var importHistoryRepository =
-                    scope.ServiceProvider.GetRequiredService<IImportHistoryRepository>();
-                await importHistoryRepository.MarkAsFailedAsync(importHistoryId, ex.Message);
+                await _importHistoryRepository.MarkAsFailedAsync(importHistoryId, ex.Message);
             }
             catch (Exception markFailedException)
             {

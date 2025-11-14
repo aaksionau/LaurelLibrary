@@ -1,10 +1,10 @@
 using Hangfire;
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Jobs.Jobs;
+namespace LaurelLibrary.Services.Jobs;
 
 public class AgeClassificationJobService
 {

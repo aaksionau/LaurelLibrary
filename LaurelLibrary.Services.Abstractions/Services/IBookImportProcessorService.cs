@@ -1,6 +1,6 @@
 using LaurelLibrary.Domain.Entities;
 
-namespace LaurelLibrary.Jobs.Interfaces;
+namespace LaurelLibrary.Services.Interfaces;
 
 public interface IBookImportProcessorService
 {

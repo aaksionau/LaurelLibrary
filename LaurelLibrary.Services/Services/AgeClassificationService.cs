@@ -1,14 +1,14 @@
 using System.Text;
 using System.Text.Json;
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Repositories;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 
-namespace LaurelLibrary.Jobs.Services;
+namespace LaurelLibrary.Services.Services;
 
 public class AgeClassificationService : IAgeClassificationService
 {

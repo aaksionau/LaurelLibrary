@@ -1,5 +1,5 @@
-using LaurelLibrary.Jobs.Jobs;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Jobs;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Logging;
 
@@ -8,15 +8,15 @@ namespace LaurelLibrary.Services.Services;
 public class EmailSenderService : IEmailSender
 {
     private readonly EmailJobService _jobService;
-    private readonly ILogger<EmailJobService> _logger;
+    private readonly ILogger<EmailSenderService> _logger;
 
-    public EmailSenderService(EmailJobService jobService, ILogger<EmailJobService> logger)
+    public EmailSenderService(EmailJobService jobService, ILogger<EmailSenderService> logger)
     {
         _jobService = jobService;
         _logger = logger;
     }
 
-    public async Task SendEmailAsync(string email, string subject, string message)
+    public Task SendEmailAsync(string email, string subject, string message)
     {
         _logger.LogInformation(
             "SendEmailAsync called. To: {Email}, Subject: {Subject}, MessageLength: {Length}",
@@ -37,6 +37,8 @@ public class EmailSenderService : IEmailSender
             };
 
             _jobService.EnqueueEmailJob(emailMessage);
+
+            return Task.CompletedTask;
         }
         catch (Exception ex)
         {

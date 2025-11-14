@@ -1,11 +1,11 @@
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using RestSharp.Authenticators;
 
-namespace LaurelLibrary.Jobs.Services;
+namespace LaurelLibrary.Services.Services;
 
 public class MailgunService : IMailgunService
 {

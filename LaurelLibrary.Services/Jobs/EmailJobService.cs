@@ -1,21 +1,21 @@
 using System.Text.Json;
 using Hangfire;
-using LaurelLibrary.Jobs.Interfaces;
 using LaurelLibrary.Services.Abstractions.Dtos;
+using LaurelLibrary.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace LaurelLibrary.Jobs.Jobs;
+namespace LaurelLibrary.Services.Jobs;
 
 public class EmailJobService
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<EmailJobService> _logger;
+    private readonly IMailgunService _mailgunService;
 
-    public EmailJobService(IServiceProvider serviceProvider, ILogger<EmailJobService> logger)
+    public EmailJobService(ILogger<EmailJobService> logger, IMailgunService mailgunService)
     {
-        _serviceProvider = serviceProvider;
         _logger = logger;
+        _mailgunService = mailgunService;
     }
 
     /// <summary>
@@ -56,9 +56,6 @@ public class EmailJobService
 
         try
         {
-            using var scope = _serviceProvider.CreateScope();
-            var mailgunService = scope.ServiceProvider.GetRequiredService<IMailgunService>();
-
             // Validate required fields (same logic as the original function)
             if (
                 string.IsNullOrEmpty(emailMessage.To)
@@ -83,7 +80,7 @@ public class EmailJobService
             );
 
             // Send email using Mailgun service
-            var success = await mailgunService.SendEmailAsync(emailMessage);
+            var success = await _mailgunService.SendEmailAsync(emailMessage);
 
             if (success)
             {
