@@ -31,6 +31,9 @@ public static class ServiceCollectionExtensions
         // Web application services
         services.AddWebApplicationServices(configuration);
 
+        // Swagger/OpenAPI services
+        services.AddSwaggerServices();
+
         // Data protection (async operation)
         await services.AddDataProtectionServices(configuration);
 
@@ -68,6 +71,9 @@ public static class WebApplicationExtensions
 
         // Configure middleware pipeline
         app.ConfigureMiddleware();
+
+        // Configure Swagger documentation
+        app.UseSwaggerDocumentation();
 
         // Configure Hangfire
         app.UseHangfireDashboard();

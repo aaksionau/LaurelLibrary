@@ -1,12 +1,15 @@
+using System.Net;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace LaurelLibrary.UI.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+[SwaggerTag("Book import management endpoints for library administrators")]
 public class ImportProgressController : ControllerBase
 {
     private readonly IBookImportService _bookImportService;
@@ -21,7 +24,31 @@ public class ImportProgressController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Get the progress of a book import operation
+    /// </summary>
+    /// <param name="importHistoryId">The unique identifier of the import operation</param>
+    /// <returns>Current progress status and statistics of the import operation</returns>
+    /// <response code="200">Import progress retrieved successfully</response>
+    /// <response code="401">If user is not authenticated</response>
+    /// <response code="403">If user doesn't have permission to view import progress</response>
+    /// <response code="404">If import operation with the specified ID was not found</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("{importHistoryId}")]
+    [SwaggerOperation(
+        Summary = "Get import progress",
+        Description = "Retrieve the current progress status and statistics of a book import operation by its unique identifier.",
+        OperationId = "GetImportProgress",
+        Tags = new[] { "Import" }
+    )]
+    [SwaggerResponse((int)HttpStatusCode.OK, "Import progress retrieved successfully")]
+    [SwaggerResponse((int)HttpStatusCode.Unauthorized, "Authentication required")]
+    [SwaggerResponse((int)HttpStatusCode.Forbidden, "Insufficient permissions")]
+    [SwaggerResponse((int)HttpStatusCode.NotFound, "Import operation not found")]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred while retrieving import progress"
+    )]
     public async Task<IActionResult> GetProgress(Guid importHistoryId)
     {
         try
