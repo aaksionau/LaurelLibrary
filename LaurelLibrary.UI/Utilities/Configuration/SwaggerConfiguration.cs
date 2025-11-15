@@ -24,13 +24,13 @@ public static class SwaggerConfiguration
                 new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Laurel Library API",
+                    Title = "MyLibrarian API",
                     Description =
                         "A comprehensive library management system API for managing books, readers, authors, categories, and library operations.",
                     Contact = new OpenApiContact
                     {
-                        Name = "Laurel Library Support",
-                        Email = "support@laurellibrary.com",
+                        Name = "MyLibrarian Support",
+                        Email = "support@mylibrarian.org",
                     },
                 }
             );
