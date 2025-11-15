@@ -1,0 +1,25 @@
+digraph CSharpDependencies {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=14, splines=sprite, overlap=false, nodesep=0.2, ranksep=0.8];
+  node [shape=box, style=filled, fillcolor=lightblue, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9];
+
+  "LaurelLibrary.Services" [label="LaurelLibrary.Services\n(net8.0)"];
+  "LaurelLibrary.Persistence" [label="LaurelLibrary.Persistence\n(net8.0)"];
+  "LaurelLibrary.Services.Abstractions" [label="LaurelLibrary.Services.Abstractions\n(net8.0)"];
+  "LaurelLibrary.UI" [label="LaurelLibrary.UI\n(net8.0)"];
+  "LaurelLibrary.Domain" [label="LaurelLibrary.Domain\n(net8.0)"];
+  "LaurelLibrary.EmailSenderServices" [label="LaurelLibrary.EmailSenderServices\n(net8.0)"];
+
+  // Project reference edges
+  "LaurelLibrary.Services" -> "LaurelLibrary.Domain" [penwidth=1.0];
+  "LaurelLibrary.Services" -> "LaurelLibrary.EmailSenderServices" [penwidth=1.0];
+  "LaurelLibrary.Services" -> "LaurelLibrary.Services.Abstractions" [penwidth=1.0];
+  "LaurelLibrary.Persistence" -> "LaurelLibrary.Domain" [penwidth=1.0];
+  "LaurelLibrary.Persistence" -> "LaurelLibrary.Services.Abstractions" [penwidth=1.0];
+  "LaurelLibrary.Services.Abstractions" -> "LaurelLibrary.Domain" [penwidth=1.0];
+  "LaurelLibrary.UI" -> "LaurelLibrary.Domain" [penwidth=1.0];
+  "LaurelLibrary.UI" -> "LaurelLibrary.Services" [penwidth=1.0];
+  "LaurelLibrary.UI" -> "LaurelLibrary.Services.Abstractions" [penwidth=1.0];
+  "LaurelLibrary.UI" -> "LaurelLibrary.Persistence" [penwidth=1.0];
+  "LaurelLibrary.EmailSenderServices" -> "LaurelLibrary.Services.Abstractions" [penwidth=1.0];
+}
