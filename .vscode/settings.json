@@ -4,5 +4,44 @@
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
     "azureFunctions.projectSubpath": "functions/LaurelLibrary.IsbnChunkProcess.Func",
-    "azureFunctions.preDeployTask": "publish (functions)"
+    "azureFunctions.preDeployTask": "publish (functions)",
+    // Reduce file watching to prevent inotify exhaustion
+    "files.watcherExclude": {
+        "**/bin/**": true,
+        "**/obj/**": true,
+        "**/node_modules/**": true,
+        "**/.git/**": true,
+        "**/bower_components/**": true,
+        "**/coverage/**": true,
+        "**/publish/**": true,
+        "**/dist/**": true,
+        "**/.vs/**": true,
+        "**/*.log": true,
+        "**/tmp/**": true,
+        "**/temp/**": true,
+        "**/artifacts/**": true
+    },
+    "search.exclude": {
+        "**/bin/**": true,
+        "**/obj/**": true,
+        "**/node_modules/**": true,
+        "**/bower_components/**": true,
+        "**/coverage/**": true,
+        "**/publish/**": true,
+        "**/dist/**": true,
+        "**/.vs/**": true,
+        "**/artifacts/**": true
+    },
+    "files.exclude": {
+        "**/bin/**": true,
+        "**/obj/**": true
+    },
+    // Limit concurrent C# projects being analyzed
+    "omnisharp.maxProjectFileCountThreshold": 100,
+    "omnisharp.useModernNet": true,
+    // Disable hot reload for development if not needed
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": false,
+    // Configure C# DevKit to be less aggressive
+    "dotnet.server.useOmnisharp": false,
+    "csharp.semanticHighlighting.enabled": false
 }

@@ -1,13 +1,16 @@
+using System.Net;
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Dtos.Mobile;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace LaurelLibrary.UI.Controllers;
 
 [ApiController]
 [Route("api/mobile")]
+[SwaggerTag("Mobile API endpoints for library mobile applications")]
 public class MobileApiController : ControllerBase
 {
     private readonly IMobileLibraryService _libraryService;
@@ -37,7 +40,33 @@ public class MobileApiController : ControllerBase
     /// <summary>
     /// Search for libraries by name, location, etc. Helps users find their library.
     /// </summary>
+    /// <param name="request">Search criteria including name, location, and other filters</param>
+    /// <returns>A list of libraries matching the search criteria</returns>
+    /// <response code="200">Returns the list of libraries matching the search criteria</response>
+    /// <response code="400">If the search request is invalid</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpPost("libraries/search")]
+    [SwaggerOperation(
+        Summary = "Search for libraries",
+        Description = "Search for libraries by name, location, and other criteria to help users find their library.",
+        OperationId = "SearchLibraries",
+        Tags = new[] { "Libraries" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Libraries found successfully",
+        typeof(List<MobileLibraryDto>)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.BadRequest,
+        "Invalid search request",
+        typeof(ValidationProblemDetails)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred while searching libraries",
+        typeof(ProblemDetails)
+    )]
     public async Task<ActionResult<List<MobileLibraryDto>>> SearchLibraries(
         [FromBody] MobileLibrarySearchRequestDto request
     )
@@ -60,7 +89,33 @@ public class MobileApiController : ControllerBase
     /// <summary>
     /// Authenticate admin user and return JWT token
     /// </summary>
+    /// <param name="request">Login credentials including email and password</param>
+    /// <returns>Authentication result with JWT token if successful</returns>
+    /// <response code="200">Login successful, returns authentication token</response>
+    /// <response code="400">Invalid login credentials or request format</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpPost("auth/login")]
+    [SwaggerOperation(
+        Summary = "Authenticate admin user",
+        Description = "Authenticate admin user with email and password, returns JWT token for subsequent API calls.",
+        OperationId = "Login",
+        Tags = new[] { "Authentication" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Authentication successful",
+        typeof(MobileLoginResponseDto)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.BadRequest,
+        "Invalid login credentials",
+        typeof(MobileLoginResponseDto)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred during authentication",
+        typeof(ProblemDetails)
+    )]
     public async Task<ActionResult<MobileLoginResponseDto>> Login(
         [FromBody] MobileLoginRequestDto request
     )
@@ -87,7 +142,33 @@ public class MobileApiController : ControllerBase
     /// <summary>
     /// Validate JWT token
     /// </summary>
+    /// <param name="request">Token validation request containing the JWT token</param>
+    /// <returns>Token validation result</returns>
+    /// <response code="200">Token validation result</response>
+    /// <response code="400">Invalid token validation request</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpPost("auth/validate")]
+    [SwaggerOperation(
+        Summary = "Validate JWT token",
+        Description = "Validate a JWT token to check if it's still valid and not expired.",
+        OperationId = "ValidateToken",
+        Tags = new[] { "Authentication" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Token validation completed",
+        typeof(MobileTokenValidationResponseDto)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.BadRequest,
+        "Invalid token validation request",
+        typeof(ValidationProblemDetails)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred during token validation",
+        typeof(ProblemDetails)
+    )]
     public async Task<ActionResult<MobileTokenValidationResponseDto>> ValidateToken(
         [FromBody] MobileTokenValidationRequestDto request
     )
@@ -110,7 +191,29 @@ public class MobileApiController : ControllerBase
     /// <summary>
     /// Get library details by ID
     /// </summary>
+    /// <param name="libraryId">The unique identifier of the library</param>
+    /// <returns>Library details including name, location, and contact information</returns>
+    /// <response code="200">Library details retrieved successfully</response>
+    /// <response code="404">Library with the specified ID was not found</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("libraries/{libraryId}")]
+    [SwaggerOperation(
+        Summary = "Get library by ID",
+        Description = "Retrieve detailed information about a specific library by its unique identifier.",
+        OperationId = "GetLibraryById",
+        Tags = new[] { "Libraries" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Library details retrieved successfully",
+        typeof(MobileLibraryDto)
+    )]
+    [SwaggerResponse((int)HttpStatusCode.NotFound, "Library not found", typeof(ProblemDetails))]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred while retrieving library information",
+        typeof(ProblemDetails)
+    )]
     public async Task<ActionResult<MobileLibraryDto>> GetLibrary(Guid libraryId)
     {
         try
