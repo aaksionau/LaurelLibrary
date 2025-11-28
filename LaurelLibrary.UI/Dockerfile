@@ -26,7 +26,7 @@ COPY LaurelLibrary.EmailSenderServices/ LaurelLibrary.EmailSenderServices/
 WORKDIR /src/LaurelLibrary.UI
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
-# Use the official .NET 8 runtime image for the final stage
+# Use the official .NET 10 runtime image for the final stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
