@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LaurelLibrary.UI.Utilities.Configuration;
@@ -60,41 +58,6 @@ public class SwaggerOperationFilter : IOperationFilter
                         "Internal Server Error - An error occurred processing the request",
                 }
             );
-        }
-
-        // Add parameter validation information
-        foreach (var parameter in operation.Parameters)
-        {
-            var parameterInfo = context
-                .MethodInfo.GetParameters()
-                .FirstOrDefault(p =>
-                    p.Name?.Equals(parameter.Name, StringComparison.OrdinalIgnoreCase) == true
-                );
-
-            if (parameterInfo != null)
-            {
-                var requiredAttribute = parameterInfo.GetCustomAttribute<RequiredAttribute>();
-                if (requiredAttribute != null)
-                {
-                    parameter.Required = true;
-                }
-
-                var displayAttribute = parameterInfo.GetCustomAttribute<DisplayAttribute>();
-                if (displayAttribute != null && !string.IsNullOrEmpty(displayAttribute.Description))
-                {
-                    parameter.Description = displayAttribute.Description;
-                }
-            }
-        }
-
-        // Enhance operation tags based on controller
-        var controllerName = context.MethodInfo.DeclaringType?.Name.Replace("Controller", "");
-        if (
-            !string.IsNullOrEmpty(controllerName)
-            && (operation.Tags == null || !operation.Tags.Any())
-        )
-        {
-            operation.Tags = new List<OpenApiTag> { new() { Name = controllerName } };
         }
     }
 }

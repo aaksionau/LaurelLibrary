@@ -143,19 +143,6 @@ public class ReadersService : IReadersService
             throw new InvalidOperationException("Current user library not found.");
         }
 
-        var possibleExistedReaders = await _readersRepository.GetAllEmailsAsync(
-            currentUser.CurrentLibraryId.Value
-        );
-
-        if (
-            possibleExistedReaders?.Any(r =>
-                string.Equals(readerDto.Email, r, StringComparison.OrdinalIgnoreCase)
-            ) == true
-        )
-        {
-            return false;
-        }
-
         var displayName = await GetUserFullNameAsync();
         var currentLibrary = await _librariesRepository.GetByIdAsync(
             currentUser.CurrentLibraryId.Value
@@ -166,6 +153,19 @@ public class ReadersService : IReadersService
 
         if (isCreateOperation)
         {
+
+            var possibleExistedReaders = await _readersRepository.GetAllEmailsAsync(
+                currentUser.CurrentLibraryId.Value
+            );
+            if (
+                possibleExistedReaders?.Any(r =>
+                    string.Equals(readerDto.Email, r, StringComparison.OrdinalIgnoreCase)
+                ) == true
+            )
+            {
+                return false;
+            }
+
             return await CreateReaderAsync(readerDto, currentUser, currentLibrary, displayName);
         }
         else
@@ -373,6 +373,7 @@ public class ReadersService : IReadersService
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             DateOfBirth = dto.DateOfBirth,
+            PhoneNumber = dto.PhoneNumber,
             Email = dto.Email,
             Address = dto.Address,
             City = dto.City,

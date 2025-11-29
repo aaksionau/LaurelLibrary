@@ -22,6 +22,7 @@ public static class ReaderDtoExtensions
             City = entity.City,
             State = entity.State,
             Zip = entity.Zip,
+            PhoneNumber = entity.PhoneNumber,
             Ean = entity.Ean,
             BarcodeImageUrl = entity.BarcodeImageUrl,
             LibraryIds = entity.Libraries.Select(l => l.LibraryId).ToList(),

@@ -33,6 +33,7 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Readers
                 City = "",
                 State = "",
                 Zip = "",
+                PhoneNumber = null,
             };
 
         public async Task OnGetAsync(int? id)

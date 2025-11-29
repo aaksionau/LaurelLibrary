@@ -32,6 +32,9 @@ public class ReaderDto
     [Required(ErrorMessage = "Zip code is required")]
     public required string Zip { get; set; }
 
+    [Phone(ErrorMessage = "Please enter a valid phone number")]
+    public string? PhoneNumber { get; set; }
+
     public string FullName => $"{FirstName} {LastName}".Trim();
     public string? Ean { get; set; }
     public string? BarcodeImageUrl { get; set; }
