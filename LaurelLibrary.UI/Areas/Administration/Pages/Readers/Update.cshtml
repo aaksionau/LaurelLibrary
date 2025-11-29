@@ -67,6 +67,20 @@
                                     <i class="bi bi-info-circle me-1"></i>Required for reader login verification
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold" asp-for="Reader.PhoneNumber" style="color: var(--color-text-primary);">
+                                    <i class="bi bi-telephone me-1" style="color: var(--color-secondary);"></i>Phone Number
+                                </label>
+                                <input type="tel" class="form-control" asp-for="Reader.PhoneNumber" 
+                                    placeholder="(555) 123-4567" />
+                                <span asp-validation-for="Reader.PhoneNumber" class="text-danger"></span>
+                                <div class="form-text" style="color: var(--color-text-secondary);">
+                                    <i class="bi bi-info-circle me-1"></i>Optional - for mobile checkout
+                                </div>
+                            </div>
                         </div>                        <!-- Address Information Section -->
                         <div class="row mt-4">
                             <div class="col-12">
@@ -187,6 +201,14 @@
                             <small class="d-block" style="color: var(--color-text-secondary);">Email</small>
                             <span class="fw-semibold" style="color: var(--color-text-primary);">@(Model.Reader.Email ?? "Not specified")</span>
                         </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Reader.PhoneNumber))
+                        {
+                            <div class="mb-3">
+                                <small class="d-block" style="color: var(--color-text-secondary);">Phone Number</small>
+                                <span class="fw-semibold" style="color: var(--color-text-primary);">@Model.Reader.PhoneNumber</span>
+                            </div>
+                        }
 
                         @if (Model.Reader.DateOfBirth != DateOnly.MinValue)
                         {

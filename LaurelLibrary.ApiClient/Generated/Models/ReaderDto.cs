@@ -105,6 +105,14 @@ namespace LaurelLibrary.ApiClient.Models
 #else
         public List<string> LibraryNames { get; set; }
 #endif
+        /// <summary>The phoneNumber property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? PhoneNumber { get; set; }
+#nullable restore
+#else
+        public string PhoneNumber { get; set; }
+#endif
         /// <summary>The readerId property</summary>
         public int? ReaderId { get; set; }
         /// <summary>The state property</summary>
@@ -164,6 +172,7 @@ namespace LaurelLibrary.ApiClient.Models
                 { "lastName", n => { LastName = n.GetStringValue(); } },
                 { "libraryIds", n => { LibraryIds = n.GetCollectionOfPrimitiveValues<Guid?>()?.AsList(); } },
                 { "libraryNames", n => { LibraryNames = n.GetCollectionOfPrimitiveValues<string>()?.AsList(); } },
+                { "phoneNumber", n => { PhoneNumber = n.GetStringValue(); } },
                 { "readerId", n => { ReaderId = n.GetIntValue(); } },
                 { "state", n => { State = n.GetStringValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
@@ -190,6 +199,7 @@ namespace LaurelLibrary.ApiClient.Models
             writer.WriteStringValue("lastName", LastName);
             writer.WriteCollectionOfPrimitiveValues<Guid?>("libraryIds", LibraryIds);
             writer.WriteCollectionOfPrimitiveValues<string>("libraryNames", LibraryNames);
+            writer.WriteStringValue("phoneNumber", PhoneNumber);
             writer.WriteIntValue("readerId", ReaderId);
             writer.WriteStringValue("state", State);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);

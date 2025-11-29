@@ -87,6 +87,7 @@ public class ReadersRepository : IReadersRepository
         existing.FirstName = reader.FirstName;
         existing.LastName = reader.LastName;
         existing.DateOfBirth = reader.DateOfBirth;
+        existing.PhoneNumber = reader.PhoneNumber;
         existing.Email = reader.Email;
         existing.Address = reader.Address;
         existing.City = reader.City;

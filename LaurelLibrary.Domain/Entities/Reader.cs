@@ -14,6 +14,7 @@ public class Reader : Audit
     public required string City { get; set; }
     public required string State { get; set; }
     public required string Zip { get; set; }
+    public string? PhoneNumber { get; set; }
     public string? Ean { get; set; }
     public string? BarcodeImageUrl { get; set; }
     public virtual Collection<Library> Libraries { get; set; } = new Collection<Library>();
