@@ -100,6 +100,7 @@ public class MobileReaderService : IMobileReaderService
                 .Select(bi => new BorrowingHistoryDto
                 {
                     BookInstanceId = bi.BookInstanceId,
+                    BookUrl = bi.Book.Image ?? string.Empty,
                     BookTitle = bi.Book.Title,
                     BookIsbn = bi.Book.Isbn ?? string.Empty,
                     AuthorNames = string.Join(", ", bi.Book.Authors.Select(a => a.FullName)),
