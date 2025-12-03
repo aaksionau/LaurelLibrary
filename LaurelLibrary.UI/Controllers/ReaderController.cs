@@ -172,6 +172,57 @@ public class ReaderController : ControllerBase
     }
 
     /// <summary>
+    /// Get available book instances by ISBN
+    /// </summary>
+    /// <param name="libraryId">The unique identifier of the library</param>
+    /// <param name="isbn">The ISBN of the book</param>
+    /// <returns>List of available book instances with available status</returns>
+    /// <response code="200">Available book instances retrieved successfully</response>
+    /// <response code="400">Invalid ISBN provided</response>
+    /// <response code="500">If an internal server error occurs</response>
+    [HttpGet("{libraryId}/available-instances")]
+    [SwaggerOperation(
+        Summary = "Get available book instances by ISBN",
+        Description = "Retrieve all available book instances for a specific ISBN in a library.",
+        OperationId = "GetAvailableBookInstances",
+        Tags = new[] { "Readers" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Available book instances retrieved successfully",
+        typeof(List<BookInstanceDto>)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.BadRequest,
+        "Invalid ISBN provided",
+        typeof(ProblemDetails)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred while retrieving available book instances",
+        typeof(ProblemDetails)
+    )]
+    public async Task<ActionResult<List<BookInstanceDto>>> GetAvailableBookInstances(
+        Guid libraryId,
+        [FromQuery] string? isbn
+    )
+    {
+        if (string.IsNullOrWhiteSpace(isbn))
+            return BadRequest("ISBN is required");
+
+        try
+        {
+            var availableInstances = await _bookService.GetAvailableBookInstancesByIsbnAsync(isbn, libraryId);
+            return Ok(availableInstances);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting available book instances for ISBN {Isbn} in library {LibraryId}", isbn, libraryId);
+            return StatusCode(500, "An error occurred while retrieving available book instances");
+        }
+    }
+
+    /// <summary>
     /// Checkout books for a reader
     /// </summary>
     /// <param name="request">Checkout request containing reader ID and book ISBNs</param>

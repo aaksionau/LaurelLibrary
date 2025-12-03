@@ -23,6 +23,7 @@ public interface IBooksRepository
     Task AddBookInstanceAsync(BookInstance instance);
     Task<BookInstance?> GetBookInstanceByIdAsync(int bookInstanceId);
     Task<BookInstance?> GetAvailableBookInstanceByIsbnAsync(string isbn, Guid libraryId);
+    Task<List<BookInstance>> GetAvailableBookInstancesByIsbnAsync(string isbn, Guid libraryId);
     Task<BookInstance?> GetBorrowedBookInstanceByIsbnAsync(string isbn, Guid libraryId);
     Task<BookInstance?> UpdateBookInstanceAsync(BookInstance bookInstance);
     Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId);

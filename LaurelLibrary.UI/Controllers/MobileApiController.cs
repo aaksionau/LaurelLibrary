@@ -230,17 +230,49 @@ public class MobileApiController : ControllerBase
     /// <summary>
     /// Search books in a specific library
     /// </summary>
+    /// <param name="libraryId">The unique identifier of the library</param>
+    /// <param name="searchQuery">Search query for book title or author name</param>
+    /// <param name="searchIsbn">Optional ISBN to search for books by ISBN number. ISBN will be normalized before search.</param>
+    /// <param name="useSemanticSearch">Whether to use semantic search</param>
+    /// <param name="page">Page number for pagination</param>
+    /// <param name="pageSize">Number of results per page (max 50 for mobile)</param>
+    /// <returns>Paged results of books matching the search criteria</returns>
+    /// <response code="200">Books found successfully</response>
+    /// <response code="400">Invalid search request</response>
+    /// <response code="500">If an internal server error occurs</response>
     [HttpGet("libraries/{libraryId}/books/search")]
+    [SwaggerOperation(
+        Summary = "Search books in a library",
+        Description = "Search for books in a specific library by title, author, or ISBN. ISBN will be normalized before search.",
+        OperationId = "SearchBooks",
+        Tags = new[] { "Books" }
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.OK,
+        "Books found successfully",
+        typeof(PagedResult<LaurelBookSummaryDto>)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.BadRequest,
+        "Invalid search request",
+        typeof(ValidationProblemDetails)
+    )]
+    [SwaggerResponse(
+        (int)HttpStatusCode.InternalServerError,
+        "An error occurred while searching books",
+        typeof(ProblemDetails)
+    )]
     public async Task<ActionResult<PagedResult<LaurelBookSummaryDto>>> SearchBooks(
         Guid libraryId,
-        [FromQuery] string searchQuery,
+        [FromQuery] string? searchQuery,
+        [FromQuery] string? searchIsbn,
         [FromQuery] bool useSemanticSearch = false,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10
     )
     {
-        if (string.IsNullOrWhiteSpace(searchQuery))
-            return BadRequest("Search query is required");
+        if (string.IsNullOrWhiteSpace(searchQuery) && string.IsNullOrWhiteSpace(searchIsbn))
+            return BadRequest("Either search query or ISBN is required");
 
         if (pageSize > 50)
             pageSize = 50; // Limit page size for mobile
@@ -252,7 +284,8 @@ public class MobileApiController : ControllerBase
                 libraryId,
                 useSemanticSearch,
                 page,
-                pageSize
+                pageSize,
+                searchIsbn
             );
             return Ok(results);
         }

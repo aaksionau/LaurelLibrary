@@ -6,6 +6,7 @@ namespace LaurelLibrary.Services.Abstractions.Dtos;
 public class BookInstanceDto
 {
     public int BookInstanceId { get; set; }
+    public LaurelBookDto? Book { get; set; }
     public Guid BookId { get; set; }
     public BookInstanceStatus Status { get; set; }
     public int? ReaderId { get; set; }

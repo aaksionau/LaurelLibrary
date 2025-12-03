@@ -226,6 +226,24 @@ public class BooksRepository : IBooksRepository
             .FirstOrDefaultAsync();
     }
 
+    public async Task<List<BookInstance>> GetAvailableBookInstancesByIsbnAsync(
+        string isbn,
+        Guid libraryId
+    )
+    {
+        return await _dbContext
+            .BookInstances.Include(bi => bi.Book)
+            .ThenInclude(b => b.Authors)
+            .Include(bi => bi.Book)
+            .ThenInclude(b => b.Categories)
+            .Where(bi =>
+                bi.Book.Isbn == isbn
+                && bi.Book.LibraryId == libraryId
+                && bi.Status == Domain.Enums.BookInstanceStatus.Available
+            )
+            .ToListAsync();
+    }
+
     public async Task<BookInstance?> GetBorrowedBookInstanceByIsbnAsync(string isbn, Guid libraryId)
     {
         return await _dbContext
