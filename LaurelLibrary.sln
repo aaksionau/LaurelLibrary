@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Services", "LaurelLibrary.Services\LaurelLibrary.Services.csproj", "{4DEE15DF-1B04-4561-96A3-F4CAD6EB3ABA}"
 EndProject
@@ -18,8 +18,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.Tests", "tests\LaurelLibrary.Tests\LaurelLibrary.Tests.csproj", "{538BEB96-6741-473A-A835-4971CCA3934C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaurelLibrary.ApiClient", "LaurelLibrary.ApiClient\LaurelLibrary.ApiClient.csproj", "{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -115,18 +113,6 @@ Global
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Release|x64.Build.0 = Release|Any CPU
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Release|x86.ActiveCfg = Release|Any CPU
 		{538BEB96-6741-473A-A835-4971CCA3934C}.Release|x86.Build.0 = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|x64.Build.0 = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Debug|x86.Build.0 = Debug|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|x64.ActiveCfg = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|x64.Build.0 = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|x86.ActiveCfg = Release|Any CPU
-		{2A0534CB-D7AA-42A3-851A-89B9ED7E09DC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
