@@ -105,6 +105,7 @@ public static class BookDtoExtensions
         return new BookInstanceDto
         {
             BookInstanceId = entity.BookInstanceId,
+            Book = entity.Book.ToLaurelBookDto(),
             BookId = entity.BookId,
             Status = entity.Status,
             ReaderId = entity.ReaderId,
