@@ -93,6 +93,7 @@ public class MobileReaderService : IMobileReaderService
 
             // Get borrowing history (current borrowed books)
             var borrowingHistory = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(
+                libraryId,
                 readerId
             );
             var currentBorrowedBooks = borrowingHistory
@@ -153,6 +154,7 @@ public class MobileReaderService : IMobileReaderService
     }
 
     public async Task<List<BorrowingHistoryDto>> GetReaderHistoryAsync(
+        Guid libraryId,
         int readerId,
         int page = 1,
         int pageSize = 50
@@ -160,7 +162,7 @@ public class MobileReaderService : IMobileReaderService
     {
         try
         {
-            var bookInstances = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(readerId);
+            var bookInstances = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(libraryId, readerId);
 
             return bookInstances
                 .Skip((page - 1) * pageSize)

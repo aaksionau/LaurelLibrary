@@ -34,6 +34,7 @@ public interface IMobileReaderService
     /// Get reader's borrowing history
     /// </summary>
     Task<List<BorrowingHistoryDto>> GetReaderHistoryAsync(
+        Guid libraryId,
         int readerId,
         int page = 1,
         int pageSize = 50

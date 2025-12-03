@@ -59,7 +59,7 @@ public class DetailsModel : PageModel
         Reader = reader;
 
         // Load borrowing history
-        BorrowingHistory = await readersService.GetBorrowingHistoryAsync(id);
+        BorrowingHistory = await readersService.GetBorrowingHistoryAsync(user.CurrentLibraryId.Value, id);
 
         // Load reader actions
         ReaderActions = await readersService.GetReaderActionsAsync(id, 1, 100); // Load up to 100 actions

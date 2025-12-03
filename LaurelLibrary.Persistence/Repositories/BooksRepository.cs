@@ -295,14 +295,14 @@ public class BooksRepository : IBooksRepository
             .ToListAsync();
     }
 
-    public async Task<List<BookInstance>> GetBorrowingHistoryByReaderIdAsync(int readerId)
+    public async Task<List<BookInstance>> GetBorrowingHistoryByReaderIdAsync(Guid libraryId, int readerId)
     {
         return await _dbContext
             .BookInstances.Include(bi => bi.Book)
             .ThenInclude(b => b.Authors)
             .Include(bi => bi.Book)
             .ThenInclude(b => b.Categories)
-            .Where(bi => bi.ReaderId == readerId)
+            .Where(bi => bi.ReaderId == readerId && bi.Book.LibraryId == libraryId)
             .OrderByDescending(bi => bi.CheckedOutDate)
             .ToListAsync();
     }
