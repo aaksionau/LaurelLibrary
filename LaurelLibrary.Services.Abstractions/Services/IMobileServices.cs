@@ -62,6 +62,14 @@ public interface IMobileBookService
     );
 
     /// <summary>
+    /// Get all available book instances by ISBN for a library
+    /// </summary>
+    /// <param name="isbn">The ISBN of the book</param>
+    /// <param name="libraryId">The unique identifier of the library</param>
+    /// <returns>List of available book instances</returns>
+    Task<List<BookInstanceDto>> GetAvailableBookInstancesByIsbnAsync(string isbn, Guid libraryId);
+
+    /// <summary>
     /// Checkout books for a reader
     /// </summary>
     Task<MobileCheckoutResponseDto> CheckoutBooksAsync(MobileCheckoutRequestDto request);

@@ -110,6 +110,56 @@ public class MobileBookService : IMobileBookService
         }
     }
 
+    public async Task<List<BookInstanceDto>> GetAvailableBookInstancesByIsbnAsync(
+        string isbn,
+        Guid libraryId
+    )
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(isbn))
+            {
+                _logger.LogWarning("GetAvailableBookInstancesByIsbnAsync called with empty ISBN");
+                return new List<BookInstanceDto>();
+            }
+
+            var normalizedIsbn = isbn.NormalizeIsbn();
+            if (string.IsNullOrWhiteSpace(normalizedIsbn))
+            {
+                _logger.LogWarning("GetAvailableBookInstancesByIsbnAsync called with invalid ISBN: {Isbn}", isbn);
+                return new List<BookInstanceDto>();
+            }
+
+            var availableInstances = await _booksRepository.GetAvailableBookInstancesByIsbnAsync(
+                normalizedIsbn,
+                libraryId
+            );
+
+            var instanceDtos = availableInstances
+                .Select(bi => bi.ToBookInstanceDto())
+                .ToList();
+
+            _logger.LogInformation(
+                "Retrieved {Count} available book instances for ISBN {Isbn} in library {LibraryId}",
+                instanceDtos.Count,
+                normalizedIsbn,
+                libraryId
+            );
+
+            return instanceDtos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error retrieving available book instances for ISBN {Isbn} in library {LibraryId}",
+                isbn,
+                libraryId
+            );
+            throw;
+        }
+    }
+
     public async Task<MobileCheckoutResponseDto> CheckoutBooksAsync(
         MobileCheckoutRequestDto request
     )
