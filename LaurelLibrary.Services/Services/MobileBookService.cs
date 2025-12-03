@@ -180,6 +180,14 @@ public class MobileBookService : IMobileBookService
                 bookInstance.Status = autoApprove 
                     ? Domain.Enums.BookInstanceStatus.Available 
                     : Domain.Enums.BookInstanceStatus.PendingReturn;
+
+                if (autoApprove)
+                {
+                    bookInstance.ReaderId = null;
+                    bookInstance.CheckedOutDate = null;
+                    bookInstance.DueDate = null;
+                }
+
                 await _booksRepository.UpdateBookInstanceAsync(bookInstance);
                 successfullyMarked++;
 
