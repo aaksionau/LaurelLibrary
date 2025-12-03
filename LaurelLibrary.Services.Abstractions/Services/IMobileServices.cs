@@ -46,12 +46,19 @@ public interface IMobileBookService
     /// <summary>
     /// Search for books in a specific library using various search methods
     /// </summary>
+    /// <param name="searchQuery">Search query for book title or author name</param>
+    /// <param name="libraryId">The unique identifier of the library</param>
+    /// <param name="useSemanticSearch">Whether to use semantic search</param>
+    /// <param name="page">Page number for pagination</param>
+    /// <param name="pageSize">Number of results per page</param>
+    /// <param name="searchIsbn">Optional ISBN to search for books. ISBN will be normalized before search.</param>
     Task<PagedResult<LaurelBookSummaryDto>> SearchBooksAsync(
-        string searchQuery,
+        string? searchQuery,
         Guid libraryId,
         bool useSemanticSearch = false,
         int page = 1,
-        int pageSize = 10
+        int pageSize = 10,
+        string? searchIsbn = null
     );
 
     /// <summary>

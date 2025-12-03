@@ -1,5 +1,6 @@
 using LaurelLibrary.Services.Abstractions.Dtos;
 using LaurelLibrary.Services.Abstractions.Dtos.Mobile;
+using LaurelLibrary.Services.Abstractions.Extensions;
 using LaurelLibrary.Services.Abstractions.Repositories;
 using LaurelLibrary.Services.Abstractions.Services;
 using Microsoft.Extensions.Logging;
@@ -33,15 +34,49 @@ public class MobileBookService : IMobileBookService
     }
 
     public async Task<PagedResult<LaurelBookSummaryDto>> SearchBooksAsync(
-        string searchQuery,
+        string? searchQuery,
         Guid libraryId,
         bool useSemanticSearch = false,
         int page = 1,
-        int pageSize = 10
+        int pageSize = 10,
+        string? searchIsbn = null
     )
     {
         try
         {
+            // If ISBN is provided, normalize it and search by ISBN
+            if (!string.IsNullOrWhiteSpace(searchIsbn))
+            {
+                var normalizedIsbn = searchIsbn.NormalizeIsbn();
+                if (!string.IsNullOrWhiteSpace(normalizedIsbn))
+                {
+                    var bookByIsbn = await _booksRepository.GetByIsbnAsync(normalizedIsbn, libraryId);
+                    if (bookByIsbn != null)
+                    {
+                        // Return single book wrapped in PagedResult
+                        return new PagedResult<LaurelBookSummaryDto>
+                        {
+                            Items = new List<LaurelBookSummaryDto> { bookByIsbn.ToSummaryBookDto() },
+                            Page = page,
+                            PageSize = pageSize,
+                            TotalCount = 1,
+                        };
+                    }
+                    else
+                    {
+                        // ISBN provided but no book found, return empty result
+                        return new PagedResult<LaurelBookSummaryDto>
+                        {
+                            Items = new List<LaurelBookSummaryDto>(),
+                            Page = page,
+                            PageSize = pageSize,
+                            TotalCount = 0,
+                        };
+                    }
+                }
+            }
+
+            // Fall back to title/author search if no ISBN or ISBN search returned nothing
             if (useSemanticSearch)
             {
                 return await _semanticSearchService.SearchBooksSemanticAsync(
@@ -66,8 +101,9 @@ public class MobileBookService : IMobileBookService
         {
             _logger.LogError(
                 ex,
-                "Error searching books with query: {SearchQuery} in library: {LibraryId}",
+                "Error searching books with query: {SearchQuery}, ISBN: {SearchIsbn} in library: {LibraryId}",
                 searchQuery,
+                searchIsbn,
                 libraryId
             );
             throw;
