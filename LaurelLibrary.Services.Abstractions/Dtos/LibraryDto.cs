@@ -44,4 +44,6 @@ public class LibraryDto
     [MaxLength(512)]
     [Display(Name = "Planning Center Secret")]
     public string? PlanningCenterSecret { get; set; }
+
+    public bool AutoApproveMobileReturns { get; set; } = false;
 }

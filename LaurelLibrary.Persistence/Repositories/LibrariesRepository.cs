@@ -95,6 +95,7 @@ public class LibrariesRepository : ILibrariesRepository
         }
         existingLibrary.Description = library.Description;
         existingLibrary.CheckoutDurationDays = library.CheckoutDurationDays;
+        existingLibrary.AutoApproveMobileReturns = library.AutoApproveMobileReturns;
         existingLibrary.UpdatedAt = DateTime.UtcNow;
         existingLibrary.UpdatedBy = library.UpdatedBy;
         await _dbContext.SaveChangesAsync();
