@@ -567,11 +567,11 @@ namespace LaurelLibrary.Tests.Services
             };
 
             _booksRepositoryMock
-                .Setup(x => x.GetBorrowingHistoryByReaderIdAsync(readerId))
+                .Setup(x => x.GetBorrowingHistoryByReaderIdAsync(libraryId, readerId))
                 .ReturnsAsync(bookInstances);
 
             // Act
-            var result = await _readersService.GetBorrowingHistoryAsync(readerId);
+            var result = await _readersService.GetBorrowingHistoryAsync(libraryId, readerId);
 
             // Assert
             Assert.NotNull(result);

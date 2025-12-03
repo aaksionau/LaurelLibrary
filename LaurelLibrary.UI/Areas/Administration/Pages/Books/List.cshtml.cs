@@ -38,9 +38,9 @@ namespace LaurelLibrary.UI.Areas.Administration.Pages.Books
         public IEnumerable<LaurelBookSummaryDto> Books { get; set; } =
             new List<LaurelBookSummaryDto>();
 
-        public LaurelLibrary.Domain.Entities.Author? SelectedAuthor { get; set; }
+        public Author? SelectedAuthor { get; set; }
 
-        public LaurelLibrary.Domain.Entities.Category? SelectedCategory { get; set; }
+        public Category? SelectedCategory { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int? SelectedAuthorId { get; set; }

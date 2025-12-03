@@ -19,7 +19,7 @@ public interface IReadersService
     );
     Task<int> GetReadersCountAsync(string? searchName = null);
     Task<bool> DeleteReaderAsync(int readerId);
-    Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(int readerId);
+    Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(Guid libraryId, int readerId);
     Task<List<ReaderActionDto>> GetReaderActionsAsync(
         int readerId,
         int page = 1,

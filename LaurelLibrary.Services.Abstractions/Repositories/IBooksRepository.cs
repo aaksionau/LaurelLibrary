@@ -20,13 +20,13 @@ public interface IBooksRepository
         string? searchAuthor = null
     );
 
-    Task AddBookInstanceAsync(LaurelLibrary.Domain.Entities.BookInstance instance);
+    Task AddBookInstanceAsync(BookInstance instance);
     Task<BookInstance?> GetBookInstanceByIdAsync(int bookInstanceId);
     Task<BookInstance?> GetAvailableBookInstanceByIsbnAsync(string isbn, Guid libraryId);
     Task<BookInstance?> GetBorrowedBookInstanceByIsbnAsync(string isbn, Guid libraryId);
     Task<BookInstance?> UpdateBookInstanceAsync(BookInstance bookInstance);
     Task<List<BookInstance>> GetBorrowedBooksByLibraryAsync(Guid libraryId);
-    Task<List<BookInstance>> GetBorrowingHistoryByReaderIdAsync(int readerId);
+    Task<List<BookInstance>> GetBorrowingHistoryByReaderIdAsync(Guid libraryId, int readerId);
     Task<bool> DeleteBookAsync(Guid bookId);
     Task<int> DeleteMultipleBooksAsync(IEnumerable<Guid> bookIds);
     Task UpdateAppropriateAgeBookAsync(Guid bookId, int minAge, int maxAge, string reasoning);

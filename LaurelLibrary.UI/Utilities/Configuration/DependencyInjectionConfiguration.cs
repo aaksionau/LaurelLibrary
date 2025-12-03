@@ -25,7 +25,6 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
         services.AddScoped<IReaderActionRepository, ReaderActionRepository>();
-        services.AddScoped<IPendingReturnsRepository, PendingReturnsRepository>();
     }
 
     public static void AddApplicationServices(this IServiceCollection services)
@@ -61,7 +60,6 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IMobileLibraryService, MobileLibraryService>();
         services.AddScoped<IMobileReaderService, MobileReaderService>();
         services.AddScoped<IMobileBookService, MobileBookService>();
-        services.AddScoped<IMobilePendingReturnsService, MobilePendingReturnsService>();
     }
 
     public static void AddExternalServices(this IServiceCollection services)

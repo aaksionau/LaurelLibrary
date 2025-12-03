@@ -454,9 +454,9 @@ public class ReadersService : IReadersService
         return barcodeUrl;
     }
 
-    public async Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(int readerId)
+    public async Task<List<BorrowingHistoryDto>> GetBorrowingHistoryAsync(Guid libraryId, int readerId)
     {
-        var bookInstances = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(readerId);
+        var bookInstances = await _booksRepository.GetBorrowingHistoryByReaderIdAsync(libraryId, readerId);
 
         return bookInstances
             .Select(bi => new BorrowingHistoryDto

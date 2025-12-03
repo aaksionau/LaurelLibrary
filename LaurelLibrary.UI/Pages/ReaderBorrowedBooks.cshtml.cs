@@ -11,6 +11,7 @@ namespace LaurelLibrary.UI.Pages;
 public class ReaderBorrowedBooksModel : PageModel
 {
     private readonly IReadersService _readersService;
+    private readonly IAuthenticationService _userService;
     private readonly ILogger<ReaderBorrowedBooksModel> _logger;
 
     public List<BorrowingHistoryDto> BorrowedBooks { get; set; } = new();
@@ -19,10 +20,12 @@ public class ReaderBorrowedBooksModel : PageModel
 
     public ReaderBorrowedBooksModel(
         IReadersService readersService,
+        IAuthenticationService userService,
         ILogger<ReaderBorrowedBooksModel> logger
     )
     {
         _readersService = readersService;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -47,8 +50,16 @@ public class ReaderBorrowedBooksModel : PageModel
                 return Page();
             }
 
+            var user = await this._userService.GetAppUserAsync();
+
+            if (!user.CurrentLibraryId.HasValue)
+            {
+                ErrorMessage = "No library selected.";
+                return Page();
+            }
+
             // Get borrowing history
-            var allHistory = await _readersService.GetBorrowingHistoryAsync(readerId.Value);
+            var allHistory = await _readersService.GetBorrowingHistoryAsync(user.CurrentLibraryId.Value, readerId.Value);
 
             // Filter to show only currently borrowed books
             BorrowedBooks = allHistory.Where(h => h.IsCurrentlyBorrowed).ToList();
