@@ -36,6 +36,8 @@ public class Library : Audit
     [StringLength(512)]
     public string? PlanningCenterSecret { get; set; }
 
+    public bool AutoApproveMobileReturns { get; set; } = false;
+
     public virtual Collection<Book> Books { get; set; } = new Collection<Book>();
 
     public virtual Collection<Reader> Students { get; set; } = new Collection<Reader>();

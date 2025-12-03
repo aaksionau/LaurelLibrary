@@ -19,6 +19,7 @@ public static class LibraryDtoExtensions
             CheckoutDurationDays = libraryDto.CheckoutDurationDays,
             PlanningCenterApplicationId = libraryDto.PlanningCenterApplicationId,
             PlanningCenterSecret = libraryDto.PlanningCenterSecret,
+            AutoApproveMobileReturns = libraryDto.AutoApproveMobileReturns,
         };
     }
 
@@ -36,6 +37,7 @@ public static class LibraryDtoExtensions
             CheckoutDurationDays = library.CheckoutDurationDays,
             PlanningCenterApplicationId = library.PlanningCenterApplicationId,
             PlanningCenterSecret = library.PlanningCenterSecret,
+            AutoApproveMobileReturns = library.AutoApproveMobileReturns,
         };
     }
 }

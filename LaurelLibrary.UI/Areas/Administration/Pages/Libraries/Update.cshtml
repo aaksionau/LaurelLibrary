@@ -204,6 +204,32 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Mobile Returns Settings Section -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-4"
+                                    style="color: var(--color-primary); border-color: var(--color-border) !important;">
+                                    <i class="bi bi-mobile me-2"></i>Mobile Returns Settings
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="autoApproveMobileReturns"
+                                        asp-for="Library.AutoApproveMobileReturns" style="width: 3em; height: 1.5em;" />
+                                    <label class="form-check-label fw-bold" for="autoApproveMobileReturns"
+                                        style="color: var(--color-text-primary); margin-left: 1rem;">
+                                        <i class="bi bi-lightning-charge me-1" style="color: var(--color-secondary);"></i>Auto-Approve Mobile Returns
+                                    </label>
+                                </div>
+                                <small class="form-text" style="color: var(--color-text-secondary); display: block; margin-top: 0.5rem; margin-left: 3.5rem;">
+                                    <i class="bi bi-info-circle me-1"></i>When enabled, books returned through the mobile app will be automatically approved instead of requiring administrator review.
+                                </small>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -366,4 +392,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
+}}

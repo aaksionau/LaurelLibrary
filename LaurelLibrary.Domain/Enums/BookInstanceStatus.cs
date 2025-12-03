@@ -9,4 +9,5 @@ public enum BookInstanceStatus
     Reserved = 3,
     Lost = 4,
     Damaged = 5,
+    PendingReturn = 6
 }
